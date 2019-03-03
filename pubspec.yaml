@@ -1,7 +1,7 @@
-name: flutter_blue
-description: Bluetooth plugin for Flutter
+name: flutter_metawear
+description: A wrapper that interfaces with Metawear
 version: 0.5.0
-author: Paul DeMarco <paulmdemarco@gmail.com>
+author: Michael Pollind <polli104@mail.chapman.edu>
 homepage: https://github.com/pauldemarco/flutter_blue
 
 environment:
@@ -15,8 +15,8 @@ dependencies:
 
 flutter:
   plugin:
-    androidPackage: com.pauldemarco.flutterblue
-    pluginClass: FlutterBluePlugin
+    androidPackage: com.gaitlab.fluttermetawear
+    pluginClass: FlutterMetawearPlugin
 
 dev_dependencies:
   flutter_test:

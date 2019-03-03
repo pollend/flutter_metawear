@@ -1,0 +1,49 @@
+group 'com.gaitlab.fluttermetawear'
+version '1.0-SNAPSHOT'
+
+buildscript {
+    repositories {
+        google()
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:3.3.1'
+    }
+}
+
+rootProject.allprojects {
+    repositories {
+        google()
+        jcenter()
+
+        ivy {
+            url "https://mbientlab.com/releases/ivyrep"
+            layout "gradle"
+        }
+    }
+}
+
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 28
+
+    defaultConfig {
+        minSdkVersion 19
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+    lintOptions {
+        disable 'InvalidPackage'
+    }
+    dependencies {
+        // Required for local unit tests (JUnit 4 framework)
+        testImplementation 'junit:junit:4.12'
+        implementation 'androidx.core:core:1.0.1'
+        implementation files('/home/michaelpollind/opt/flutter/bin/cache/artifacts/engine/android-arm/flutter.jar')
+    }
+}
+
+dependencies {
+    implementation 'com.mbientlab:metawear:3.4.0'
+}
