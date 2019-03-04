@@ -22,13 +22,12 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.builder.filter;
 
 /**
  * Operation modes for the passthrough limiter
  * @author Eric Tsai
  */
-public enum Passthrough {
+enum Passthrough {
     /** Allow all data through */
     ALL,
     /** Only allow data through if value &gt; 0 */

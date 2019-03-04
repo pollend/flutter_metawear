@@ -22,13 +22,11 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.builder.function;
-
 /**
  * 1 operand functions that operate on sensor or processor data
  * @author Eric Tsai
  */
-public enum Function1 {
+enum Function1 {
     /** Calculates the absolute value */
     ABS_VALUE,
     /** Calculate root sum square (vector magnitude) */

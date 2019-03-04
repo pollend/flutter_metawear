@@ -39,7 +39,7 @@ import bolts.Task;
  * Object representing a MetaWear board
  * @author Eric Tsai
  */
-public interface MetaWearBoard {
+abstract class MetaWearBoard {
     /**
      * UUID identifying the MetaWear GATT service and the advertising UUID.  This UUID can be used to remove
      * non MetaWear devices from a Bluetooth LE scan.

@@ -22,5 +22,20 @@
  * hello@mbientlab.com.
  */
 
-/** Classes for interacting with a MetaWear board */
-package com.mbientlab.metawear;
+/**
+ * Available MetaWear models
+ * @author Eric Tsai
+ */
+enum Model {
+    METAWEAR_R,
+    METAWEAR_RG,
+    METAWEAR_RPRO,
+    METAWEAR_C,
+    METAWEAR_CPRO,
+    METAENV,
+    METADETECT,
+    METAHEALTH,
+    METATRACKER,
+    METAMOTION_R,
+    METAMOTION_C
+}

@@ -22,13 +22,11 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.builder;
-
 /**
  * Route element for enforcing that users call {@link #to()} immediately after declaring a multicast
  * @author Eric Tsai
  */
-public interface RouteMulticast {
+abstract class RouteMulticast {
     /**
      * Signals the creation of a new multicast branch
      * @return RouteComponent from the most recent multicast component

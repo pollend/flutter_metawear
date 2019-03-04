@@ -22,13 +22,11 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.builder.predicate;
-
 /**
  * Output types of the pulse finder
  * @author Eric Tsai
  */
-public enum PulseOutput {
+enum PulseOutput {
     /** Returns the number of samples in the pulse */
     WIDTH,
     /** Returns a running sum of all samples in the pulse */

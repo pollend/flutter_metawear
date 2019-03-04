@@ -1,156 +1,133 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="BookmarkManager">
+    <bookmark url="file://$PROJECT_DIR$/lib/module" />
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="4cb0f089-fc99-4dea-a4d4-afab97db7b8a" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/lib/ActiveDataProducer.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/AnonymousRoute.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/AsyncDataProducer.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/CodeBlock.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/ConfigEditorBase.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/Configurable.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/Data.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/DataProducer.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/DataToken.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/DeviceInformation.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/ForcedDataProducer.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/IllegalFirmwareFile.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/IllegalRouteOperationException.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/MetaWearBoard.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/Model.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/Observer.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/Route.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/Subscriber.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/TaskTimeoutException.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/UnsupportedModuleException.dart" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/android/BtleService.dart" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/android/package-info.dart" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/builder/RouteBuilder.dart" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/builder/RouteComponent.dart" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/builder/RouteMulticast.dart" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/builder/RouteSplit.dart" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/builder/filter/Comparison.dart" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/builder/filter/ComparisonOutput.dart" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/builder/filter/DifferentialOutput.dart" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/builder/filter/Passthrough.dart" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/builder/filter/ThresholdOutput.dart" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/builder/filter/package-info.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/builder/function/Function1.dart" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/builder/function/Function2.dart" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/builder/function/package-info.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/builder/package-info.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/builder/predicate/PulseOutput.dart" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/builder/predicate/package-info.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/data/Acceleration.dart" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/data/AngularVelocity.dart" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/data/CartesianAxis.dart" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/data/EulerAngles.dart" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/data/FloatVector.dart" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/data/MagneticField.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/data/Quaternion.dart" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/data/SensorOrientation.dart" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/data/Sign.dart" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/data/TapType.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/data/package-info.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/AccelerometerBma255Impl.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/AccelerometerBmi160Impl.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/AccelerometerBoschImpl.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/AccelerometerMma8452qImpl.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/AmbientLightLtr329Impl.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/ArrayData.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/BarometerBme280Impl.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/BarometerBmp280Impl.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/BarometerBoschImpl.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/ByteArrayData.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/ColorTcs34725Impl.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/Constant.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/DataAttributes.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/DataPrivate.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/DataProcessorConfig.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/DataProcessorImpl.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/DataTypeBase.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/DebugImpl.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/DeviceDataConsumer.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/EventImpl.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/FloatVectorData.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/GpioImpl.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/GsrImpl.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/GyroBmi160Impl.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/HapticImpl.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/HumidityBme280Impl.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/IBeaconImpl.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/IntData.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/JseMetaWearBoard.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/LedImpl.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/LoggingImpl.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/MacroImpl.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/MagnetometerBmm150Impl.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/MetaWearBoardPrivate.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/MilliUnitsSFloatData.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/MilliUnitsUFloatData.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/ModuleImplBase.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/ModuleInfo.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/NeoPixelImpl.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/Pair.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/ProximityTsl2671Impl.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/RouteComponentImpl.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/RouteMulticastImpl.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/RouteSplitImpl.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/SFloatData.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/SensorFusionBoschImpl.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/SerialPassthroughImpl.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/SettingsImpl.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/StreamedDataConsumer.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/SwitchImpl.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/TemperatureImpl.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/TimerImpl.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/Tuple3.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/UFloatData.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/UintData.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/Util.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/Version.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/package-info.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/platform/BatteryService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/platform/BtleGatt.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/platform/BtleGattCharacteristic.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/platform/DeviceInformationService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/platform/IO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/platform/TimedTask.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/impl/platform/package-info.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/module/Accelerometer.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/module/AccelerometerBma255.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/module/AccelerometerBmi160.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/module/AccelerometerBosch.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/module/AccelerometerMma8452q.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/module/AmbientLightLtr329.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/module/BarometerBme280.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/module/BarometerBmp280.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/module/BarometerBosch.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/module/ColorTcs34725.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/module/DataProcessor.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/module/Debug.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/module/Gpio.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/module/Gsr.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/module/GyroBmi160.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/module/Haptic.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/module/HumidityBme280.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/module/IBeacon.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/module/Led.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/module/Logging.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/module/Macro.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/module/MagnetometerBmm150.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/module/NeoPixel.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/module/ProximityTsl2671.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/module/SensorFusionBosch.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/module/SerialPassthrough.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/module/Settings.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/module/Switch.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/module/Temperature.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/module/Timer.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/module/package-info.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/package-info.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/flutter_metawear.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/flutter_metawear.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Dart_Packages.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Flutter_Plugins.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Flutter_Plugins.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/ActiveDataProducer.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/ActiveDataProducer.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/AnonymousRoute.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/AnonymousRoute.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/AsyncDataProducer.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/AsyncDataProducer.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/CodeBlock.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/CodeBlock.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/ConfigEditorBase.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/ConfigEditorBase.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/Configurable.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/Configurable.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/Data.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/Data.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/DataProducer.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/DataProducer.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/DataToken.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/DataToken.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/DeviceInformation.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/DeviceInformation.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/ForcedDataProducer.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/ForcedDataProducer.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/IllegalFirmwareFile.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/IllegalFirmwareFile.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/IllegalRouteOperationException.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/IllegalRouteOperationException.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/MetaWearBoard.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/MetaWearBoard.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/Model.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/Model.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/Observer.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/Observer.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/Route.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/Route.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/Subscriber.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/Subscriber.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/TaskTimeoutException.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/TaskTimeoutException.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/builder/RouteBuilder.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/builder/RouteBuilder.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/builder/RouteComponent.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/builder/RouteComponent.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/builder/RouteMulticast.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/builder/RouteMulticast.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/builder/RouteSplit.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/builder/RouteSplit.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/builder/filter/Comparison.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/builder/filter/Comparison.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/builder/filter/ComparisonOutput.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/builder/filter/ComparisonOutput.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/builder/filter/DifferentialOutput.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/builder/filter/DifferentialOutput.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/builder/filter/Passthrough.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/builder/filter/Passthrough.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/builder/filter/ThresholdOutput.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/builder/filter/ThresholdOutput.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/builder/filter/package-info.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/builder/function/Function1.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/builder/function/Function1.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/builder/function/Function2.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/builder/function/Function2.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/builder/function/package-info.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/builder/package-info.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/builder/predicate/PulseOutput.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/builder/predicate/PulseOutput.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/builder/predicate/package-info.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/AmbientLightLtr329Impl.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/AmbientLightLtr329Impl.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/ArrayData.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/ArrayData.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/BarometerBme280Impl.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/BarometerBme280Impl.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/BarometerBmp280Impl.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/BarometerBmp280Impl.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/BarometerBoschImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/BarometerBoschImpl.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/ByteArrayData.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/ByteArrayData.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/ColorTcs34725Impl.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/ColorTcs34725Impl.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/Constant.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/Constant.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/DataAttributes.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/DataAttributes.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/DataPrivate.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/DataPrivate.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/DataProcessorConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/DataProcessorConfig.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/DataProcessorImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/DataProcessorImpl.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/DataTypeBase.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/DataTypeBase.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/DebugImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/DebugImpl.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/DeviceDataConsumer.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/DeviceDataConsumer.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/EventImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/EventImpl.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/FloatVectorData.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/FloatVectorData.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/GpioImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/GpioImpl.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/GsrImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/GsrImpl.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/GyroBmi160Impl.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/GyroBmi160Impl.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/HapticImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/HapticImpl.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/HumidityBme280Impl.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/HumidityBme280Impl.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/IBeaconImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/IBeaconImpl.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/IntData.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/IntData.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/JseMetaWearBoard.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/JseMetaWearBoard.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/LedImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/LedImpl.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/LoggingImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/LoggingImpl.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/MacroImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/MacroImpl.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/MagnetometerBmm150Impl.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/MagnetometerBmm150Impl.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/MetaWearBoardPrivate.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/MetaWearBoardPrivate.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/MilliUnitsSFloatData.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/MilliUnitsSFloatData.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/MilliUnitsUFloatData.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/MilliUnitsUFloatData.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/ModuleImplBase.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/ModuleImplBase.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/ModuleInfo.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/ModuleInfo.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/NeoPixelImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/NeoPixelImpl.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/Pair.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/Pair.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/ProximityTsl2671Impl.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/ProximityTsl2671Impl.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/RouteComponentImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/RouteComponentImpl.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/RouteMulticastImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/RouteMulticastImpl.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/RouteSplitImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/RouteSplitImpl.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/SFloatData.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/SFloatData.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/SensorFusionBoschImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/SensorFusionBoschImpl.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/SerialPassthroughImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/SerialPassthroughImpl.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/SettingsImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/SettingsImpl.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/StreamedDataConsumer.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/StreamedDataConsumer.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/SwitchImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/SwitchImpl.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/TemperatureImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/TemperatureImpl.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/TimerImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/TimerImpl.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/Tuple3.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/Tuple3.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/UFloatData.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/UFloatData.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/UintData.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/UintData.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/Util.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/Util.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/Version.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/Version.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/module/Accelerometer.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/module/Accelerometer.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/module/AccelerometerBma255.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/module/AccelerometerBma255.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/module/AccelerometerBmi160.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/module/AccelerometerBmi160.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/module/AccelerometerBosch.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/module/AccelerometerBosch.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/module/AccelerometerMma8452q.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/module/AccelerometerMma8452q.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/module/AmbientLightLtr329.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/module/AmbientLightLtr329.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/module/BarometerBme280.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/module/BarometerBme280.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/module/BarometerBmp280.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/module/BarometerBmp280.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/module/BarometerBosch.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/module/BarometerBosch.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/module/ColorTcs34725.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/module/ColorTcs34725.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/module/DataProcessor.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/module/DataProcessor.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/module/Debug.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/module/Debug.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/module/Gpio.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/module/Gpio.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/module/Gsr.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/module/Gsr.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/module/GyroBmi160.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/module/GyroBmi160.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/module/Haptic.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/module/Haptic.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/module/HumidityBme280.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/module/HumidityBme280.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/module/IBeacon.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/module/IBeacon.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/module/Led.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/module/Led.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/module/Logging.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/module/Logging.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/module/Macro.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/module/Macro.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/module/MagnetometerBmm150.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/module/MagnetometerBmm150.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/module/NeoPixel.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/module/NeoPixel.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/module/ProximityTsl2671.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/module/ProximityTsl2671.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/module/SensorFusionBosch.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/module/SensorFusionBosch.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/module/SerialPassthrough.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/module/SerialPassthrough.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/module/Settings.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/module/Settings.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/module/Switch.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/module/Switch.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/module/Temperature.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/module/Temperature.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/module/Timer.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/module/Timer.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/module/package-info.java" beforeDir="false" afterPath="$PROJECT_DIR$/lib/module/package-info.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/package-info.java" beforeDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -161,50 +138,101 @@
   <component name="FileEditorManager">
     <leaf>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/pubspec.yaml">
+        <entry file="file://$PROJECT_DIR$/lib/builder/filter/DifferentialOutput.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="330">
-              <caret line="22" column="16" selection-start-line="22" selection-start-column="16" selection-end-line="22" selection-end-column="16" />
+            <state relative-caret-position="360">
+              <caret line="24" selection-start-line="24" selection-end-line="24" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/lib/flutter_metawear.dart">
-          <provider selected="true" editor-type-id="text-editor" />
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/.gitignore">
+        <entry file="file://$PROJECT_DIR$/lib/builder/filter/Passthrough.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="120">
-              <caret line="8" selection-start-line="8" selection-end-line="8" />
+            <state relative-caret-position="360">
+              <caret line="24" selection-start-line="24" selection-end-line="24" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/example/test/widget_test.dart">
+        <entry file="file://$PROJECT_DIR$/lib/builder/filter/ThresholdOutput.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state>
-              <folding>
-                <element signature="e#0#1046#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="360">
+              <caret line="24" selection-start-line="24" selection-end-line="24" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/lib/android/BtleService.dart">
-          <provider selected="true" editor-type-id="text-editor" />
+        <entry file="file://$PROJECT_DIR$/lib/builder/function/Function1.dart">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="345">
+              <caret line="23" selection-start-line="23" selection-end-line="23" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/lib/builder/function/Function2.dart">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="345">
+              <caret line="23" selection-start-line="23" selection-end-line="23" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/lib/builder/predicate/PulseOutput.dart">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="345">
+              <caret line="23" selection-start-line="23" selection-end-line="23" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/lib/builder/RouteBuilder.dart">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="345">
+              <caret line="23" selection-start-line="23" selection-end-line="23" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/lib/builder/RouteComponent.dart">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-3339">
+              <caret line="30" column="7" lean-forward="true" selection-start-line="30" selection-start-column="7" selection-end-line="30" selection-end-column="7" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/lib/builder/RouteMulticast.dart">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="420">
+              <caret line="28" column="9" lean-forward="true" selection-start-line="28" selection-start-column="9" selection-end-line="28" selection-end-column="9" />
+            </state>
+          </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/lib/builder/filter/ComparisonOutput.dart">
-          <provider selected="true" editor-type-id="text-editor" />
+        <entry file="file://$PROJECT_DIR$/lib/builder/RouteSplit.dart">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="345">
+              <caret line="23" lean-forward="true" selection-start-line="23" selection-end-line="23" />
+            </state>
+          </provider>
         </entry>
       </file>
     </leaf>
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>UUID</find>
+    </findStrings>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -213,6 +241,23 @@
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/protos/metawear.proto" />
+        <option value="$PROJECT_DIR$/lib/Model.dart" />
+        <option value="$PROJECT_DIR$/lib/MetaWearBoard.dart" />
+        <option value="$PROJECT_DIR$/lib/DeviceInformation.dart" />
+        <option value="$PROJECT_DIR$/lib/DataToken.dart" />
+        <option value="$PROJECT_DIR$/lib/Route.dart" />
+        <option value="$PROJECT_DIR$/lib/builder/filter/Comparison.dart" />
+        <option value="$PROJECT_DIR$/lib/builder/filter/ComparisonOutput.dart" />
+        <option value="$PROJECT_DIR$/lib/builder/filter/DifferentialOutput.dart" />
+        <option value="$PROJECT_DIR$/lib/builder/filter/Passthrough.dart" />
+        <option value="$PROJECT_DIR$/lib/builder/filter/ThresholdOutput.dart" />
+        <option value="$PROJECT_DIR$/lib/builder/function/Function1.dart" />
+        <option value="$PROJECT_DIR$/lib/builder/function/Function2.dart" />
+        <option value="$PROJECT_DIR$/lib/builder/predicate/PulseOutput.dart" />
+        <option value="$PROJECT_DIR$/lib/builder/RouteBuilder.dart" />
+        <option value="$PROJECT_DIR$/lib/builder/RouteComponent.dart" />
+        <option value="$PROJECT_DIR$/lib/builder/RouteMulticast.dart" />
+        <option value="$PROJECT_DIR$/lib/builder/RouteSplit.dart" />
       </list>
     </option>
   </component>
@@ -283,6 +328,25 @@
               <item name="lib" type="462c0819:PsiDirectoryNode" />
               <item name="data" type="462c0819:PsiDirectoryNode" />
             </path>
+            <path>
+              <item name="flutter_metawear" type="b2602c69:ProjectViewProjectNode" />
+              <item name="flutter_metawear" type="462c0819:PsiDirectoryNode" />
+              <item name="lib" type="462c0819:PsiDirectoryNode" />
+              <item name="impl" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="flutter_metawear" type="b2602c69:ProjectViewProjectNode" />
+              <item name="flutter_metawear" type="462c0819:PsiDirectoryNode" />
+              <item name="lib" type="462c0819:PsiDirectoryNode" />
+              <item name="impl" type="462c0819:PsiDirectoryNode" />
+              <item name="platform" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="flutter_metawear" type="b2602c69:ProjectViewProjectNode" />
+              <item name="flutter_metawear" type="462c0819:PsiDirectoryNode" />
+              <item name="lib" type="462c0819:PsiDirectoryNode" />
+              <item name="module" type="462c0819:PsiDirectoryNode" />
+            </path>
           </expand>
           <select />
         </subPane>
@@ -293,7 +357,7 @@
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1551681808212" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1551716960618" />
     <property name="dart.analysis.tool.window.force.activate" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../MetaWear-SDK-Android" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
@@ -338,12 +402,13 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="8461000" />
+    <option name="totallyTimeSpent" value="10591000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="29" width="1102" height="1051" extended-state="4" />
+    <frame x="0" y="29" width="1920" height="1051" extended-state="6" />
+    <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.4431818" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.2497332" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Designer" order="2" />
       <window_info id="Image Layers" order="3" />
@@ -352,6 +417,7 @@
       <window_info id="UI Designer" order="6" />
       <window_info id="Build Variants" order="7" side_tool="true" />
       <window_info id="Captures" order="8" />
+      <window_info anchor="bottom" id="Messages" visible="true" weight="0.16721672" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
       <window_info anchor="bottom" id="Run" order="2" />
@@ -364,7 +430,7 @@
       <window_info anchor="bottom" id="Database Changes" order="9" />
       <window_info anchor="bottom" id="Version Control" order="10" />
       <window_info anchor="bottom" id="Flutter Performance" order="11" side_tool="true" />
-      <window_info anchor="bottom" id="Dart Analysis" order="12" visible="true" weight="0.32893288" />
+      <window_info anchor="bottom" id="Dart Analysis" order="12" weight="0.0330033" />
       <window_info anchor="bottom" id="Android Profiler" order="13" show_stripe_button="false" />
       <window_info anchor="bottom" id="Logcat" order="14" />
       <window_info anchor="bottom" id="Docker" order="15" show_stripe_button="false" />
@@ -407,11 +473,151 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/android/BtleService.dart">
+    <entry file="file://$PROJECT_DIR$/lib/impl/AmbientLightLtr329Impl.dart">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
+    <entry file="file://$PROJECT_DIR$/lib/Model.dart">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="345">
+          <caret line="23" selection-start-line="23" selection-end-line="23" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/MetaWearBoard.dart">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-2482">
+          <caret line="46" column="8" selection-start-line="46" selection-start-column="4" selection-end-line="46" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/pubspec.yaml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="330">
+          <caret line="22" column="16" selection-start-line="22" selection-start-column="16" selection-end-line="22" selection-end-column="16" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/DeviceInformation.dart">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="21">
+          <caret line="32" column="23" selection-start-line="32" selection-start-column="23" selection-end-line="32" selection-end-column="23" />
+          <folding>
+            <element signature="e#0#4180#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/DataToken.dart">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="525">
+          <caret line="35" column="24" selection-start-line="35" selection-start-column="24" selection-end-line="35" selection-end-column="24" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/Route.dart">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="606">
+          <caret line="74" column="8" selection-start-line="74" selection-start-column="8" selection-end-line="74" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/android/BtleService.dart">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1215" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/builder/filter/Comparison.dart">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="345">
+          <caret line="23" lean-forward="true" selection-start-line="23" selection-end-line="23" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/lib/builder/filter/ComparisonOutput.dart">
-      <provider selected="true" editor-type-id="text-editor" />
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="345">
+          <caret line="23" selection-start-line="23" selection-end-line="23" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/builder/filter/DifferentialOutput.dart">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="360">
+          <caret line="24" selection-start-line="24" selection-end-line="24" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/builder/filter/Passthrough.dart">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="360">
+          <caret line="24" selection-start-line="24" selection-end-line="24" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/builder/filter/ThresholdOutput.dart">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="360">
+          <caret line="24" selection-start-line="24" selection-end-line="24" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/builder/function/Function1.dart">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="345">
+          <caret line="23" selection-start-line="23" selection-end-line="23" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/builder/function/package-info.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <folding>
+            <element signature="e#0#1897#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/builder/function/Function2.dart">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="345">
+          <caret line="23" selection-start-line="23" selection-end-line="23" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/builder/predicate/PulseOutput.dart">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="345">
+          <caret line="23" selection-start-line="23" selection-end-line="23" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/builder/RouteBuilder.dart">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="345">
+          <caret line="23" selection-start-line="23" selection-end-line="23" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/builder/RouteComponent.dart">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-3339">
+          <caret line="30" column="7" lean-forward="true" selection-start-line="30" selection-start-column="7" selection-end-line="30" selection-end-column="7" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/builder/RouteMulticast.dart">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="420">
+          <caret line="28" column="9" lean-forward="true" selection-start-line="28" selection-start-column="9" selection-end-line="28" selection-end-column="9" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/builder/RouteSplit.dart">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="345">
+          <caret line="23" lean-forward="true" selection-start-line="23" selection-end-line="23" />
+        </state>
+      </provider>
     </entry>
   </component>
   <component name="masterDetails">

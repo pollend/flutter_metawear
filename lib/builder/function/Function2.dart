@@ -22,13 +22,11 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.builder.function;
-
 /**
  * 2 operand functions that operate on sensor or processor data
  * @author Eric Tsai
  */
-public enum Function2 {
+enum Function2 {
     /** Add the data */
     ADD,
     /** Multiply the data */

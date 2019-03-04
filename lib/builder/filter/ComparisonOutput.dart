@@ -22,13 +22,11 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.builder.filter;
-
 /**
  * Output modes for the comparison filter, only supported by firmware v1.2.3 or higher
  * @author Eric Tsai
  */
-public enum ComparisonOutput {
+enum ComparisonOutput {
     /** Input value is returned when the comparison is satisfied */
     ABSOLUTE,
     /** The reference value that satisfies the comparison is returned, no output if none match */

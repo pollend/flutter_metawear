@@ -22,22 +22,12 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.builder;
-
-import com.mbientlab.metawear.CodeBlock;
-import com.mbientlab.metawear.Data;
-import com.mbientlab.metawear.DataToken;
-import com.mbientlab.metawear.Subscriber;
-import com.mbientlab.metawear.builder.filter.*;
-import com.mbientlab.metawear.builder.function.*;
-import com.mbientlab.metawear.builder.predicate.*;
-import com.mbientlab.metawear.module.DataProcessor;
 
 /**
  * Component in a route definition
  * @author Eric Tsai
  */
-public interface RouteComponent {
+abstract class RouteComponent {
     /**
      * Similar to a {@link CodeBlock} except this interface is specifically for
      * data producers

@@ -22,13 +22,11 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.builder;
-
 /**
  * RouteComponent for enforcing that users call {@link #index(int)} immediately after splitting data
  * @author Eric Tsai
  */
-public interface RouteSplit {
+abstract class RouteSplit {
     /**
      * Gets a specific component value from the split data value
      * @param i    Position in the split values array to return

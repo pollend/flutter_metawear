@@ -22,13 +22,11 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear;
-
 /**
  * Defines how data flows from a data producer to an endpoint
  * @author Eric Tsai
  */
-public interface Route {
+abstract class Route {
     /**
      * Generates a string identifying the data producer chain the subscriber is receiving data from.
      * This value can be matched with the output from {@link AnonymousRoute#identifier()} if syncing data
@@ -43,20 +41,20 @@ public interface Route {
      * @param env   Environment values to use with the subscriber
      * @return True if operation succeeded, false otherwise
      */
-    boolean setEnvironment(int pos, Object ... env);
+    bool setEnvironment(int pos, Object ... env);
     /**
      * Quiets the stream the subscriber is listening to, does nothing if the subscriber is handling log data
      * @param pos   Numerical position of the subscriber to interact with, starting at 0
      * @return True if operation succeeded, false otherwise
      */
-    boolean unsubscribe(int pos);
+    bool unsubscribe(int pos);
     /**
      * Reactivates the stream the subscriber is listening to.  If the subscriber
      * originally listened to log data, the function only updates the subscriber.
      * @param pos   Numerical position of the subscriber to interact with, starting at 0
      * @return True if operation succeeded, false otherwise
      */
-    boolean resubscribe(int pos);
+    bool resubscribe(int pos);
     /**
      * Reactivates the stream the subscriber is listening to and updates the data subscriber.  If the subscriber
      * originally listened to log data, the function only updates the subscriber.
@@ -64,7 +62,7 @@ public interface Route {
      * @param subscriber    New subscriber to handle the received data
      * @return True if operation succeeded, false otherwise
      */
-    boolean resubscribe(int pos, Subscriber subscriber);
+    bool resubscribe(int pos, Subscriber subscriber);
 
     /**
      * Removes the route and marks the object as inactive
@@ -74,7 +72,7 @@ public interface Route {
      *  Checks  if the route is
      * @return True if route is active
      */
-    boolean isActive();
+    bool isActive();
     /**
      * Unique value identifying the route.  This value can be used with {@link MetaWearBoard#lookupRoute(int)} lookupRoute}
      * to retrieve the current object

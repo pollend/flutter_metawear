@@ -22,13 +22,12 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.builder.filter;
 
 /**
  * Output modes for the differentiail filter
  * @author Eric Tsai
  */
-public enum DifferentialOutput {
+enum DifferentialOutput {
     /** Return the data as is */
     ABSOLUTE,
     /** Return the difference between the value and its reference point */

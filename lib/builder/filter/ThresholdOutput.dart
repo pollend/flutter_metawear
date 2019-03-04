@@ -22,13 +22,12 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.builder.filter;
 
 /**
  * Output modes for the threshold filter
  * @author Eric Tsai
  */
-public enum ThresholdOutput {
+enum ThresholdOutput {
     /** Return the data as is */
     ABSOLUTE,
     /** 1 if the data exceeded the threshold, -1 if below */

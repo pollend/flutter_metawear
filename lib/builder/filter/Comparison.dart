@@ -22,13 +22,11 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.builder.filter;
-
 /**
  * Supported comparison operations
  * @author Eric Tsai
  */
-public enum Comparison {
+enum Comparison {
     /** Equal */
     EQ,
     /** Not equal */

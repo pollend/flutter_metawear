@@ -22,13 +22,11 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.builder;
-
 /**
  * Builder class for creating a data route
  * @author Eric Tsai
  */
-public interface RouteBuilder {
+abstract class RouteBuilder {
     /**
      * Called by the API with the RouteComponent corresponding to the entry point of the data route
      * @param source    Entry point for the route
