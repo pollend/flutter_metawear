@@ -2,122 +2,155 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="4cb0f089-fc99-4dea-a4d4-afab97db7b8a" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Dart_Packages.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/.gradle/4.10.1/fileChanges/last-build.bin" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/.gradle/4.10.1/fileContent/fileContent.lock" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/.gradle/4.10.1/fileHashes/fileHashes.bin" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/.gradle/4.10.1/fileHashes/fileHashes.lock" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/.gradle/4.10.1/fileHashes/resourceHashesCache.bin" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/.gradle/4.10.1/gc.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/.gradle/4.10.1/javaCompile/classAnalysis.bin" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/.gradle/4.10.1/javaCompile/jarAnalysis.bin" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/.gradle/4.10.1/javaCompile/javaCompile.lock" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/.gradle/4.10.1/javaCompile/taskHistory.bin" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/.gradle/4.10.1/taskHistory/taskHistory.bin" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/.gradle/4.10.1/taskHistory/taskHistory.lock" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/.gradle/buildOutputCleanup/buildOutputCleanup.lock" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/.gradle/buildOutputCleanup/cache.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/.gradle/buildOutputCleanup/outputFiles.bin" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/.gradle/vcs-1/gc.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/.idea/.name" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/.idea/caches/build_file_checksums.ser" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/.idea/caches/gradle_models.ser" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/.idea/codeStyles/Project.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/.idea/gradle.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/.idea/libraries/Gradle____local_aars____home_michaelpollind_opt_flutter_bin_cache_artifacts_engine_android_arm_flutter_jar_unspecified_jar.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/.idea/libraries/Gradle__androidx_annotation_annotation_1_0_0_jar.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/.idea/libraries/Gradle__androidx_arch_core_core_common_2_0_0_jar.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/.idea/libraries/Gradle__androidx_collection_collection_1_0_0_jar.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/.idea/libraries/Gradle__androidx_core_core_1_0_1_aar.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/.idea/libraries/Gradle__androidx_lifecycle_lifecycle_common_2_0_0_jar.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/.idea/libraries/Gradle__androidx_lifecycle_lifecycle_runtime_2_0_0_aar.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/.idea/libraries/Gradle__androidx_versionedparcelable_versionedparcelable_1_0_0_aar.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/.idea/libraries/Gradle__com_google_protobuf_protobuf_lite_3_0_1_jar.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/.idea/libraries/Gradle__com_mbientlab_metawear_3_4_0_aar.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/.idea/libraries/Gradle__com_parse_bolts_bolts_tasks_1_4_0_jar.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/.idea/libraries/Gradle__junit_junit_4_12_jar.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/.idea/libraries/Gradle__org_hamcrest_hamcrest_core_1_3_jar.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/.idea/runConfigurations.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/build.gradle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/flutter_metawear.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/gradle.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/gradle/wrapper/gradle-wrapper.jar" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/gradle/wrapper/gradle-wrapper.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/gradlew" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/gradlew.bat" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/local.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/settings.gradle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/src/main/AndroidManifest.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/src/main/java/com/gaitlab/fluttermetawear/FlutterMetawearPlugin.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/src/main/java/com/gaitlab/fluttermetawear/MetawearChannel.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/src/main/java/com/gaitlab/fluttermetawear/MetawearModuleChannel.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/android/src/main/java/com/gaitlab/fluttermetawear/MetawearRouteBuildChannel.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/.metadata" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/README.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/android/app/build.gradle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/android/app/src/debug/AndroidManifest.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/android/app/src/main/AndroidManifest.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/android/app/src/main/java/com/example/example/MainActivity.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/android/app/src/main/res/drawable/launch_background.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/android/app/src/main/res/mipmap-hdpi/ic_launcher.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/android/app/src/main/res/mipmap-mdpi/ic_launcher.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/android/app/src/main/res/mipmap-xhdpi/ic_launcher.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/android/app/src/main/res/values/styles.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/android/app/src/profile/AndroidManifest.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/android/build.gradle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/android/gradle.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/android/gradle/wrapper/gradle-wrapper.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/android/settings.gradle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/ios/Flutter/AppFrameworkInfo.plist" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/ios/Flutter/Debug.xcconfig" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/ios/Flutter/Release.xcconfig" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/ios/Runner.xcodeproj/project.pbxproj" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/ios/Runner.xcodeproj/project.xcworkspace/contents.xcworkspacedata" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/ios/Runner.xcworkspace/contents.xcworkspacedata" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/ios/Runner/AppDelegate.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/ios/Runner/AppDelegate.m" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-1024x1024@1x.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@1x.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@3x.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@1x.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@2x.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@3x.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@1x.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@2x.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@3x.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@2x.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@3x.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@1x.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@2x.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-83.5x83.5@2x.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/ios/Runner/Assets.xcassets/LaunchImage.imageset/Contents.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@2x.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@3x.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/ios/Runner/Assets.xcassets/LaunchImage.imageset/README.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/ios/Runner/Base.lproj/LaunchScreen.storyboard" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/ios/Runner/Base.lproj/Main.storyboard" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/ios/Runner/Info.plist" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/ios/Runner/main.m" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/lib/main.dart" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/pubspec.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/example/test/widget_test.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/ActiveDataProducer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/AnonymousRoute.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/AsyncDataProducer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/CodeBlock.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/ConfigEditorBase.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/Configurable.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/Data.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/DataProducer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/DataToken.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/DeviceInformation.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/ForcedDataProducer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/IllegalFirmwareFile.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/IllegalRouteOperationException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/MetaWearBoard.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/Model.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/Observer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/Route.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/Subscriber.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/TaskTimeoutException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/UnsupportedModuleException.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/android/BtleService.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/android/package-info.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/builder/RouteBuilder.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/builder/RouteComponent.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/builder/RouteMulticast.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/builder/RouteSplit.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/builder/filter/Comparison.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/builder/filter/ComparisonOutput.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/builder/filter/DifferentialOutput.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/builder/filter/Passthrough.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/builder/filter/ThresholdOutput.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/builder/filter/package-info.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/builder/function/Function1.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/builder/function/Function2.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/builder/function/package-info.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/builder/package-info.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/builder/predicate/PulseOutput.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/builder/predicate/package-info.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/data/Acceleration.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/data/AngularVelocity.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/data/CartesianAxis.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/data/EulerAngles.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/data/FloatVector.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/data/MagneticField.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/data/Quaternion.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/data/SensorOrientation.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/data/Sign.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/data/TapType.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/data/package-info.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/AccelerometerBma255Impl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/AccelerometerBmi160Impl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/AccelerometerBoschImpl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/AccelerometerMma8452qImpl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/AmbientLightLtr329Impl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/ArrayData.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/BarometerBme280Impl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/BarometerBmp280Impl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/BarometerBoschImpl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/ByteArrayData.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/ColorTcs34725Impl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/Constant.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/DataAttributes.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/DataPrivate.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/DataProcessorConfig.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/DataProcessorImpl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/DataTypeBase.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/DebugImpl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/DeviceDataConsumer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/EventImpl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/FloatVectorData.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/GpioImpl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/GsrImpl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/GyroBmi160Impl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/HapticImpl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/HumidityBme280Impl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/IBeaconImpl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/IntData.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/JseMetaWearBoard.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/LedImpl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/LoggingImpl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/MacroImpl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/MagnetometerBmm150Impl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/MetaWearBoardPrivate.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/MilliUnitsSFloatData.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/MilliUnitsUFloatData.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/ModuleImplBase.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/ModuleInfo.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/NeoPixelImpl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/Pair.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/ProximityTsl2671Impl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/RouteComponentImpl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/RouteMulticastImpl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/RouteSplitImpl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/SFloatData.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/SensorFusionBoschImpl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/SerialPassthroughImpl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/SettingsImpl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/StreamedDataConsumer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/SwitchImpl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/TemperatureImpl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/TimerImpl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/Tuple3.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/UFloatData.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/UintData.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/Util.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/Version.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/package-info.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/platform/BatteryService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/platform/BtleGatt.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/platform/BtleGattCharacteristic.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/platform/DeviceInformationService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/platform/IO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/platform/TimedTask.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/impl/platform/package-info.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/module/Accelerometer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/module/AccelerometerBma255.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/module/AccelerometerBmi160.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/module/AccelerometerBosch.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/module/AccelerometerMma8452q.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/module/AmbientLightLtr329.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/module/BarometerBme280.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/module/BarometerBmp280.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/module/BarometerBosch.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/module/ColorTcs34725.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/module/DataProcessor.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/module/Debug.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/module/Gpio.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/module/Gsr.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/module/GyroBmi160.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/module/Haptic.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/module/HumidityBme280.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/module/IBeacon.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/module/Led.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/module/Logging.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/module/Macro.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/module/MagnetometerBmm150.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/module/NeoPixel.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/module/ProximityTsl2671.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/module/SensorFusionBosch.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/module/SerialPassthrough.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/module/Settings.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/module/Switch.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/module/Temperature.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/module/Timer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/module/package-info.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/package-info.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/flutter_metawear.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/flutter_metawear.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Dart_SDK.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Dart_SDK.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Dart_Packages.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/flutter_metawear.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/flutter_metawear.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/pubspec.yaml" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -127,13 +160,48 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/lib/flutter_metawear.dart">
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/pubspec.yaml">
           <provider selected="true" editor-type-id="text-editor">
-            <state>
-              <caret column="25" lean-forward="true" selection-start-column="25" selection-end-column="25" />
+            <state relative-caret-position="330">
+              <caret line="22" column="16" selection-start-line="22" selection-start-column="16" selection-end-line="22" selection-end-column="16" />
             </state>
           </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/lib/flutter_metawear.dart">
+          <provider selected="true" editor-type-id="text-editor" />
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/.gitignore">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="120">
+              <caret line="8" selection-start-line="8" selection-end-line="8" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/example/test/widget_test.dart">
+          <provider selected="true" editor-type-id="text-editor">
+            <state>
+              <folding>
+                <element signature="e#0#1046#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/lib/android/BtleService.dart">
+          <provider selected="true" editor-type-id="text-editor" />
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/lib/builder/filter/ComparisonOutput.dart">
+          <provider selected="true" editor-type-id="text-editor" />
         </entry>
       </file>
     </leaf>
@@ -148,10 +216,11 @@
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds">
-    <option name="y" value="426" />
-    <option name="width" value="960" />
-    <option name="height" value="782" />
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="1102" />
+    <option name="y" value="29" />
+    <option name="width" value="818" />
+    <option name="height" value="1051" />
   </component>
   <component name="ProjectReloadState">
     <option name="STATE" value="1" />
@@ -161,6 +230,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="PackagesPane" />
       <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
@@ -174,22 +244,66 @@
               <item name="flutter_metawear" type="462c0819:PsiDirectoryNode" />
               <item name="lib" type="462c0819:PsiDirectoryNode" />
             </path>
+            <path>
+              <item name="flutter_metawear" type="b2602c69:ProjectViewProjectNode" />
+              <item name="flutter_metawear" type="462c0819:PsiDirectoryNode" />
+              <item name="lib" type="462c0819:PsiDirectoryNode" />
+              <item name="android" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="flutter_metawear" type="b2602c69:ProjectViewProjectNode" />
+              <item name="flutter_metawear" type="462c0819:PsiDirectoryNode" />
+              <item name="lib" type="462c0819:PsiDirectoryNode" />
+              <item name="builder" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="flutter_metawear" type="b2602c69:ProjectViewProjectNode" />
+              <item name="flutter_metawear" type="462c0819:PsiDirectoryNode" />
+              <item name="lib" type="462c0819:PsiDirectoryNode" />
+              <item name="builder" type="462c0819:PsiDirectoryNode" />
+              <item name="filter" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="flutter_metawear" type="b2602c69:ProjectViewProjectNode" />
+              <item name="flutter_metawear" type="462c0819:PsiDirectoryNode" />
+              <item name="lib" type="462c0819:PsiDirectoryNode" />
+              <item name="builder" type="462c0819:PsiDirectoryNode" />
+              <item name="function" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="flutter_metawear" type="b2602c69:ProjectViewProjectNode" />
+              <item name="flutter_metawear" type="462c0819:PsiDirectoryNode" />
+              <item name="lib" type="462c0819:PsiDirectoryNode" />
+              <item name="builder" type="462c0819:PsiDirectoryNode" />
+              <item name="predicate" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="flutter_metawear" type="b2602c69:ProjectViewProjectNode" />
+              <item name="flutter_metawear" type="462c0819:PsiDirectoryNode" />
+              <item name="lib" type="462c0819:PsiDirectoryNode" />
+              <item name="data" type="462c0819:PsiDirectoryNode" />
+            </path>
           </expand>
           <select />
         </subPane>
       </pane>
-      <pane id="PackagesPane" />
       <pane id="AndroidView" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1551681808212" />
     <property name="dart.analysis.tool.window.force.activate" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../flutter_blue" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../MetaWear-SDK-Android" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="show.migrate.to.gradle.popup" value="false" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/lib" />
+    </key>
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -224,25 +338,20 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="6351000" />
+    <option name="totallyTimeSpent" value="8461000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="426" width="960" height="782" extended-state="0" />
-    <editor active="true" />
+    <frame x="0" y="29" width="1102" height="1051" extended-state="4" />
     <layout>
-      <window_info id="Build Variants" side_tool="true" />
-      <window_info id="Captures" />
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.50993377" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.4431818" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Designer" order="2" />
       <window_info id="Image Layers" order="3" />
       <window_info id="Favorites" order="4" side_tool="true" />
       <window_info id="Capture Tool" order="5" />
       <window_info id="UI Designer" order="6" />
-      <window_info anchor="bottom" id="Dart Analysis" visible="true" weight="0.48307693" />
-      <window_info anchor="bottom" id="Android Profiler" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Logcat" />
-      <window_info anchor="bottom" id="Docker" show_stripe_button="false" />
+      <window_info id="Build Variants" order="7" side_tool="true" />
+      <window_info id="Captures" order="8" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
       <window_info anchor="bottom" id="Run" order="2" />
@@ -255,7 +364,10 @@
       <window_info anchor="bottom" id="Database Changes" order="9" />
       <window_info anchor="bottom" id="Version Control" order="10" />
       <window_info anchor="bottom" id="Flutter Performance" order="11" side_tool="true" />
-      <window_info anchor="right" id="Device File Explorer" side_tool="true" />
+      <window_info anchor="bottom" id="Dart Analysis" order="12" visible="true" weight="0.32893288" />
+      <window_info anchor="bottom" id="Android Profiler" order="13" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Logcat" order="14" />
+      <window_info anchor="bottom" id="Docker" order="15" show_stripe_button="false" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -267,36 +379,39 @@
       <window_info anchor="right" id="Palette&#9;" order="8" />
       <window_info anchor="right" id="Theme Preview" order="9" />
       <window_info anchor="right" id="Capture Analysis" order="10" />
+      <window_info anchor="right" id="Device File Explorer" order="11" side_tool="true" />
     </layout>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/protos/regnerate.md">
-      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
-        <state split_layout="SPLIT">
-          <first_editor />
-          <second_editor />
+    <entry file="file://$PROJECT_DIR$/protos/regnerate.md" />
+    <entry file="file://$PROJECT_DIR$/protos/metawear.proto" />
+    <entry file="file://$PROJECT_DIR$/lib/flutter_metawear.dart">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.gitignore">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="120">
+          <caret line="8" selection-start-line="8" selection-end-line="8" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/protos/metawear.proto">
+    <entry file="file://$PROJECT_DIR$/example/test/widget_test.dart">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="23">
-          <caret line="16" column="1" selection-start-line="16" selection-start-column="1" selection-end-line="16" selection-end-column="1" />
+        <state>
           <folding>
-            <element signature="n#!!doc" expanded="true" />
+            <element signature="e#0#1046#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/flutter_metawear.dart">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="25" lean-forward="true" selection-start-column="25" selection-end-column="25" />
-        </state>
-      </provider>
+    <entry file="file://$PROJECT_DIR$/lib/android/BtleService.dart">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/builder/filter/ComparisonOutput.dart">
+      <provider selected="true" editor-type-id="text-editor" />
     </entry>
   </component>
   <component name="masterDetails">
