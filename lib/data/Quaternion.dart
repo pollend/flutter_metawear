@@ -21,51 +21,47 @@
  * Should you have any questions regarding your right to use this Software, contact MbientLab via email:
  * hello@mbientlab.com.
  */
-
-package com.mbientlab.metawear.data;
-
-import java.util.Locale;
+import 'package:flutter_metawear/data/FloatVector.dart';
+import 'package:sprintf/sprintf.dart';
 
 /**
  * Encapsulates a quaternion in the form q = w + x<b>i</b> + y<b>j</b> + z<b>k</b>
  * @author Eric Tsai
  */
-public class Quaternion extends FloatVector {
-    public Quaternion(float w, float x, float y, float z) {
-        super(w, x, y, z);
-    }
+class Quaternion extends FloatVector {
+    Quaternion(double w, double x, double y, double z): super(w,x,y,z);
 
     /**
      * Gets the value of the w component
      * @return w component value
      */
-    public float w() {
+     double w() {
         return vector[0];
     }
     /**
      * Gets the value of the x component
      * @return x component value
      */
-    public float x() {
+    double x() {
         return vector[1];
     }
     /**
      * Gets the value of the y component
      * @return y component value
      */
-    public float y() {
+    double y() {
         return vector[2];
     }
     /**
      * Gets the value of the z component
      * @return z component value
      */
-    public float z() {
+    double z() {
         return vector[3];
     }
 
-    @Override
-    public String toString() {
-        return String.format(Locale.US, "{w: %.3f, x: %.3f, y: %.3f, z: %.3f}", w(), x(), y(), z());
+    @override
+    String toString() {
+        return sprintf("{w: %.3f, x: %.3f, y: %.3f, z: %.3f}", [w(), x(), y(), z()]);
     }
 }

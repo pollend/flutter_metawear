@@ -23,23 +23,30 @@
  */
 
 
+import 'package:flutter_metawear/builder/RouteMulticast.dart';
+import 'package:flutter_metawear/builder/RouteSplit.dart';
+import 'package:flutter_metawear/builder/filter/ThresholdOutput.dart';
+import 'package:flutter_metawear/builder/function/Function2.dart';
+
+/**
+ * Similar to a {@link CodeBlock} except this interface is specifically for
+ * data producers
+ * @author Eric Tsai
+ */
+abstract class Action {
+    /**
+     * Writes the MetaWear commands to the board to be executed every time new token is created
+     * @param token    Token representing the on-board token
+     */
+    void execute(DataToken token);
+}
+
+
 /**
  * Component in a route definition
  * @author Eric Tsai
  */
 abstract class RouteComponent {
-    /**
-     * Similar to a {@link CodeBlock} except this interface is specifically for
-     * data producers
-     * @author Eric Tsai
-     */
-    interface Action {
-        /**
-         * Writes the MetaWear commands to the board to be executed every time new token is created
-         * @param token    Token representing the on-board token
-         */
-        void execute(DataToken token);
-    }
 
     /**
      * Splits the route directing the input data to different end points

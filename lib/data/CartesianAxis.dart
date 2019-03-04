@@ -22,13 +22,12 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.data;
 
 /**
  * Created by etsai on 11/13/16.
  */
 
-public enum CartesianAxis {
+enum CartesianAxis {
     X,
     Y,
     Z

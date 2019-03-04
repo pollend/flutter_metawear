@@ -31,7 +31,7 @@ public class MetawearRouteBuildChannel implements MethodChannel.MethodCallHandle
     @Override
     public void onMethodCall(MethodCall methodCall, MethodChannel.Result result) {
         switch (methodCall.method){
-            case "packed_acc":
+            case "steam":
                 routeComponent.stream(new Subscriber() {
                     @Override
                     public void apply(Data data, Object... env) {

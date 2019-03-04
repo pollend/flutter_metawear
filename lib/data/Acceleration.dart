@@ -22,43 +22,44 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.data;
 
-import java.util.Locale;
+import 'package:flutter_metawear/data/FloatVector.dart';
+import 'package:sprintf/sprintf.dart';
 
 /**
  * Encapsulates acceleration data, values are in units of g's
  * @author Eric Tsai
  */
-public class Acceleration extends FloatVector {
-    public Acceleration(float x, float y, float z) {
-        super(x, y, z);
-    }
+class Acceleration extends FloatVector {
+    Acceleration(double x, double y, double z) : super(x, y, z);
+
 
     /**
      * Gets the acceleration on the x-axis
      * @return X-axis acceleration
      */
-    public float x() {
+    double x() {
         return vector[0];
     }
+
     /**
      * Gets the acceleration on the y-axis
      * @return Y-axis acceleration
      */
-    public float y() {
+    double y() {
         return vector[1];
     }
+
     /**
      * Gets the acceleration on the z-axis
      * @return Z-axis acceleration
      */
-    public float z() {
+    double z() {
         return vector[2];
     }
 
-    @Override
-    public String toString() {
-        return String.format(Locale.US, "{x: %.3fg, y: %.3fg, z: %.3fg}", x(), y(), z());
+    @override
+    String toString() {
+        return sprintf("{x: %.3fg, y: %.3fg, z: %.3fg}", [x(), y(), z()]);
     }
 }

@@ -22,50 +22,49 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.data;
-
-import java.util.Locale;
+import 'package:flutter_metawear/data/FloatVector.dart';
+import 'package:sprintf/sprintf.dart';
 
 /**
  * Encapsulates angular velocity data, values are in degrees per second
  * @author Eric Tsai
  */
-public class AngularVelocity extends FloatVector {
+class AngularVelocity extends FloatVector {
     /** Degrees per second */
-    protected static final String DEGS_PER_SEC= "\u00B0/s";
+    static const String DEGS_PER_SEC = "\u00B0/s";
 
-    public AngularVelocity(float x, float y, float z) {
-        super(x, y, z);
-    }
+    AngularVelocity(double x, double y, double z) : super(x, y, z);
 
     /**
      * Gets the angular velocity around the x-axis
      * @return X-axis angular velocity
      */
-    public float x() {
+    double x() {
         return vector[0];
     }
+
     /**
      * Gets the angular velocity around the y-axis
      * @return Y-axis angular velocity
      */
-    public float y() {
+    double y() {
         return vector[1];
     }
+
     /**
      * Gets the angular velocity around the z-axis
      * @return Z-axis angular velocity
      */
-    public float z() {
+    double z() {
         return vector[2];
     }
 
-    @Override
-    public String toString() {
-        return String.format(Locale.US, "{x: %.3f%s, y: %.3f%s, z: %.3f%s}",
-                x(), DEGS_PER_SEC,
-                y(), DEGS_PER_SEC,
-                z(), DEGS_PER_SEC
-        );
+    @override
+    String toString() {
+        return sprintf("{x: %.3f%s, y: %.3f%s, z: %.3f%s}", [
+            x(), DEGS_PER_SEC,
+            y(), DEGS_PER_SEC,
+            z(), DEGS_PER_SEC
+        ]);
     }
 }

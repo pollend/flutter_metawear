@@ -22,14 +22,14 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear;
+import 'package:flutter_metawear/ConfigEditorBase.dart';
 
 /**
  * Attribute indicating the object can be configured
  * @param <T>    Type that modifies this object's configuration
  * @author Eric Tsai
  */
-public interface Configurable<T extends ConfigEditorBase> {
+abstract class Configurable<T extends ConfigEditorBase> {
     /**
      * Configure the object
      * @return Config editor object

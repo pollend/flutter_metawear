@@ -22,18 +22,11 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.module;
-
-import com.mbientlab.metawear.CodeBlock;
-import com.mbientlab.metawear.MetaWearBoard.Module;
-
-import bolts.Task;
-
 /**
  * On-board scheduler for executing MetaWear commands in the future
  * @author Eric Tsai
  */
-public interface Timer extends Module {
+abstract class Timer extends Module {
     /**
      * A task comprising of MetaWear commands programmed to run on-board at a certain times
      * @author Eric Tsai

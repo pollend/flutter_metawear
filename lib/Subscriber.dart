@@ -22,15 +22,12 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear;
-
-import java.io.Serializable;
 
 /**
  * Handles data that is sent to the local device
  * @author Eric Tsai
  */
-public interface Subscriber extends Serializable {
+abstract class Subscriber extends Serializable {
     /**
      * Called when data from the corresponding producer has arrived
      * @param data   Data received from the sensor

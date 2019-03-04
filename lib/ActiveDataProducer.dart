@@ -22,11 +22,11 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear;
+import 'package:flutter_metawear/DataProducer.dart';
 
 /**
  * A type DataProducer that is always active
  * @author Eric Tsai
  */
-public interface ActiveDataProducer extends DataProducer {
+abstract class ActiveDataProducer extends DataProducer {
 }

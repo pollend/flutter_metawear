@@ -22,15 +22,30 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.module;
+import 'package:flutter_metawear/AsyncDataProducer.dart';
 
-import com.mbientlab.metawear.AsyncDataProducer;
-import com.mbientlab.metawear.ConfigEditorBase;
-import com.mbientlab.metawear.Configurable;
-import com.mbientlab.metawear.MetaWearBoard.Module;
-import com.mbientlab.metawear.data.Acceleration;
-
-import bolts.Task;
+/**
+ * Reports measured acceleration values from the accelerometer.  Combined xyz acceleration data is represented
+ * by the {@link Acceleration} class and split data is interpreted as a float.
+ * @author Eric Tsai
+ */
+abstract class AccelerationDataProducer extends AsyncDataProducer {
+    /**
+     * Get the name for x-axis data
+     * @return X-axis data name
+     */
+    String xAxisName();
+    /**
+     * Get the name for y-axis data
+     * @return Y-axis data name
+     */
+    String yAxisName();
+    /**
+     * Get the name for z-axis data
+     * @return Z-axis data name
+     */
+    String zAxisName();
+}
 
 /**
  * Measures sources of acceleration, such as gravity or motion.  This interface is provides general
@@ -41,29 +56,7 @@ import bolts.Task;
  * @see AccelerometerBmi160
  * @see AccelerometerMma8452q
  */
-public interface Accelerometer extends Module, Configurable<Accelerometer.ConfigEditor<? extends Accelerometer.ConfigEditor>> {
-    /**
-     * Reports measured acceleration values from the accelerometer.  Combined xyz acceleration data is represented
-     * by the {@link Acceleration} class and split data is interpreted as a float.
-     * @author Eric Tsai
-     */
-    interface AccelerationDataProducer extends AsyncDataProducer {
-        /**
-         * Get the name for x-axis data
-         * @return X-axis data name
-         */
-        String xAxisName();
-        /**
-         * Get the name for y-axis data
-         * @return Y-axis data name
-         */
-        String yAxisName();
-        /**
-         * Get the name for z-axis data
-         * @return Z-axis data name
-         */
-        String zAxisName();
-    }
+abstract class Accelerometer extends Module, Configurable<Accelerometer.ConfigEditor<? extends Accelerometer.ConfigEditor>> {
     /**
      * Get an implementation of the {@link AccelerationDataProducer} interface
      * @return AccelerationDataProducer object

@@ -22,13 +22,12 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear;
 
 /**
  * Monitors an on-board event and executes the corresponding {@link CodeBlock} when its event is fired
  * @author Eric Tsai
  */
-public interface Observer {
+abstract class Observer {
     /**
      * Unique value identifying the observer.  Used with {@link MetaWearBoard#lookupObserver(int)}
      * to retrieve an existing observer

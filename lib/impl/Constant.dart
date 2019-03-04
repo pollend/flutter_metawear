@@ -22,62 +22,74 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.impl;
 
-import java.util.HashMap;
 
-/**
- * Created by etsai on 9/20/16.
- */
-class Constant {
-    static final long RESPONSE_TIMEOUT = 1000L;
-    static final byte COMMAND_LENGTH = 18, MAX_BTLE_LENGTH = COMMAND_LENGTH + 2;
+class ModuleType {
+    static final int RESPONSE_TIMEOUT = 1000;
+    static final int COMMAND_LENGTH = 18, MAX_BTLE_LENGTH = COMMAND_LENGTH + 2;
 
-    enum Module {
-        SWITCH(0x01, "Switch"),
-        LED(0x02, "Led"),
-        ACCELEROMETER(0x03, "Accelerometer"),
-        TEMPERATURE(0x04, "Temperature"),
-        GPIO(0x05, "Gpio"),
-        NEO_PIXEL(0x06, "NeoPixel"),
-        IBEACON(0x07, "IBeacon"),
-        HAPTIC(0x08, "Haptic"),
-        DATA_PROCESSOR(0x09, "DataProcessor"),
-        EVENT(0x0a, "Event"),
-        LOGGING(0x0b, "Logging"),
-        TIMER(0x0c, "Timer"),
-        SERIAL_PASSTHROUGH(0x0d, "SerialPassthrough"),
-        MACRO(0x0f, "Macro"),
-        GSR(0x10, "Conductance"),
-        SETTINGS(0x11, "Settings"),
-        BAROMETER(0x12, "Barometer"),
-        GYRO(0x13, "Gyro"),
-        AMBIENT_LIGHT(0x14, "AmbientLight"),
-        MAGNETOMETER(0x15, "Magnetometer"),
-        HUMIDITY(0x16, "Humidity"),
-        COLOR_DETECTOR(0x17, "Color"),
-        PROXIMITY(0x18, "Proximity"),
-        SENSOR_FUSION(0x19, "SensorFusion"),
-        DEBUG(0xfe, "Debug");
+    final int id;
+    final String friendlyName;
 
-        public final byte id;
-        public final String friendlyName;
+    const ModuleType._interal(this.id, this.friendlyName);
 
-        Module(int id, String friendlyName) {
-            this.id= (byte) id;
-            this.friendlyName = friendlyName;
-        }
+    static const SWITCH = const ModuleType._interal(0x01, "Switch");
+    static const LED = const ModuleType._interal(0x02, "Led");
+    static const ACCELEROMETER = const ModuleType._interal(0x03, "Accelerometer");
+    static const TEMPERATURE = const ModuleType._interal(0x04, "Temperature");
+    static const GPIO = const ModuleType._interal(0x05, "Gpio");
+    static const NEO_PIXEL = const ModuleType._interal(0x06, "NeoPixel");
+    static const IBEACON = const ModuleType._interal(0x07, "IBeacon");
+    static const HAPTIC = const ModuleType._interal(0x08, "Haptic");
+    static const DATA_PROCESSOR = const ModuleType._interal(0x09, "DataProcessor");
+    static const EVENT = const ModuleType._interal(0x0a, "Event");
+    static const LOGGING = const ModuleType._interal(0x0b, "Logging");
+    static const TIMER = const ModuleType._interal(0x0c, "Timer");
+    static const SERIAL_PASSTHROUGH = const ModuleType._interal( 0x0d, "SerialPassthrough");
+    static const MACRO = const ModuleType._interal(0x0f, "Macro");
+    static const GSR = const ModuleType._interal(0x10, "Conductance");
+    static const SETTINGS = const ModuleType._interal(0x11, "Settings");
+    static const BAROMETER = const ModuleType._interal(0x12, "Barometer");
+    static const GYRO = const ModuleType._interal(0x13, "Gyro");
+    static const AMBIENT_LIGHT = const ModuleType._interal(0x14, "AmbientLight");
+    static const MAGNETOMETER = const ModuleType._interal(0x15, "Magnetometer");
+    static const HUMIDITY = const ModuleType._interal(0x16, "Humidity");
+    static const COLOR_DETECTOR = const ModuleType._interal(0x17, "Color");
+    static const PROXIMITY = const ModuleType._interal(0x18, "Proximity");
+    static const SENSOR_FUSION = const ModuleType._interal(0x19, "SensorFusion");
+    static const DEBUG = const ModuleType._interal(0xfe, "Debug");
 
-        private static final HashMap<Byte, Module> byteToEnum;
-        static {
-            byteToEnum = new HashMap<>();
-            for(Module it: Module.values()) {
-                byteToEnum.put(it.id, it);
-            }
-        }
+    static final Map<int, ModuleType> _byteToEnum = {
+        SWITCH.id: SWITCH,
+        LED.id: LED,
+        ACCELEROMETER.id: ACCELEROMETER,
+        TEMPERATURE.id: TEMPERATURE,
+        GPIO.id: GPIO,
+        NEO_PIXEL.id: NEO_PIXEL,
+        IBEACON.id: IBEACON,
+        HAPTIC.id: HAPTIC,
+        DATA_PROCESSOR.id: DATA_PROCESSOR,
+        EVENT.id: EVENT,
+        LOGGING.id: LOGGING,
+        TIMER.id: TIMER,
+        SERIAL_PASSTHROUGH.id: SERIAL_PASSTHROUGH,
+        MACRO.id: MACRO,
+        GSR.id: GSR,
+        SETTINGS.id: SETTINGS,
+        BAROMETER.id: BAROMETER,
+        GYRO.id: GYRO,
+        AMBIENT_LIGHT.id: AMBIENT_LIGHT,
+        MAGNETOMETER.id: MAGNETOMETER,
+        HUMIDITY.id: HUMIDITY,
+        COLOR_DETECTOR.id: COLOR_DETECTOR,
+        PROXIMITY.id: PROXIMITY,
+        SENSOR_FUSION.id: SENSOR_FUSION,
+        DEBUG.id: DEBUG
+    };
 
-        public static Module lookupEnum(byte id) {
-            return byteToEnum.get(id);
-        }
+    static Module lookupEnum(int id){
+        return _byteToEnum[id];
     }
+
+
 }

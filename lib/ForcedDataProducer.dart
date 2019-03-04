@@ -22,16 +22,14 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear;
-
-import com.mbientlab.metawear.module.Timer;
+import 'package:flutter_metawear/DataProducer.dart';
 
 /**
  * A data producer that only emits data when a {@link #read()} command is issued.  Using the {@link Timer} module,
  * a periodic read can be programmed onto the board to avoid having to repeatedly send the command from the local device.
  * @author Eric Tsai
  */
-public interface ForcedDataProducer extends DataProducer {
+abstract class ForcedDataProducer extends DataProducer {
     /**
      * Sends a read command to the producer
      */

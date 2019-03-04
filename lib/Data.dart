@@ -22,20 +22,20 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear;
 
-import java.util.Calendar;
+import 'dart:typed_data';
 
 /**
  * A sample of sensor data
  * @author Eric Tsai
  */
-public interface Data {
+abstract class Data {
     /**
      * Time of when the data was received (streaming) or created (logging)
      * @return Data timestamp
      */
-    Calendar timestamp();
+    DateTime timestamp();
+
     /**
      * String representation of the timestamp in the format <code>YYYY-MM-DDTHH:MM:SS.LLL</code>.  The timezone
      * of the string will be the local device's current timezone.
@@ -47,17 +47,17 @@ public interface Data {
      * the {@link #bytes()} method
      * @return Value corresponding to 1 unit
      */
-    float scale();
+    double scale();
     /**
      * Raw byte representation of the data value
      * @return Byte array of the value
      */
-    byte[] bytes();
+    Uint8List bytes();
     /**
      * Classes that can be used when calling {@link #value(Class)}
      * @return Array of valid classes
      */
-    Class<?>[] types();
+    Type types();
 
     /**
      * Converts the data bytes to a usable data type
@@ -66,7 +66,7 @@ public interface Data {
      * @return Data value as the specified type
      * @throws ClassCastException if the data cannot be casted to desired type
      */
-    <T> T value(Class<T> clazz);
+     T value<T>(Type clazz);
     /**
      * Extra information attached to this data sample
      * @param clazz     Class type to convert the value to
@@ -74,5 +74,5 @@ public interface Data {
      * @return Extra data casted as the specified type
      * @throws ClassCastException if the data cannot be casted to the desired type
      */
-    <T> T extra(Class<T> clazz);
+    T extra<T>(Type clazz);
 }

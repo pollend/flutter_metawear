@@ -22,40 +22,53 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.impl.platform;
 
-import java.util.UUID;
+import 'package:uuid/uuid.dart';
 
 /**
  * Bluetooth GATT characteristic
  * @author Eric Tsai
  */
-public class BtleGattCharacteristic {
+class BtleGattCharacteristic {
     /** UUID identifying the service the characteristic belongs to */
-    public final UUID serviceUuid;
+    final Uuid serviceUuid;
+
     /** UUID identifying the characteristic */
-    public final UUID uuid;
+    final Uuid uuid;
 
-    public BtleGattCharacteristic(UUID serviceUuid, UUID uuid) {
-        this.serviceUuid = serviceUuid;
-        this.uuid = uuid;
-    }
+    BtleGattCharacteristic({Uuid this.serviceUuid, Uuid this.uuid});
 
-    @Override
-    public boolean equals(Object o) {
+
+    @override
+    int get hashCode => serviceUuid.hashCode * 31 + uuid.hashCode;
+
+    @override
+    bool operator ==(o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null || runtimeType != o.runtimeType) return false;
 
-        BtleGattCharacteristic that = (BtleGattCharacteristic) o;
+        BtleGattCharacteristic that = o as BtleGattCharacteristic;
 
-        return serviceUuid.equals(that.serviceUuid) && uuid.equals(that.uuid);
-
+        return serviceUuid == that.serviceUuid && uuid == that.uuid;
     }
-
-    @Override
-    public int hashCode() {
-        int result = serviceUuid.hashCode();
-        result = 31 * result + uuid.hashCode();
-        return result;
-    }
+//
+//
+//
+//    @Override
+//    public boolean equals(Object o) {
+//        if (this == o) return true;
+//        if (o == null || getClass() != o.getClass()) return false;
+//
+//        BtleGattCharacteristic that = (BtleGattCharacteristic) o;
+//
+//        return serviceUuid.equals(that.serviceUuid) && uuid.equals(that.uuid);
+//
+//    }
+//
+//    @Override
+//    public int hashCode() {
+//        int result = serviceUuid.hashCode();
+//        result = 31 * result + uuid.hashCode();
+//        return result;
+//    }
 }

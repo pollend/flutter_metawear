@@ -22,20 +22,22 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear;
 
 /**
  * Checked exception signifying a module is not supported on the connected MetaWear board
  * @author Eric Tsai
  */
-public class UnsupportedModuleException extends Exception {
-    private static final long serialVersionUID = -2869845467241050695L;
+class UnsupportedModuleException implements Exception {
+    //    private static final long serialVersionUID = -2869845467241050695L;
+
+    final String message;
 
     /**
      * Creates an exception with the given message
      * @param msg    Message to accompany the exception
      */
-    public UnsupportedModuleException(String msg) {
-        super(msg);
-    }
+    UnsupportedModuleException({this.message});
+
+    @override
+    String toString() => "Unsupported Module: $message";
 }

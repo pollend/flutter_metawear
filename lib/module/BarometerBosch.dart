@@ -22,13 +22,6 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.module;
-
-import com.mbientlab.metawear.AsyncDataProducer;
-import com.mbientlab.metawear.ConfigEditorBase;
-import com.mbientlab.metawear.Configurable;
-import com.mbientlab.metawear.MetaWearBoard.Module;
-
 /**
  * Absolute barometric pressure sensor by Bosch.  This interface provides general access to a Bosch
  * barometer. If you know specifically which barometer is on your board, use the appropriate subclass
@@ -37,7 +30,7 @@ import com.mbientlab.metawear.MetaWearBoard.Module;
  * @see BarometerBme280
  * @see BarometerBmp280
  */
-public interface BarometerBosch extends Module, Configurable<BarometerBosch.ConfigEditor<? extends BarometerBosch.ConfigEditor>> {
+abstract class BarometerBosch extends Module, Configurable<BarometerBosch.ConfigEditor<? extends BarometerBosch.ConfigEditor>> {
     /**
      * Supported oversampling modes on a Bosch barometer
      * @author Eric Tsai

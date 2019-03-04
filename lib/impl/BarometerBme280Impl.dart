@@ -22,11 +22,6 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.impl;
-
-import com.mbientlab.metawear.module.BarometerBme280;
-
-import static com.mbientlab.metawear.impl.Constant.Module.BAROMETER;
 
 /**
  * Created by etsai on 9/20/16.

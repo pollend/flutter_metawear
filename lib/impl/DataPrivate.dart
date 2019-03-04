@@ -22,12 +22,6 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.impl;
-
-import com.mbientlab.metawear.Data;
-
-import java.util.Calendar;
-import java.util.Locale;
 
 /**
  * Created by etsai on 9/4/16.

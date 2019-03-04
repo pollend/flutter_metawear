@@ -22,6 +22,8 @@
  * hello@mbientlab.com.
  */
 
+import 'package:flutter_metawear/builder/RouteComponent.dart';
+
 /**
  * Builder class for creating a data route
  * @author Eric Tsai

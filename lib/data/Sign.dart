@@ -22,9 +22,7 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.data;
-
-public enum Sign {
+enum Sign {
     POSITIVE,
     NEGATIVE
 }

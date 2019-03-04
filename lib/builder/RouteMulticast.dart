@@ -22,6 +22,8 @@
  * hello@mbientlab.com.
  */
 
+import 'package:flutter_metawear/builder/RouteComponent.dart';
+
 /**
  * Route element for enforcing that users call {@link #to()} immediately after declaring a multicast
  * @author Eric Tsai

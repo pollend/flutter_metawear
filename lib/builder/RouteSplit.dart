@@ -22,6 +22,8 @@
  * hello@mbientlab.com.
  */
 
+import 'package:flutter_metawear/builder/RouteComponent.dart';
+
 /**
  * RouteComponent for enforcing that users call {@link #index(int)} immediately after splitting data
  * @author Eric Tsai

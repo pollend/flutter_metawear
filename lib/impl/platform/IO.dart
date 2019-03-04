@@ -22,19 +22,11 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.impl.platform;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-
-import bolts.Task;
-
 /**
  * IO operations used by the API, must be implemented by the target platform to use the API.
  * @author Eric Tsai
  */
-public interface IO {
+abstract class IO {
     /**
      * Save the data to the local device
      * @param key     Key value identifying the data

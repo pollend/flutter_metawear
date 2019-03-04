@@ -22,79 +22,74 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.impl;
 
-import java.io.Serializable;
-import java.util.Arrays;
+import 'dart:core';
+
+import 'dart:typed_data';
 
 /**
  * Created by etsai on 9/4/16.
  */
-class DataAttributes implements Serializable {
-    private static final long serialVersionUID = 236031852609753664L;
+class DataAttributes {
+//    private static final long serialVersionUID = 236031852609753664L;
 
-    final byte[] sizes;
-    final byte copies, offset;
-    final boolean signed;
+    final Uint8List sizes;
+    final int copies;
+    final int offset;
+    final bool signed;
 
-    DataAttributes(byte[] sizes, byte copies, byte offset, boolean signed) {
-        this.sizes = sizes;
-        this.copies = copies;
-        this.offset = offset;
-        this.signed = signed;
-    }
+    DataAttributes(this.sizes, this.copies, this.offset, this.signed);
+
 
     DataAttributes dataProcessorCopy() {
-        byte[] sizesCopy = Arrays.copyOf(sizes, sizes.length);
-        return new DataAttributes(sizesCopy, copies, (byte) 0, signed);
+        Uint8List copy = Uint8List.fromList(sizes);
+        return new DataAttributes(copy, copies, 0, signed);
     }
 
-    DataAttributes dataProcessorCopySize(byte newSize) {
-        byte[] sizesCopy = Arrays.copyOf(sizes, sizes.length);
-        Arrays.fill(sizesCopy, newSize);
-        return new DataAttributes(sizesCopy, copies, (byte) 0, signed);
+    DataAttributes dataProcessorCopySize(int newSize) {
+        Uint8List copy = Uint8List(sizes.length);
+        copy.fillRange(0, copy.length, newSize);
+        return new DataAttributes(copy, copies, 0, signed);
     }
 
-    DataAttributes dataProcessorCopySigned(boolean newSigned) {
-        byte[] sizesCopy = Arrays.copyOf(sizes, sizes.length);
-        return new DataAttributes(sizesCopy, copies, (byte) 0, newSigned);
+    DataAttributes dataProcessorCopySigned(bool newSigned) {
+        Uint8List copy = Uint8List.fromList(sizes);
+        return new DataAttributes(copy, copies, 0, newSigned);
     }
 
-    DataAttributes dataProcessorCopyCopies(byte newCopies) {
-        byte[] sizesCopy = Arrays.copyOf(sizes, sizes.length);
-        return new DataAttributes(sizesCopy, newCopies, (byte) 0, signed);
+    DataAttributes dataProcessorCopyCopies(int newCopies) {
+        Uint8List copy = Uint8List.fromList(sizes);
+        return new DataAttributes(copy, newCopies, 0, signed);
     }
 
-    public byte length() {
-        return (byte) (unitLength() * copies);
+    int length() {
+        return (unitLength() * copies);
     }
 
-    public byte unitLength() {
-        byte sum = 0;
-        for(byte elem : sizes) {
-            sum+= elem;
+    int unitLength() {
+        int sum = 0;
+        for (int elem in sizes) {
+            sum += elem;
         }
-
         return sum;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        DataAttributes that = (DataAttributes) o;
-
-        return copies == that.copies && offset == that.offset && signed == that.signed && Arrays.equals(sizes, that.sizes);
-
+    @override
+    bool operator ==(other) {
+        if (this == other) return true;
+        if (other == null || other is DataAttributes) return false;
+        DataAttributes that = other as DataAttributes;
+        return copies == that.copies && offset == that.offset &&
+            signed == that.signed && Arrays.equals(sizes, that.sizes);
     }
 
-    @Override
-    public int hashCode() {
-        int result = Arrays.hashCode(sizes);
-        result = 31 * result + (int) copies;
-        result = 31 * result + (int) offset;
+    @override
+    int get hashCode {
+        int result = sizes.hashCode;
+        result = 31 * result + copies;
+        result = 31 * result + offset;
         result = 31 * result + (signed ? 1 : 0);
         return result;
     }
+
 }

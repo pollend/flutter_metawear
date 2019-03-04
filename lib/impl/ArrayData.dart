@@ -22,15 +22,11 @@
  *   hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.impl;
+import 'package:flutter_metawear/impl/Constant.dart';
+import 'package:flutter_metawear/impl/DataTypeBase.dart';
 
-import com.mbientlab.metawear.Data;
-import com.mbientlab.metawear.module.DataProcessor;
-
-import java.util.Calendar;
-
-public class ArrayData extends DataTypeBase {
-    private static final long serialVersionUID = 4427138245810712009L;
+class ArrayData extends DataTypeBase {
+//    private static final long serialVersionUID = 4427138245810712009L;
 
     ArrayData(Constant.Module module, byte register, byte id, DataAttributes attributes) {
         super(module, register, id, attributes);

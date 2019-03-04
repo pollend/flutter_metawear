@@ -22,57 +22,56 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.data;
 
-import java.util.Locale;
+
+import 'FloatVector.dart';
+import 'package:sprintf/sprintf.dart';
 
 /**
  * Encapsulates Euler angles, values are in degrees
  * @author Eric Tsai
  */
-public class EulerAngles extends FloatVector {
-    private static final String DEGS= "\u00B0";
+class EulerAngles extends FloatVector {
+    static const String DEGS= "\u00B0";
 
-    public EulerAngles(float heading, float pitch, float roll, float yaw) {
-        super(heading, pitch, roll, yaw);
-    }
+    EulerAngles(double heading, double pitch, double roll, double yaw) : super(heading,pitch,roll,yaw);
 
     /**
      * Gets the heading angle
      * @return Heading angel
      */
-    public float heading() {
+    double heading() {
         return vector[0];
     }
     /**
      * Gets the pitch angle
      * @return Pitch angle
      */
-    public float pitch() {
+    double pitch() {
         return vector[1];
     }
     /**
      * Gets the roll angle
      * @return Roll angle
      */
-    public float roll() {
+    double roll() {
         return vector[2];
     }
     /**
      * Gets the yaw angle
      * @return Yaw angle
      */
-    public float yaw() {
+    double yaw() {
         return vector[3];
     }
 
-    @Override
-    public String toString() {
-        return String.format(Locale.US, "{heading %.3f%s, pitch: %.3f%s, roll: %.3f%s, yaw: %.3f%s}",
+    @override
+    String toString() {
+
+        return sprintf("{heading %.3f%s, pitch: %.3f%s, roll: %.3f%s, yaw: %.3f%s}",[
                 heading(), DEGS,
                 pitch(), DEGS,
                 roll(), DEGS,
-                yaw(), DEGS
-        );
+                yaw(), DEGS]);
     }
 }

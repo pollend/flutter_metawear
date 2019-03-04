@@ -22,13 +22,11 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.data;
-
 /**
  * Tap types to detect
  * @author Eric Tsai
  */
-public enum TapType {
+enum TapType {
     SINGLE,
     DOUBLE
 }

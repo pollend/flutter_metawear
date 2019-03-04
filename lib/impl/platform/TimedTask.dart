@@ -1,16 +1,8 @@
-package com.mbientlab.metawear.impl.platform;
-
-import java.util.ArrayList;
-import java.util.concurrent.TimeoutException;
-
-import bolts.CancellationTokenSource;
-import bolts.Task;
-import bolts.TaskCompletionSource;
 
 /**
  * Created by eric on 12/8/17.
  */
-public class TimedTask<T> {
+class TimedTask<T> {
     private TaskCompletionSource<T> taskSource;
     private CancellationTokenSource cts;
 

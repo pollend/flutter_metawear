@@ -33,5 +33,5 @@ abstract class DataToken {
      * @param offset        Byte to start copying from
      * @param length        Number of bytes to copy
      */
-    DataToken slice(byte offset, byte length);
+    DataToken slice(int offset, int length);
 }

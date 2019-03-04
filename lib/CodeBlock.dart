@@ -22,13 +22,11 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear;
-
 /**
  * Interface for saving MetaBase commands to the board
  * @author Eric Tsai
  */
-public interface CodeBlock {
+abstract class CodeBlock {
     /**
      * Saves the MetaWear commands used in implementations of this function to the board.  The commands
      * are only executed when triggered by an internal event

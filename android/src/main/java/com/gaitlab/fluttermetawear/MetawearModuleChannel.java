@@ -47,11 +47,8 @@ public class MetawearModuleChannel implements MethodChannel.MethodCallHandler{
     @Override
     public void onMethodCall(MethodCall methodCall, final MethodChannel.Result result) {
         switch (methodCall.method){
-            case "release_handler":
-                isReleased = true;
-                break;
             case "acc_start":
-                Accelerometer accelerometer = board.getModule(Accelerometer.class);
+                Accelerometer accelerometer = metawearChannel.getBoard().getModule(Accelerometer.class);
                 accelerometer.start();
                 break;
             case "acc_stop":
@@ -63,18 +60,21 @@ public class MetawearModuleChannel implements MethodChannel.MethodCallHandler{
                 }
 
                 break;
-            case "settings_disconnect":
-                metawearChannel.getBoard().getModule(Settings.class).onDisconnectAsync(new CodeBlockCallback(registrar,metawearChannel)).continueWith(new Continuation<Observer, Object>() {
-                    @Override
-                    public Object then(Task<Observer> task) throws Exception {
-                        if(task.isFaulted()){
-
-                        } else if(task.isCompleted()) {
-                            result.success(Boolean.TRUE);
-                        }
-                        return null;
-                    }
-                });
+            case "settings_disconnect_handler":
+                CodeBlockCallback callback = new MetawearModuleChannel.CodeBlockCallback(registrar,metawearChannel);
+                metawearChannel.getBoard().getModule(Settings.class).onDisconnectAsync(callback);
+                result.success(callback.getNamespace());
+//                metawearChannel.getBoard().getModule(Settings.class).onDisconnectAsync(callback).continueWith(new Continuation<Observer, Object>() {
+//                    @Override
+//                    public Object then(Task<Observer> task) throws Exception {
+//                        if(task.isFaulted()){
+//
+//                        } else if(task.isCompleted()) {
+//                            result.success(Boolean.TRUE);
+//                        }
+//                        return null;
+//                    }
+//                });
 
                 break;
             case "end":
@@ -86,6 +86,7 @@ public class MetawearModuleChannel implements MethodChannel.MethodCallHandler{
                 callback.run();
             }
         }
+        this.notifyAll();
     }
 
     public static class CodeBlockCallback implements CodeBlock {
@@ -106,7 +107,7 @@ public class MetawearModuleChannel implements MethodChannel.MethodCallHandler{
         @Override
         public void program() {
 
-            this.routeChannel = new MetawearModuleChannel(registrar,metawearChannel);
+            this.routeChannel = new MetawearModuleChannel(registrar,metawearChannel,false);
             synchronized (this.routeChannel){
                 try{
                     while (!this.routeChannel.isReleased) {

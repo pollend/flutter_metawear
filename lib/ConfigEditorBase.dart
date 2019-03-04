@@ -22,13 +22,12 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear;
 
 /**
  * Base class for configuration editor classes.
  * @author Eric Tsai
  */
-public interface ConfigEditorBase {
+abstract class ConfigEditorBase {
     /**
      * Write the configuration to the board
      */

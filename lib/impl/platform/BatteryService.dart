@@ -21,16 +21,13 @@
  * Should you have any questions regarding your right to use this Software, contact MbientLab via email:
  * hello@mbientlab.com.
  */
-
-package com.mbientlab.metawear.impl.platform;
-
-import java.util.UUID;
+import 'package:uuid/uuid.dart';
 
 /**
  * Characteristics under the Battery GATT service
  * @author Eric Tsai
  */
-public class BatteryService {
+class BatteryService {
     /** Battery level characteristic */
     public static final BtleGattCharacteristic BATTERY_LEVEL = new BtleGattCharacteristic(
             UUID.fromString("0000180f-0000-1000-8000-00805f9b34fb"),

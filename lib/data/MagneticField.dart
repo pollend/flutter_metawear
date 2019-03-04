@@ -22,5 +22,40 @@
  * hello@mbientlab.com.
  */
 
-/** Helper classes for keeping the API implementation platform agnostic */
-package com.mbientlab.metawear.impl.platform;
+import 'package:flutter_metawear/data/FloatVector.dart';
+import 'package:sprintf/sprintf.dart';
+
+/**
+ * Encapsulates magnetic field strength data, values are in micro tesla
+ * @author Eric Tsai
+ */
+class MagneticField extends FloatVector {
+    MagneticField(double x, double y, double z): super(x,y,z);
+
+    /**
+     * Gets the magnetic field strength along the X-axis
+     * @return X-axis bfield strength
+     */
+    double x() {
+        return vector[0];
+    }
+    /**
+     * Gets the magnetic field strength along the y-axis
+     * @return Y-axis bfield strength
+     */
+    double y() {
+        return vector[1];
+    }
+    /**
+     * Gets the magnetic field strength along the z-axis
+     * @return Z-axis bfield strength
+     */
+    double z() {
+        return vector[2];
+    }
+
+    @override
+    String toString() {
+        return sprintf("{x: %.9fT, y: %.9fT, z: %.9fT}", [x(), y(), z()]);
+    }
+}

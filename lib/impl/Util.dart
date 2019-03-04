@@ -22,59 +22,57 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.impl;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.util.Arrays;
-import java.util.Deque;
-import java.util.LinkedList;
+import 'dart:typed_data';
 
+import 'package:flutter_metawear/impl/DataAttributes.dart';
+import 'package:sprintf/sprintf.dart';
+import 'dart:math';
 /**
  * Created by etsai on 9/4/16.
  */
-public class Util {
-    public static int closestIndex(float[] values, float key) {
-        float smallest= Math.abs(values[0] - key);
-        int place= 0;
+class Util {
+    static int closestIndex(List<double> values, double key) {
+        double smallest = (values[0] - key).abs();
+        int place = 0;
 
-        for(int i= 1; i < values.length; i++) {
-            float distance= Math.abs(values[i] - key);
+        for (int i = 1; i < values.length; i++) {
+            double distance = (values[i] - key).abs();
             if (distance < smallest) {
-                smallest= distance;
-                place= i;
+                smallest = distance;
+                place = i;
             }
         }
 
         return place;
     }
 
-    public static String arrayToHexString(byte[] value) {
+    static String arrayToHexString(List<int> value) {
         if (value == null || value.length == 0) {
             return "[]";
         }
 
-        StringBuilder builder= new StringBuilder();
-        builder.append(String.format("[0x%02x", value[0]));
+        StringBuffer builder= new StringBuffer();
+        builder.write(sprintf("[0x%02x", value[0]));
         for(int i= 1; i < value.length; i++) {
-            builder.append(String.format(", 0x%02x", value[i]));
+            builder.write(sprintf(", 0x%02x", value[i]));
         }
-        builder.append("]");
+        builder.write("]");
 
         return builder.toString();
     }
 
-    static ByteBuffer bytesToSIntBuffer(boolean logData, byte[] data, DataAttributes attributes) {
-        final byte[] actual;
+    static ByteBuffer bytesToSIntBuffer(bool logData, Uint8List data, DataAttributes attributes) {
+        Uint8List actual;
 
         if (logData) {
-            actual = new byte[Math.min(data.length, attributes.length())];
-            System.arraycopy(data, 0, actual, 0, actual.length);
+            actual = Uint8List(min(data.length, attributes.length()));
+            actual.setAll(0, data);
         } else {
-            actual = new byte[Math.min(data.length - attributes.offset, attributes.length())];
-            System.arraycopy(data, attributes.offset, actual, 0, actual.length);
+            actual = Uint8List(min(data.length - attributes.offset, attributes.length()));
+            actual.setAll(0, data);
+//            System.arraycopy(data, attributes.offset, actual, 0, actual.length);
         }
-
         return ByteBuffer.wrap(Util.padByteArray(actual, 4, true)).order(ByteOrder.LITTLE_ENDIAN);
     }
 

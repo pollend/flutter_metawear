@@ -22,27 +22,23 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear;
 
-import com.mbientlab.metawear.builder.RouteBuilder;
-import com.mbientlab.metawear.builder.RouteComponent;
-import com.mbientlab.metawear.builder.filter.Comparison;
-import com.mbientlab.metawear.builder.filter.ComparisonOutput;
-import com.mbientlab.metawear.builder.function.Function2;
+import 'dart:async';
 
-import bolts.Task;
+import 'package:flutter_metawear/Route.dart';
+import 'package:flutter_metawear/builder/RouteBuilder.dart';
 
 /**
  * A component that creates data, such as firmware features (battery level reporting) or sensors
  * @author Eric Tsai
  */
-public interface DataProducer {
+abstract class DataProducer {
     /**
      * Adds a route to direct where the data will go
      * @param builder   Builder object to construct the route
      * @return Task holding the created route if successful
      */
-    Task<Route> addRouteAsync(RouteBuilder builder);
+    Future<Route> addRouteAsync(RouteBuilder builder);
     /**
      * Unique name identifying the data for feedback loops
      * @return Data name

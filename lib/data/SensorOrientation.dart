@@ -22,13 +22,11 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.data;
-
 /**
  * Enumeration of sensor orientations
  * @author Eric Tsai
  */
-public enum SensorOrientation {
+enum SensorOrientation {
     FACE_UP_PORTRAIT_UPRIGHT,
     FACE_UP_PORTRAIT_UPSIDE_DOWN,
     FACE_UP_LANDSCAPE_LEFT,

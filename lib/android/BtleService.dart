@@ -22,58 +22,11 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.android;
-
-import android.app.Service;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothGatt;
-import android.bluetooth.BluetoothGattCallback;
-import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothGattDescriptor;
-import android.bluetooth.BluetoothGattService;
-import android.bluetooth.BluetoothProfile;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.os.Binder;
-import android.os.IBinder;
-import android.util.Base64;
-import android.util.Log;
-
-import com.mbientlab.metawear.BuildConfig;
-import com.mbientlab.metawear.MetaWearBoard;
-import com.mbientlab.metawear.impl.JseMetaWearBoard;
-import com.mbientlab.metawear.impl.platform.BtleGatt;
-import com.mbientlab.metawear.impl.platform.BtleGattCharacteristic;
-import com.mbientlab.metawear.impl.platform.IO;
-import com.mbientlab.metawear.impl.platform.TimedTask;
-
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Queue;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import bolts.Capture;
-import bolts.Task;
-import bolts.TaskCompletionSource;
 
 /**
  * Created by etsai on 10/9/16.
  */
-public class BtleService extends Service {
+class BtleService extends Service {
     private static final UUID CHARACTERISTIC_CONFIG= UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
     private static final String DOWNLOAD_DIR_NAME = "download";
     private static final String LOG_TAG = "metawear-btle";

@@ -22,20 +22,26 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear;
-
 /**
  * Exception indicating that an illegal route operation was attempted.
  * @author Eric Tsai
  */
-public class IllegalRouteOperationException extends RuntimeException {
-    private static final long serialVersionUID = -418823318014857905L;
+class IllegalRouteOperationException implements Exception {
+//    private static final long serialVersionUID = -418823318014857905L;
 
-    public IllegalRouteOperationException(String message) {
-        super(message);
-    }
+    Exception cause;
+    final String message;
 
-    public IllegalRouteOperationException(String message, Throwable cause) {
-        super(message, cause);
-    }
+    IllegalRouteOperationException(this.message, [this.cause]);
+
+    @override
+  String toString() {
+    // TODO: implement toString
+    return "IllegalRouteOperationException:$cause";
+  }
+
+
+//    public IllegalRouteOperationException(String message, Exception cause) {
+//        super(message, cause);
+//    }
 }
