@@ -22,49 +22,48 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.module;
+import 'package:flutter_metawear/MetaWearBoard.dart';
 
-import com.mbientlab.metawear.ConfigEditorBase;
-import com.mbientlab.metawear.Configurable;
-import com.mbientlab.metawear.ForcedDataProducer;
-import com.mbientlab.metawear.MetaWearBoard.Module;
+/**
+ * Voltages that can be applied to the GSR electrodes
+ */
+enum ConstantVoltage {
+    CV_500MV,
+    CV_250MV
+}
+/**
+ * Gains that can be applied to the GSR circuit
+ */
+enum Gain {
+    GSR_499K,
+    GSR_1M
+}
+
+
+/**
+ * Interface for configuring GSR settings
+ */
+abstract class ConfigEditor extends ConfigEditorBase {
+/**
+ * Sets the constant voltage applied to the electrodes
+ * @param cv    New constant voltage value
+ * @return Calling object
+ */
+ConfigEditor constantVoltage(ConstantVoltage cv);
+/**
+ * Sets the gain applied to the circuit
+ * @param gain    New gain value
+ * @return Calling object
+ */
+ConfigEditor gain(Gain gain);
+}
 
 /**
  * Interacts with a GSR (galvanic skin response) sensor
  * @author Eric Tsai
  */
-public interface Gsr extends Module, Configurable<Gsr.ConfigEditor> {
-    /**
-     * Voltages that can be applied to the GSR electrodes
-     */
-    enum ConstantVoltage {
-        CV_500MV,
-        CV_250MV
-    }
-    /**
-     * Gains that can be applied to the GSR circuit
-     */
-    enum Gain {
-        GSR_499K,
-        GSR_1M
-    }
-    /**
-     * Interface for configuring GSR settings
-     */
-    interface ConfigEditor extends ConfigEditorBase {
-        /**
-         * Sets the constant voltage applied to the electrodes
-         * @param cv    New constant voltage value
-         * @return Calling object
-         */
-        ConfigEditor constantVoltage(ConstantVoltage cv);
-        /**
-         * Sets the gain applied to the circuit
-         * @param gain    New gain value
-         * @return Calling object
-         */
-        ConfigEditor gain(Gain gain);
-    }
+abstract class Gsr extends Module, Configurable<Gsr.ConfigEditor;> {
+
 
     /**
      * Gets a list of available conductance channels

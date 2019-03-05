@@ -23,6 +23,7 @@
  */
 
 import 'package:flutter_metawear/AsyncDataProducer.dart';
+import 'package:flutter_metawear/MetaWearBoard.dart';
 
 /**
  * Reports measured acceleration values from the accelerometer.  Combined xyz acceleration data is represented

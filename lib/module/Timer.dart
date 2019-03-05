@@ -22,39 +22,48 @@
  * hello@mbientlab.com.
  */
 
+import 'package:flutter_metawear/CodeBlock.dart';
+import 'package:flutter_metawear/MetaWearBoard.dart';
+
+
+/**
+ * A task comprising of MetaWear commands programmed to run on-board at a certain times
+ * @author Eric Tsai
+ */
+abstract class ScheduledTask {
+    /**
+     * Start task execution
+     */
+    void start();
+
+    /**
+     * Stop task execution
+     */
+    void stop();
+
+    /**
+     * Checks if this object represents an active task
+     * @return True if task is still scheduled on-board
+     */
+    bool isActive();
+
+    /**
+     * Get the numerical id of this task
+     * @return Task ID
+     */
+    int id();
+
+    /**
+     * Removes this task from the board
+     */
+    void remove();
+}
+
 /**
  * On-board scheduler for executing MetaWear commands in the future
  * @author Eric Tsai
  */
 abstract class Timer extends Module {
-    /**
-     * A task comprising of MetaWear commands programmed to run on-board at a certain times
-     * @author Eric Tsai
-     */
-    interface ScheduledTask {
-        /**
-         * Start task execution
-         */
-        void start();
-        /**
-         * Stop task execution
-         */
-        void stop();
-        /**
-         * Checks if this object represents an active task
-         * @return True if task is still scheduled on-board
-         */
-        boolean isActive();
-        /**
-         * Get the numerical id of this task
-         * @return Task ID
-         */
-        byte id();
-        /**
-         * Removes this task from the board
-         */
-        void remove();
-    }
 
     /**
      * Schedule a task to be indefinitely executed on-board at fixed intervals
@@ -64,7 +73,8 @@ abstract class Timer extends Module {
      * @return Task holding the result of the scheduled request
      * @see ScheduledTask
      */
-    Task<ScheduledTask> scheduleAsync(int period, boolean delay, CodeBlock mwCode);
+    Future<ScheduledTask> scheduleAsync(int period, bool delay, CodeBlock mwCode);
+
     /**
      * Schedule a task to be executed on-board at fixed intervals for a specific number of repetitions
      * @param period         How often to execute the task, in milliseconds
@@ -74,11 +84,11 @@ abstract class Timer extends Module {
      * @return Task holding the result of the scheduled task
      * @see ScheduledTask
      */
-    Task<ScheduledTask> scheduleAsync(int period, short repetitions, boolean delay, CodeBlock mwCode);
+    Future<ScheduledTask> scheduleAsyncRepeated(int period, int repetitions, bool delay, CodeBlock mwCode);
     /**
      * Find the {@link ScheduledTask} object corresponding to the given id
      * @param id    Task id to lookup
      * @return Schedule task matching the id, null if no matches
      */
-    ScheduledTask lookupScheduledTask(byte id);
+    ScheduledTask lookupScheduledTask(int id);
 }

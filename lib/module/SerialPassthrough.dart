@@ -22,128 +22,130 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.module;
+import 'dart:typed_data';
 
-import com.mbientlab.metawear.DataProducer;
-import com.mbientlab.metawear.MetaWearBoard.Module;
+import 'package:flutter_metawear/DataProducer.dart';
+import 'package:flutter_metawear/MetaWearBoard.dart';
 
-import bolts.Task;
+/**
+ * Supported SPI frequencies
+ * @author Eric Tsai
+ */
+enum SpiFrequency {
+    /** 125 KHz */
+    FREQ_125_KHZ,
+    /** 250 KHz */
+    FREQ_250_KHZ,
+    /** 500 KHz */
+    FREQ_500_KHZ,
+    /** 1 MHz */
+    FREQ_1_MHZ,
+    /** 2 MHz */
+    FREQ_2_MHZ,
+    /** 4 MHz */
+    FREQ_4_MHZ,
+    /** 8 MHz */
+    FREQ_8_MHZ
+}
+
+/**
+ * Data received from the I2C bus
+ * @author Eric Tsai
+ */
+abstract class I2C extends DataProducer {
+    /**
+     * Read data via the I2C bus
+     * @param deviceAddr      Device to read from
+     * @param registerAddr    Device's register to read
+     */
+    void read(int deviceAddr, int registerAddr);
+}
+
+/**
+ * Builder to construct common parameters for an SPI read/write operation.  The {@link #lsbFirst()}
+ * and {@link #useNativePins()} parameters are optional and default to false if not set; the {@link #data(byte[])}
+ * parameter is also optional for a read operation but required for writes.  All other parameters are required.
+ * @param <T>    Return type of the commit function
+ * @author Eric Tsai
+ */
+abstract class SpiParameterBuilder<T> {
+    /**
+     * Data to write to the sensor.  If used with a read operation, the data will be written prior to the read
+     * @param data    Data to write
+     * @return Calling object
+     */
+    SpiParameterBuilder<T> data(Uint8List data);
+    /**
+     * Pin for slave select
+     * @param pin    Pin value
+     * @return Calling object
+     */
+    SpiParameterBuilder<T> slaveSelectPin(int pin);
+    /**
+     * Pin for serial clock
+     * @param pin     Pin value
+     * @return Calling object
+     */
+    SpiParameterBuilder<T> clockPin(int pin);
+    /**
+     * Pin for master output, slave input
+     * @param pin    Pin value
+     * @return Calling object
+     */
+    SpiParameterBuilder<T> mosiPin(int pin);
+    /**
+     * Pin for master input, slave output
+     * @param pin    Pin value
+     * @return Calling object
+     */
+    SpiParameterBuilder<T> misoPin(int pin);
+    /**
+     * Call to have LSB sent first
+     * @return Calling object
+     */
+    SpiParameterBuilder<T> lsbFirst();
+    /**
+     * SPI operating mode, see <a href="https://en.wikipedia.org/wiki/Serial_Peripheral_Interface_Bus#Mode_numbers">SPI Wiki Page</a>
+     * for details on the mode values
+     * @param mode    Value between [0, 3]
+     * @return Calling object
+     */
+    SpiParameterBuilder<T> mode(int mode);
+    /**
+     * SPI operating frequency
+     * @param freq    Operating frequency
+     * @return Calling object
+     */
+    SpiParameterBuilder<T> frequency(SpiFrequency freq);
+    /**
+     * Call to use the nRF pin mappings rather than the GPIO pin mappings
+     * @return Calling object
+     */
+    SpiParameterBuilder<T> useNativePins();
+    /**
+     * Commit the parameters
+     */
+    T commit();
+}
+
+/**
+ * Data received from the SPI bus
+ * @author Eric Tsai
+ */
+abstract class SPI extends DataProducer {
+    /**
+     * Reads data from a device through the SPI bus
+     * @return Builder to set additional parameters
+     */
+    SpiParameterBuilder<void> read();
+}
 
 /**
  * Bridge for serial communication to connected sensors
  * @author Eric Tsai
  */
-public interface SerialPassthrough extends Module {
-    /**
-     * Data received from the I2C bus
-     * @author Eric Tsai
-     */
-    interface I2C extends DataProducer {
-        /**
-         * Read data via the I2C bus
-         * @param deviceAddr      Device to read from
-         * @param registerAddr    Device's register to read
-         */
-        void read(byte deviceAddr, byte registerAddr);
-    }
+abstract class SerialPassthrough extends Module {
 
-    /**
-     * Supported SPI frequencies
-     * @author Eric Tsai
-     */
-    enum SpiFrequency {
-        /** 125 KHz */
-        FREQ_125_KHZ,
-        /** 250 KHz */
-        FREQ_250_KHZ,
-        /** 500 KHz */
-        FREQ_500_KHZ,
-        /** 1 MHz */
-        FREQ_1_MHZ,
-        /** 2 MHz */
-        FREQ_2_MHZ,
-        /** 4 MHz */
-        FREQ_4_MHZ,
-        /** 8 MHz */
-        FREQ_8_MHZ
-    }
-    /**
-     * Builder to construct common parameters for an SPI read/write operation.  The {@link #lsbFirst()}
-     * and {@link #useNativePins()} parameters are optional and default to false if not set; the {@link #data(byte[])}
-     * parameter is also optional for a read operation but required for writes.  All other parameters are required.
-     * @param <T>    Return type of the commit function
-     * @author Eric Tsai
-     */
-    interface SpiParameterBuilder<T> {
-        /**
-         * Data to write to the sensor.  If used with a read operation, the data will be written prior to the read
-         * @param data    Data to write
-         * @return Calling object
-         */
-        SpiParameterBuilder<T> data(byte[] data);
-        /**
-         * Pin for slave select
-         * @param pin    Pin value
-         * @return Calling object
-         */
-        SpiParameterBuilder<T> slaveSelectPin(byte pin);
-        /**
-         * Pin for serial clock
-         * @param pin     Pin value
-         * @return Calling object
-         */
-        SpiParameterBuilder<T> clockPin(byte pin);
-        /**
-         * Pin for master output, slave input
-         * @param pin    Pin value
-         * @return Calling object
-         */
-        SpiParameterBuilder<T> mosiPin(byte pin);
-        /**
-         * Pin for master input, slave output
-         * @param pin    Pin value
-         * @return Calling object
-         */
-        SpiParameterBuilder<T> misoPin(byte pin);
-        /**
-         * Call to have LSB sent first
-         * @return Calling object
-         */
-        SpiParameterBuilder<T> lsbFirst();
-        /**
-         * SPI operating mode, see <a href="https://en.wikipedia.org/wiki/Serial_Peripheral_Interface_Bus#Mode_numbers">SPI Wiki Page</a>
-         * for details on the mode values
-         * @param mode    Value between [0, 3]
-         * @return Calling object
-         */
-        SpiParameterBuilder<T> mode(byte mode);
-        /**
-         * SPI operating frequency
-         * @param freq    Operating frequency
-         * @return Calling object
-         */
-        SpiParameterBuilder<T> frequency(SpiFrequency freq);
-        /**
-         * Call to use the nRF pin mappings rather than the GPIO pin mappings
-         * @return Calling object
-         */
-        SpiParameterBuilder<T> useNativePins();
-        /**
-         * Commit the parameters
-         */
-        T commit();
-    }
-    /**
-     * Data received from the SPI bus
-     * @author Eric Tsai
-     */
-    interface SPI extends DataProducer {
-        /**
-         * Reads data from a device through the SPI bus
-         * @return Builder to set additional parameters
-         */
-        SpiParameterBuilder<Void> read();
-    }
 
     /**
      * Get an object representing the I2C data corresponding to the id.  If the id value cannot be matched
@@ -153,14 +155,15 @@ public interface SerialPassthrough extends Module {
      * @param id        Value between [0, 254]
      * @return I2C object representing I2C data
      */
-    I2C i2c(byte length, byte id);
+    I2C i2c(int length, int id);
+
     /**
      * Write data to a sensor via the I2C bus.
      * @param deviceAddr Device to write to
      * @param registerAddr Device's register to write to
      * @param data DataToken to write, up to 10 bytes
      */
-    void writeI2c(byte deviceAddr, byte registerAddr, byte[] data);
+    void writeI2c(int deviceAddr, int registerAddr, Uint8List data);
     /**
      * Read data from a sensor via the I2C bus.  Unlike {@link I2C#read(byte, byte)}, this function provides
      * a direct way to access I2C data as opposed to creating a data route.
@@ -169,7 +172,7 @@ public interface SerialPassthrough extends Module {
      * @param length          How many bytes to read
      * @return Task holding the returned value
      */
-    Task<byte[]> readI2cAsync(byte deviceAddr, byte registerAddr, byte length);
+    Future<Uint8List> readI2cAsync(int deviceAddr, int registerAddr, byte length);
 
     /**
      * Get an object representing the SPI data corresponding to the id.  If the id value cannot be matched
@@ -179,13 +182,13 @@ public interface SerialPassthrough extends Module {
      * @param id        Value between [0, 14]
      * @return SPI object representing SPI data, null if the SPI bus is not accessible with the current firmware
      */
-    SPI spi(byte length, byte id);
+    SPI spi(int length, int id);
     /**
      * Write data to a sensor via the SPI bus.  The data to be written to the board is set with the
      * {@link SpiParameterBuilder#data(byte[])} method
      * @return Builder to set additional parameters, null if the SPI bus is not accessible with the current firmware
      */
-    SpiParameterBuilder<Void> writeSpi();
+    SpiParameterBuilder<void> writeSpi();
     /**
      * Read data from a sensor via the SPI bus.  Unlike {@link SPI#read()}, this function provides a direct
      * way to access SPI data as opposed to creating a data route.  If the SPI bus is not accessible with
@@ -193,5 +196,5 @@ public interface SerialPassthrough extends Module {
      * @param length    How many bytes to read
      * @return Editor object to configure the read parameters
      */
-    SpiParameterBuilder<Task<byte[]>> readSpiAsync(byte length);
+    SpiParameterBuilder<Future<Uint8List>> readSpiAsync(int length);
 }

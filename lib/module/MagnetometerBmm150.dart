@@ -22,140 +22,144 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.module;
+import 'package:flutter_metawear/AsyncDataProducer.dart';
+import 'package:flutter_metawear/ConfigEditorBase.dart';
+import 'package:flutter_metawear/MetaWearBoard.dart';
 
-import com.mbientlab.metawear.AsyncDataProducer;
-import com.mbientlab.metawear.ConfigEditorBase;
-import com.mbientlab.metawear.Configurable;
-import com.mbientlab.metawear.MetaWearBoard.Module;
-import com.mbientlab.metawear.data.MagneticField;
+/**
+ * Recommended configurations for the magnetometer as outlined in the specs sheet.
+ * <table summary="Recommended sensor configurations">
+ *     <thead>
+ *         <tr>
+ *             <th>Setting</th>
+ *             <th>ODR</th>
+ *             <th>Average Current</th>
+ *             <th>Noise</th>
+ *         </tr>
+ *     </thead>
+ *     <tbody>
+ *         <tr>
+ *             <td>LOW_POWER</td>
+ *             <td>10Hz</td>
+ *             <td>170&#956;A</td>
+ *             <td>1.0&#956;T (xy axis), 1.4&#956;T (z axis)</td>
+ *         </tr>
+ *         <tr>
+ *             <td>REGULAR</td>
+ *             <td>10Hz</td>
+ *             <td>0.5mA</td>
+ *             <td>0.6&#956;T</td>
+ *         </tr>
+ *         <tr>
+ *             <td>ENHANCED_REGULAR</td>
+ *             <td>10Hz</td>
+ *             <td>0.8mA</td>
+ *             <td>0.5&#956;T</td>
+ *         </tr>
+ *         <tr>
+ *             <td>HIGH_ACCURACY</td>
+ *             <td>20Hz</td>
+ *             <td>4.9mA</td>
+ *             <td>0.3&#956;T</td>
+ *         </tr>
+ *     </tbody>
+ * </table>
+ * @author Eric Tsai
+ */
+enum Preset {
+    LOW_POWER,
+    REGULAR,
+    ENHANCED_REGULAR,
+    HIGH_ACCURACY
+}
+
+/**
+ * Supported output data rates for the BMM150 sensor
+ * @author Eric Tsai
+ */
+enum OutputDataRate {
+    /** 10Hz */
+    ODR_10_HZ,
+    /** 2Hz */
+    ODR_2_HZ,
+    /** 6Hz */
+    ODR_6_HZ,
+    /** 8Hz */
+    ODR_8_HZ,
+    /** 15Hz */
+    ODR_15_HZ,
+    /** 20Hz */
+    ODR_20_HZ,
+    /** 25Hz */
+    ODR_25_HZ,
+    /** 30Hz */
+    ODR_30_HZ
+}
+
+/**
+ * Sensor configuration editor, only for advanced users.  It is recommended that one of the {@link Preset}
+ * configurations be used.
+ * @author Eric Tsai
+ */
+abstract class  ConfigEditor extends ConfigEditorBase {
+    /**
+     * Sets the number of repetitions on the XY axis
+     * @param reps    nXY repetitions, between [1, 511]
+     * @return Calling object
+     */
+    ConfigEditor xyReps(short reps);
+
+    /**
+     * sets the number of repetitions on the Z axis
+     * @param reps    nZ repetitions, between [1, 256]
+     * @return Calling object
+     */
+    ConfigEditor zReps(short reps);
+
+    /**
+     * Sets the output data rate
+     * @param odr    New output data rate
+     * @return Calling object
+     */
+    ConfigEditor outputDataRate(OutputDataRate odr);
+}
+
+/**
+ * Reports measured magnetic field strength, in units of Telsa (T) from the magnetometer.  Combined XYZ data
+ * is represented as a {@link MagneticField} object while split data is interpreted as a float.
+ */
+abstract class MagneticFieldDataProducer extends AsyncDataProducer {
+    /**
+     * Get the name for x-axis data
+     * @return X-axis data name
+     */
+    String xAxisName();
+
+    /**
+     * Get the name for y-axis data
+     * @return Y-axis data name
+     */
+    String yAxisName();
+
+    /**
+     * Get the name for z-axis data
+     * @return Z-axis data name
+     */
+    String zAxisName();
+}
 
 /**
  * Bosch sensor measuring magnetic field strength
  * @author Eric Tsai
  */
-public interface MagnetometerBmm150 extends Module, Configurable<MagnetometerBmm150.ConfigEditor> {
-    /**
-     * Recommended configurations for the magnetometer as outlined in the specs sheet.
-     * <table summary="Recommended sensor configurations">
-     *     <thead>
-     *         <tr>
-     *             <th>Setting</th>
-     *             <th>ODR</th>
-     *             <th>Average Current</th>
-     *             <th>Noise</th>
-     *         </tr>
-     *     </thead>
-     *     <tbody>
-     *         <tr>
-     *             <td>LOW_POWER</td>
-     *             <td>10Hz</td>
-     *             <td>170&#956;A</td>
-     *             <td>1.0&#956;T (xy axis), 1.4&#956;T (z axis)</td>
-     *         </tr>
-     *         <tr>
-     *             <td>REGULAR</td>
-     *             <td>10Hz</td>
-     *             <td>0.5mA</td>
-     *             <td>0.6&#956;T</td>
-     *         </tr>
-     *         <tr>
-     *             <td>ENHANCED_REGULAR</td>
-     *             <td>10Hz</td>
-     *             <td>0.8mA</td>
-     *             <td>0.5&#956;T</td>
-     *         </tr>
-     *         <tr>
-     *             <td>HIGH_ACCURACY</td>
-     *             <td>20Hz</td>
-     *             <td>4.9mA</td>
-     *             <td>0.3&#956;T</td>
-     *         </tr>
-     *     </tbody>
-     * </table>
-     * @author Eric Tsai
-     */
-    enum Preset {
-        LOW_POWER,
-        REGULAR,
-        ENHANCED_REGULAR,
-        HIGH_ACCURACY
-    }
+abstract class MagnetometerBmm150 extends Module, Configurable<MagnetometerBmm150.ConfigEditor> {
+
     /**
      * Sets the power mode to one of the preset configurations
      * @param preset    Preset to use
      */
     void usePreset(Preset preset);
 
-    /**
-     * Supported output data rates for the BMM150 sensor
-     * @author Eric Tsai
-     */
-    enum OutputDataRate {
-        /** 10Hz */
-        ODR_10_HZ,
-        /** 2Hz */
-        ODR_2_HZ,
-        /** 6Hz */
-        ODR_6_HZ,
-        /** 8Hz */
-        ODR_8_HZ,
-        /** 15Hz */
-        ODR_15_HZ,
-        /** 20Hz */
-        ODR_20_HZ,
-        /** 25Hz */
-        ODR_25_HZ,
-        /** 30Hz */
-        ODR_30_HZ
-    }
-    /**
-     * Sensor configuration editor, only for advanced users.  It is recommended that one of the {@link Preset}
-     * configurations be used.
-     * @author Eric Tsai
-     */
-    interface ConfigEditor extends ConfigEditorBase {
-        /**
-         * Sets the number of repetitions on the XY axis
-         * @param reps    nXY repetitions, between [1, 511]
-         * @return Calling object
-         */
-        ConfigEditor xyReps(short reps);
-        /**
-         * sets the number of repetitions on the Z axis
-         * @param reps    nZ repetitions, between [1, 256]
-         * @return Calling object
-         */
-        ConfigEditor zReps(short reps);
-
-        /**
-         * Sets the output data rate
-         * @param odr    New output data rate
-         * @return Calling object
-         */
-        ConfigEditor outputDataRate(OutputDataRate odr);
-    }
-    /**
-     * Reports measured magnetic field strength, in units of Telsa (T) from the magnetometer.  Combined XYZ data
-     * is represented as a {@link MagneticField} object while split data is interpreted as a float.
-     */
-    interface MagneticFieldDataProducer extends AsyncDataProducer {
-        /**
-         * Get the name for x-axis data
-         * @return X-axis data name
-         */
-        String xAxisName();
-        /**
-         * Get the name for y-axis data
-         * @return Y-axis data name
-         */
-        String yAxisName();
-        /**
-         * Get the name for z-axis data
-         * @return Z-axis data name
-         */
-        String zAxisName();
-    }
     /**
      * Get an implementation of the MagneticFieldDataProducer interface
      * @return Object controlling B field data

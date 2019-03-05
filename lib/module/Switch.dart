@@ -22,23 +22,19 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.module;
-
-import com.mbientlab.metawear.ActiveDataProducer;
-import com.mbientlab.metawear.MetaWearBoard.Module;
-
-import bolts.Task;
+import 'package:flutter_metawear/ActiveDataProducer.dart';
+import 'package:flutter_metawear/MetaWearBoard.dart';
 
 /**
  * On-board push button switch
  * @author Eric Tsai
  */
-public interface Switch extends Module {
+abstract class Switch extends Module {
     /**
      * Get an implementation of the ActiveDataProducer interface for the button state, represented as
      * a boolean (true = pressed, false = released) or byte (1 = pressed, 0 = released)
      * @return Object for the switch state
      */
     ActiveDataProducer state();
-    Task<Byte> readCurrentStateAsync();
+    Future<int> readCurrentStateAsync();
 }

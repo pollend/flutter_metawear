@@ -50,6 +50,7 @@ class Util {
         return place;
     }
 
+
     static String arrayToHexString(List<int> value) {
         if (value == null || value.length == 0) {
             return "[]";

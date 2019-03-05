@@ -22,65 +22,68 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.module;
+import 'package:flutter_metawear/ForcedDataProducer.dart';
+import 'package:flutter_metawear/MetaWearBoard.dart';
+import 'package:flutter_metawear/module/Temperature.dart';
 
-import com.mbientlab.metawear.ForcedDataProducer;
-import com.mbientlab.metawear.MetaWearBoard.Module;
+/**
+ * Available types of temperature sensors.  Different boards will have a different combination
+ * of sensor types
+ * @author Eric Tsai
+ */
+enum SensorType {
+    /** Temperature measured by the nRF SOC */
+    NRF_SOC,
+    /** Temperature measured by an externally connected thermistor */
+    EXT_THERMISTOR,
+    /** Temperature measured by either the BMP280 or BME280 sensor */
+    BOSCH_ENV,
+    /** Temperature measured by an on-board thermistor */
+    PRESET_THERMISTOR
+}
+
+/**
+ * Data measured by a temperature sensor
+ * @author Eric Tsai
+ */
+abstract class  Sensor extends ForcedDataProducer {
+    /**
+     * Get the type of temperature sensor measuring the data
+     * @return Sensor type
+     */
+    SensorType type();
+}
+
+
+/**
+ * Temperature data measured by an externally connected thermistor
+ * @author Eric Tsai
+ */
+abstract class  ExternalThermistor extends Sensor {
+/**
+ * Configures the settings for the thermistor
+ * @param dataPin           GPIO pin that reads the data
+ * @param pulldownPin       GPIO pin the pulldown resistor is connected to
+ * @param activeHigh        True if the pulldown pin is active high
+ */
+void configure(int dataPin, int pulldownPin, bool activeHigh);
+}
 
 /**
  * Accesses the temperature sensors
  * @author Eric Tsai
  */
-public interface Temperature extends Module {
-    /**
-     * Available types of temperature sensors.  Different boards will have a different combination
-     * of sensor types
-     * @author Eric Tsai
-     */
-    enum SensorType {
-        /** Temperature measured by the nRF SOC */
-        NRF_SOC,
-        /** Temperature measured by an externally connected thermistor */
-        EXT_THERMISTOR,
-        /** Temperature measured by either the BMP280 or BME280 sensor */
-        BOSCH_ENV,
-        /** Temperature measured by an on-board thermistor */
-        PRESET_THERMISTOR
-    }
-    /**
-     * Data measured by a temperature sensor
-     * @author Eric Tsai
-     */
-    interface Sensor extends ForcedDataProducer {
-        /**
-         * Get the type of temperature sensor measuring the data
-         * @return Sensor type
-         */
-        SensorType type();
-    }
-    /**
-     * Temperature data measured by an externally connected thermistor
-     * @author Eric Tsai
-     */
-    interface ExternalThermistor extends Sensor {
-        /**
-         * Configures the settings for the thermistor
-         * @param dataPin           GPIO pin that reads the data
-         * @param pulldownPin       GPIO pin the pulldown resistor is connected to
-         * @param activeHigh        True if the pulldown pin is active high
-         */
-        void configure(byte dataPin, byte pulldownPin, boolean activeHigh);
-    }
+abstract class Temperature extends Module {
 
     /**
      * Get an array of available temperature sensors
      * @return Temperature sensors array
      */
-    Sensor[] sensors();
+    List<Sensor> sensors();
     /**
      * Find all temperature sensors whose {@link Sensor#type()} function matches the {@code type} parameter
      * @param type    Sensor type to look for
      * @return Array of sensors matching the sensor type, null if no matches found
      */
-    Sensor[] findSensors(SensorType type);
+    List<Sensor> findSensors(SensorType type);
 }

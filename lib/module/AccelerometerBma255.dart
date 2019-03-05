@@ -22,7 +22,6 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.module;
 
 /**
  * Extension of the {@link AccelerometerBosch} interface providing finer control of the BMA255 accelerometer

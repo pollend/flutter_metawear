@@ -22,24 +22,98 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.module;
 
-import com.mbientlab.metawear.AsyncDataProducer;
-import com.mbientlab.metawear.ConfigEditorBase;
-import com.mbientlab.metawear.Configurable;
-import com.mbientlab.metawear.MetaWearBoard.Module;
-import com.mbientlab.metawear.data.Acceleration;
-import com.mbientlab.metawear.data.AngularVelocity;
-import com.mbientlab.metawear.data.EulerAngles;
-import com.mbientlab.metawear.data.MagneticField;
-import com.mbientlab.metawear.data.Quaternion;
-import com.mbientlab.metawear.impl.Util;
+import 'package:flutter_metawear/ConfigEditorBase.dart';
+import 'package:flutter_metawear/MetaWearBoard.dart';
 
-import java.util.Arrays;
-import java.util.Locale;
 
-import bolts.CancellationToken;
-import bolts.Task;
+/**
+ * Supported data ranges for accelerometer data
+ * @author Eric Tsai
+ */
+enum AccRange {
+    /** +/-2g */
+    AR_2G,
+    /** +/-4g */
+    AR_4G,
+    /** +/-8g */
+    AR_8G,
+    /** +/-16g */
+    AR_16G,
+}
+/**
+ * Supported data ranges for gyro data
+ * @author Eric Tsai
+ */
+enum GyroRange {
+    /** +/-2000 degs/s */
+    GR_2000DPS,
+    /** +/-1000 degs/s */
+    GR_1000DPS,
+    /** +/-500 degs/s */
+    GR_500DPS,
+    /** +/-250 degs/s */
+    GR_250DPS,
+}
+/**
+ * Accuracy of the correct sensor data
+ * @author Eric Tsai
+ */
+enum CalibrationAccuracy {
+    UNRELIABLE,
+    LOW_ACCURACY,
+    MEDIUM_ACCURACY,
+    HIGH_ACCURACY
+}
+/**
+ * Available sensor fusion modes
+ * @author Eric Tsai
+ */
+enum Mode {
+    SLEEP,
+    NDOF,
+    IMU_PLUS,
+    COMPASS,
+    M4G
+}
+
+
+/**
+ * Configuration editor for the sensor fusion algorithm
+ * @author Eric Tsai
+ */
+abstract class ConfigEditor extends ConfigEditorBase {
+/**
+ * Sets the sensor fusion mode
+ * @param mode    New sensor fusion mode
+ * @return Calling object
+ */
+ConfigEditor mode(Mode mode);
+/**
+ * Sets the accelerometer data range
+ * @param range    New data range
+ * @return Calling object
+ */
+ConfigEditor accRange(AccRange range);
+/**
+ * Sets the gyro data range
+ * @param range    New data range
+ * @return Calling object
+ */
+ConfigEditor gyroRange(GyroRange range);
+/**
+ * Extra configuration settings for the accelerometer
+ * @param settings Additional accelerometer settings
+ * @return Calling object
+ */
+ConfigEditor accExtra(Object ... settings);
+/**
+ * Extra configuration settings for the gyroscope
+ * @param settings Additional gyroscope settings
+ * @return Calling object
+ */
+ConfigEditor gyroExtra(Object ... settings);
+}
 
 /**
  * Algorithm combining accelerometer, gyroscope, and magnetometer data for Bosch sensors.  When using
@@ -47,7 +121,7 @@ import bolts.Task;
  * the algorithm will automatically configure those sensors based on the selected fusion mode.
  * @author Eric Tsai
  */
-public interface SensorFusionBosch extends Module, Configurable<SensorFusionBosch.ConfigEditor> {
+abstract class SensorFusionBosch extends Module, Configurable<ConfigEditor> {
     /**
      * Handler for processing download updates
      */
@@ -270,92 +344,7 @@ public interface SensorFusionBosch extends Module, Configurable<SensorFusionBosc
                     Util.arrayToHexString(accelerometer), Util.arrayToHexString(gyroscope), Util.arrayToHexString(magnetometer));
         }
     }
-    /**
-     * Supported data ranges for accelerometer data
-     * @author Eric Tsai
-     */
-    enum AccRange {
-        /** +/-2g */
-        AR_2G,
-        /** +/-4g */
-        AR_4G,
-        /** +/-8g */
-        AR_8G,
-        /** +/-16g */
-        AR_16G,
-    }
-    /**
-     * Supported data ranges for gyro data
-     * @author Eric Tsai
-     */
-    enum GyroRange {
-        /** +/-2000 degs/s */
-        GR_2000DPS,
-        /** +/-1000 degs/s */
-        GR_1000DPS,
-        /** +/-500 degs/s */
-        GR_500DPS,
-        /** +/-250 degs/s */
-        GR_250DPS,
-    }
-    /**
-     * Accuracy of the correct sensor data
-     * @author Eric Tsai
-     */
-    enum CalibrationAccuracy {
-        UNRELIABLE,
-        LOW_ACCURACY,
-        MEDIUM_ACCURACY,
-        HIGH_ACCURACY
-    }
-    /**
-     * Available sensor fusion modes
-     * @author Eric Tsai
-     */
-    enum Mode {
-        SLEEP,
-        NDOF,
-        IMU_PLUS,
-        COMPASS,
-        M4G
-    }
 
-    /**
-     * Configuration editor for the sensor fusion algorithm
-     * @author Eric Tsai
-     */
-    interface ConfigEditor extends ConfigEditorBase {
-        /**
-         * Sets the sensor fusion mode
-         * @param mode    New sensor fusion mode
-         * @return Calling object
-         */
-        ConfigEditor mode(Mode mode);
-        /**
-         * Sets the accelerometer data range
-         * @param range    New data range
-         * @return Calling object
-         */
-        ConfigEditor accRange(AccRange range);
-        /**
-         * Sets the gyro data range
-         * @param range    New data range
-         * @return Calling object
-         */
-        ConfigEditor gyroRange(GyroRange range);
-        /**
-         * Extra configuration settings for the accelerometer
-         * @param settings Additional accelerometer settings
-         * @return Calling object
-         */
-        ConfigEditor accExtra(Object ... settings);
-        /**
-         * Extra configuration settings for the gyroscope
-         * @param settings Additional gyroscope settings
-         * @return Calling object
-         */
-        ConfigEditor gyroExtra(Object ... settings);
-    }
 
     /**
      * Get an implementation of the AsyncDataProducer interface for corrected acceleration data,
