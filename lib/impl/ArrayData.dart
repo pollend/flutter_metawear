@@ -22,7 +22,7 @@
  *   hello@mbientlab.com.
  */
 
-import 'package:flutter_metawear/impl/Constant.dart';
+import 'package:flutter_metawear/impl/ModuleType.dart';
 import 'package:flutter_metawear/impl/DataTypeBase.dart';
 
 class ArrayData extends DataTypeBase {

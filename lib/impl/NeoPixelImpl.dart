@@ -22,14 +22,6 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.impl;
-
-import com.mbientlab.metawear.module.NeoPixel;
-
-import java.util.HashMap;
-
-import static com.mbientlab.metawear.impl.Constant.Module.NEO_PIXEL;
-
 /**
  * Created by etsai on 9/18/16.
  */

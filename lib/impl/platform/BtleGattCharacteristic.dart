@@ -23,7 +23,7 @@
  */
 
 
-import 'package:uuid/uuid.dart';
+import 'package:flutter_blue/flutter_blue.dart';
 
 /**
  * Bluetooth GATT characteristic
@@ -31,12 +31,12 @@ import 'package:uuid/uuid.dart';
  */
 class BtleGattCharacteristic {
     /** UUID identifying the service the characteristic belongs to */
-    final Uuid serviceUuid;
+    final Guid serviceUuid;
 
     /** UUID identifying the characteristic */
-    final Uuid uuid;
+    final Guid uuid;
 
-    BtleGattCharacteristic({Uuid this.serviceUuid, Uuid this.uuid});
+    BtleGattCharacteristic({Guid this.serviceUuid, Guid this.uuid});
 
 
     @override

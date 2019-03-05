@@ -21,7 +21,8 @@
  * Should you have any questions regarding your right to use this Software, contact MbientLab via email:
  * hello@mbientlab.com.
  */
-import 'package:uuid/uuid.dart';
+import 'package:flutter_blue/flutter_blue.dart';
+import 'package:flutter_metawear/impl/platform/BtleGattCharacteristic.dart';
 
 /**
  * Characteristics under the Battery GATT service
@@ -29,8 +30,8 @@ import 'package:uuid/uuid.dart';
  */
 class BatteryService {
     /** Battery level characteristic */
-    public static final BtleGattCharacteristic BATTERY_LEVEL = new BtleGattCharacteristic(
-            UUID.fromString("0000180f-0000-1000-8000-00805f9b34fb"),
-            UUID.fromString("00002a19-0000-1000-8000-00805f9b34fb")
+    static final BtleGattCharacteristic BATTERY_LEVEL = new BtleGattCharacteristic(
+        serviceUuid: Guid("0000180f-0000-1000-8000-00805f9b34fb"),
+        uuid: Guid("00002a19-0000-1000-8000-00805f9b34fb")
     );
 }

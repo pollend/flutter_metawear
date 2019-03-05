@@ -23,9 +23,12 @@
  */
 
 
+import 'dart:collection';
 import 'dart:typed_data';
 
 import 'package:flutter_metawear/impl/DataAttributes.dart';
+import 'package:flutter_metawear/impl/DataTypeBase.dart';
+import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
 import 'package:sprintf/sprintf.dart';
 import 'dart:math';
 /**
@@ -62,7 +65,7 @@ class Util {
         return builder.toString();
     }
 
-    static ByteBuffer bytesToSIntBuffer(bool logData, Uint8List data, DataAttributes attributes) {
+    static Uint8List bytesToSIntBuffer(bool logData, Uint8List data, DataAttributes attributes) {
         Uint8List actual;
 
         if (logData) {
@@ -73,76 +76,73 @@ class Util {
             actual.setAll(0, data);
 //            System.arraycopy(data, attributes.offset, actual, 0, actual.length);
         }
-        return ByteBuffer.wrap(Util.padByteArray(actual, 4, true)).order(ByteOrder.LITTLE_ENDIAN);
+        return _padByteArray(actual,4,true);//, newSize, signed)ByteBuffer.wrap(Util.padByteArray(actual, 4, true)).order(ByteOrder.LITTLE_ENDIAN);
     }
 
-    static ByteBuffer bytesToUIntBuffer(boolean logData, byte[] data, DataAttributes attributes) {
-        final byte[] actual;
+    static Uint8List bytesToUIntBuffer(bool logData, Uint8List data, DataAttributes attributes) {
+        Uint8List actual;
 
         if (logData) {
-            actual = new byte[Math.min(data.length, attributes.length())];
-            System.arraycopy(data, 0, actual, 0, actual.length);
+            actual = Uint8List(min(data.length, attributes.length()));
+            actual.setAll(0, data);
+//            System.arraycopy(data, 0, actual, 0, actual.length);
         } else {
-            actual = new byte[Math.min(data.length - attributes.offset, attributes.length())];
-            System.arraycopy(data, attributes.offset, actual, 0, actual.length);
+            actual = Uint8List(min(data.length - attributes.offset, attributes.length()));
+            actual.setAll(attributes.offset, data);
+//            System.arraycopy(data, attributes.offset, actual, 0, actual.length);
         }
 
-        return ByteBuffer.wrap(Util.padByteArray(actual, 8, false)).order(ByteOrder.LITTLE_ENDIAN);
+        return _padByteArray(actual,8,false);//, newSize, signed) ByteBuffer.wrap(Util.padByteArray(actual, 8, false)).order(ByteOrder.LITTLE_ENDIAN);
     }
 
-    private static byte[] padByteArray(byte[] input, int newSize, boolean signed) {
+    static Uint8List _padByteArray(Uint8List input, int newSize, bool signed) {
         if (newSize <= input.length) {
-            byte[] copy= new byte[input.length];
-            System.arraycopy(input, 0, copy, 0, input.length);
-
+            Uint8List copy = Uint8List(input.length);
+            copy.setAll(0, input);
             return copy;
         }
 
-        byte[] copy= new byte[newSize];
-        byte padByte;
-
+        Uint8List copy= Uint8List(newSize);
+        int padByte;
         if (signed && (input[input.length - 1] & 0x80) == 0x80) {
-            padByte= (byte) 0xff;
+            padByte= 0xff;
         } else {
             padByte= 0;
         }
-
-        System.arraycopy(input, 0, copy, 0, input.length < newSize ? input.length : newSize);
-        if (newSize > input.length) {
-            Arrays.fill(copy, input.length, newSize, padByte);
-        }
+        copy.fillRange(0, copy.length-1,padByte);
+        copy.setAll(0, input);
         return copy;
     }
 
     static String createProducerChainString(DataTypeBase source, MetaWearBoardPrivate mwPrivate) {
-        Deque<DataTypeBase> parents = new LinkedList<>();
+        Queue<DataTypeBase> parents = Queue();
         DataTypeBase current = source;
 
         do {
-            parents.push(current);
+            parents.add(current);
             current = current.input;
         } while(current != null);
 
-        StringBuilder builder = new StringBuilder();
-        boolean first = true;
-        while(!parents.isEmpty()) {
+        StringBuffer builder = StringBuffer();
+        bool first = true;
+        while(!parents.isEmpty) {
             if (!first) {
-                builder.append(":");
+                builder.write(":");
             }
-            builder.append(DataTypeBase.createUri(parents.poll(), mwPrivate));
+            builder.write(DataTypeBase.createUri(parents.removeLast(), mwPrivate));
             first = false;
         }
 
         return builder.toString();
     }
 
-    static byte clearRead(byte value) {
-        return (byte) (value & 0x3f);
+    static int clearRead(int value) {
+        return (value & 0x3f);
     }
-    static byte setRead(byte value) {
-        return (byte) (0x80 | value);
+    static int setRead(int value) {
+        return (0x80 | value);
     }
-    static byte setSilentRead(byte value) {
-        return (byte) (0xc0 | value);
+    static int setSilentRead(int value) {
+        return (0xc0 | value);
     }
 }

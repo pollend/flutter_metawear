@@ -22,92 +22,36 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.impl;
 
-import com.mbientlab.metawear.AnonymousRoute;
-import com.mbientlab.metawear.CodeBlock;
-import com.mbientlab.metawear.DataToken;
-import com.mbientlab.metawear.DeviceInformation;
-import com.mbientlab.metawear.IllegalFirmwareFile;
-import com.mbientlab.metawear.IllegalRouteOperationException;
-import com.mbientlab.metawear.Model;
-import com.mbientlab.metawear.Observer;
-import com.mbientlab.metawear.MetaWearBoard;
-import com.mbientlab.metawear.Route;
-import com.mbientlab.metawear.TaskTimeoutException;
-import com.mbientlab.metawear.builder.RouteBuilder;
-import com.mbientlab.metawear.UnsupportedModuleException;
-import com.mbientlab.metawear.builder.RouteComponent.Action;
-import com.mbientlab.metawear.impl.RouteComponentImpl.Cache;
-import com.mbientlab.metawear.impl.DataProcessorImpl.Processor;
-import com.mbientlab.metawear.impl.LoggingImpl.DataLogger;
-import com.mbientlab.metawear.impl.platform.BtleGatt.WriteType;
-import com.mbientlab.metawear.module.*;
-import com.mbientlab.metawear.Subscriber;
-import com.mbientlab.metawear.module.Timer.ScheduledTask;
-import com.mbientlab.metawear.impl.platform.*;
+import 'dart:typed_data';
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import 'package:flutter_metawear/MetaWearBoard.dart';
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Queue;
-import java.util.TreeSet;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
-import bolts.CancellationTokenSource;
-import bolts.Capture;
-import bolts.Task;
-import bolts.TaskCompletionSource;
-
-import static com.mbientlab.metawear.impl.Constant.Module.DATA_PROCESSOR;
-import static com.mbientlab.metawear.impl.Constant.Module.MACRO;
+abstract class RegisterResponseHandler {
+    void onResponseReceived(Uint8List response);
+}
 
 /**
  * Platform agnostic implementation of the {@link MetaWearBoard} interface using only standard Java APIs.  Platform specific functionality
  * is abstracted with the {@link IO} and {@link BtleGatt} interfaces.
  * @author Eric Tsai
  */
-public class JseMetaWearBoard implements MetaWearBoard {
-    private static final BtleGattCharacteristic MW_CMD_GATT_CHAR= new BtleGattCharacteristic(
+class JseMetaWearBoard implements MetaWearBoard {
+    static final BtleGattCharacteristic MW_CMD_GATT_CHAR= BtleGattCharacteristic(
             METAWEAR_GATT_SERVICE,
             UUID.fromString("326A9001-85CB-9195-D9DD-464CFBBAE75A")
-    ), MW_NOTIFY_CHAR = new BtleGattCharacteristic(
+    );
+    static final MW_NOTIFY_CHAR = new BtleGattCharacteristic(
             METAWEAR_GATT_SERVICE,
             UUID.fromString("326A9006-85CB-9195-D9DD-464CFBBAE75A")
     );
 
-    private static final long RELEASE_INFO_TTL = 1800000L;
-    private static final byte READ_INFO_REGISTER= Util.setRead((byte) 0x0);
-    private final static String DEFAULT_FIRMWARE_BUILD = "vanilla", LOG_TAG = "metawear", RELEASES_URL = "https://mbientlab.com/releases", INFO_JSON = "info2.json";
-    private final static String BOARD_INFO= "com.mbientlab.metawear.impl.JseMetaWearBoard.BOARD_INFO",
+    static final int RELEASE_INFO_TTL = 1800000;
+    static final int READ_INFO_REGISTER =  Util.setRead((byte) 0x0);
+    static final String DEFAULT_FIRMWARE_BUILD = "vanilla", LOG_TAG = "metawear", RELEASES_URL = "https://mbientlab.com/releases", INFO_JSON = "info2.json";
+    static final String BOARD_INFO= "com.mbientlab.metawear.impl.JseMetaWearBoard.BOARD_INFO",
             BOARD_STATE = "com.mbientlab.metawear.impl.JseMetaWearBoard.BOARD_STATE";
 
-    interface RegisterResponseHandler {
-        void onResponseReceived(byte[] response);
-    }
 
     private enum RouteType {
         DATA,
@@ -171,7 +115,7 @@ public class JseMetaWearBoard implements MetaWearBoard {
     private Task<Void> connectTask = null;
     private boolean connected;
 
-    private final MetaWearBoardPrivate mwPrivate = new MetaWearBoardPrivate() {
+    final MetaWearBoardPrivate mwPrivate = new MetaWearBoardPrivate() {
         @Override
         public Task<Void> boardDisconnect() {
             return gatt.remoteDisconnectAsync();

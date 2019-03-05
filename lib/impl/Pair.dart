@@ -22,7 +22,6 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.impl;
 
 /**
  * Created by etsai on 8/31/16.

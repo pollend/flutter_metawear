@@ -22,52 +22,56 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.impl;
+import 'dart:async';
+import 'dart:typed_data';
 
-import com.mbientlab.metawear.CodeBlock;
-import com.mbientlab.metawear.DataToken;
-import com.mbientlab.metawear.Observer;
-import com.mbientlab.metawear.Route;
-import com.mbientlab.metawear.builder.RouteBuilder;
-import com.mbientlab.metawear.impl.JseMetaWearBoard.RegisterResponseHandler;
-import com.mbientlab.metawear.module.Timer;
+import 'package:flutter_metawear/CodeBlock.dart';
+import 'package:flutter_metawear/DataToken.dart';
+import 'package:flutter_metawear/MetaWearBoard.dart';
+import 'package:flutter_metawear/Observer.dart';
+import 'package:flutter_metawear/Route.dart';
+import 'package:flutter_metawear/builder/RouteBuilder.dart';
+import 'package:flutter_metawear/impl/DataTypeBase.dart';
+import 'package:flutter_metawear/impl/JseMetaWearBoard.dart';
+import 'package:flutter_metawear/impl/ModuleInfo.dart';
+import 'package:flutter_metawear/impl/ModuleType.dart';
+import 'package:flutter_metawear/impl/Version.dart';
+import 'package:flutter_metawear/module/Timer.dart';
 
-import java.util.Collection;
-import java.util.Map;
-
-import bolts.Task;
+import 'package:tuple/tuple.dart';
 
 /**
  * Created by etsai on 8/31/16.
  */
-interface MetaWearBoardPrivate {
-    Task<Void> boardDisconnect();
-    void sendCommand(byte[] command);
-    void sendCommand(byte[] command, int dest, DataToken input);
-    void sendCommand(Constant.Module module, byte register, byte ... parameters);
-    void sendCommand(Constant.Module module, byte register, byte id, byte ... parameters);
+abstract class MetaWearBoardPrivate {
+    Future<void> boardDisconnect();
+    void sendCommand(Uint8List command,[int dest, DataToken input]);
+//    void sendCommand(Uint8List command, int dest, DataToken input);
+
+    void sendCommandForModule(ModuleType module, int register, List<int> parameters,[int id]);
+//    void sendCommand(Constant.Module module, byte register, byte id, byte ... parameters);
 
     void tagProducer(String name, DataTypeBase producer);
     DataTypeBase lookupProducer(String name);
-    boolean hasProducer(String name);
+    bool hasProducer(String name);
     void removeProducerTag(String name);
 
-    ModuleInfo lookupModuleInfo(Constant.Module id);
-    Collection<DataTypeBase> getDataTypes();
-    Map<Class<? extends com.mbientlab.metawear.MetaWearBoard.Module>, com.mbientlab.metawear.MetaWearBoard.Module> getModules();
-    void addDataIdHeader(Pair<Byte, Byte> key);
-    void addDataHandler(Tuple3<Byte, Byte, Byte> key, RegisterResponseHandler handler);
-    void addResponseHandler(Pair<Byte, Byte> key, RegisterResponseHandler handler);
-    void removeDataHandler(Tuple3<Byte, Byte, Byte> key, RegisterResponseHandler handler);
-    int numDataHandlers(Tuple3<Byte, Byte, Byte> key);
+    ModuleInfo lookupModuleInfo(ModuleType id);
+    List<DataTypeBase> getDataTypes();
+    Map<Type, Module> getModules();
+    void addDataIdHeader(Tuple2<int, int> key);
+    void addDataHandler(Tuple3<int, int, int> key, RegisterResponseHandler handler);
+    void addResponseHandler(Tuple2<int, int> key, RegisterResponseHandler handler);
+    void removeDataHandler(Tuple3<int, int, int> key, RegisterResponseHandler handler);
+    int numDataHandlers(Tuple3<int, int, int> key);
 
-    void removeProcessor(boolean sync, byte id);
+    void removeProcessor(bool sync, int id);
     void removeRoute(int id);
     void removeEventManager(int id);
 
-    Task<Route> queueRouteBuilder(RouteBuilder builder, String producerTag);
-    Task<Timer.ScheduledTask> queueTaskManager(CodeBlock mwCode, byte[] timerConfig);
-    Task<Observer> queueEvent(DataTypeBase owner, CodeBlock codeBlock);
+    Future<Route> queueRouteBuilder(RouteBuilder builder, String producerTag);
+    Future<Timer.ScheduledTask> queueTaskManager(CodeBlock mwCode, byte[] timerConfig);
+    Future<Observer> queueEvent(DataTypeBase owner, CodeBlock codeBlock);
 
     void logWarn(String message);
 

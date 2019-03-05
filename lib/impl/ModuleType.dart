@@ -87,9 +87,7 @@ class ModuleType {
         DEBUG.id: DEBUG
     };
 
-    static Module lookupEnum(int id){
+    static ModuleType lookupEnum(int id){
         return _byteToEnum[id];
     }
-
-
 }

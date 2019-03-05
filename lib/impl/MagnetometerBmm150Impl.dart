@@ -22,24 +22,6 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.impl;
-
-import com.mbientlab.metawear.AsyncDataProducer;
-import com.mbientlab.metawear.Data;
-import com.mbientlab.metawear.Route;
-import com.mbientlab.metawear.builder.RouteBuilder;
-import com.mbientlab.metawear.data.MagneticField;
-import com.mbientlab.metawear.module.MagnetometerBmm150;
-
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.util.Calendar;
-import java.util.Locale;
-
-import bolts.Task;
-
-import static com.mbientlab.metawear.impl.Constant.Module.MAGNETOMETER;
-
 /**
  * Created by etsai on 9/20/16.
  */

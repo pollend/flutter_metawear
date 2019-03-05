@@ -22,39 +22,45 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.impl.platform;
 
-import java.util.UUID;
+import 'package:flutter_blue/flutter_blue.dart';
+import 'package:flutter_metawear/impl/platform/BtleGattCharacteristic.dart';
 
 /**
  * Manufacturer and/or vendor information about a device
  * @author Eric Tsai
  */
-public class DeviceInformationService {
-    private static final UUID SERVICE_UUID = UUID.fromString("0000180a-0000-1000-8000-00805f9b34fb");
+class DeviceInformationService {
+    static final Guid _SERVICE_UUID = Guid(
+        "0000180a-0000-1000-8000-00805f9b34fb");
+
     /** Revision for the firmware within the device */
-    public static final BtleGattCharacteristic FIRMWARE_REVISION = new BtleGattCharacteristic(
-            SERVICE_UUID,
-            UUID.fromString("00002a26-0000-1000-8000-00805f9b34fb")
+    static final BtleGattCharacteristic FIRMWARE_REVISION = new BtleGattCharacteristic(
+        serviceUuid: _SERVICE_UUID,
+        uuid: Guid("00002a26-0000-1000-8000-00805f9b34fb")
     );
+
     /** Model number that is assigned by the device */
-    public static final BtleGattCharacteristic MODEL_NUMBER = new BtleGattCharacteristic(
-            SERVICE_UUID,
-            UUID.fromString("00002a24-0000-1000-8000-00805f9b34fb")
+    static final BtleGattCharacteristic MODEL_NUMBER = new BtleGattCharacteristic(
+        serviceUuid: _SERVICE_UUID,
+        uuid: Guid("00002a24-0000-1000-8000-00805f9b34fb")
     );
+
     /** Revision for the hardware within the device */
-    public static final BtleGattCharacteristic HARDWARE_REVISION = new BtleGattCharacteristic(
-            SERVICE_UUID,
-            UUID.fromString("00002a27-0000-1000-8000-00805f9b34fb")
+    static final BtleGattCharacteristic HARDWARE_REVISION = new BtleGattCharacteristic(
+        serviceUuid: _SERVICE_UUID,
+        uuid: Guid("00002a27-0000-1000-8000-00805f9b34fb")
     );
+
     /** Name of the manufacturer of the device */
-    public static final BtleGattCharacteristic MANUFACTURER_NAME = new BtleGattCharacteristic(
-            SERVICE_UUID,
-            UUID.fromString("00002a29-0000-1000-8000-00805f9b34fb")
+    static final BtleGattCharacteristic MANUFACTURER_NAME = new BtleGattCharacteristic(
+        serviceUuid: _SERVICE_UUID,
+        uuid: Guid("00002a29-0000-1000-8000-00805f9b34fb")
     );
+
     /** Serial number for a particular instance of the device */
-    public static final BtleGattCharacteristic SERIAL_NUMBER = new BtleGattCharacteristic(
-            SERVICE_UUID,
-            UUID.fromString("00002a25-0000-1000-8000-00805f9b34fb")
+    static final BtleGattCharacteristic SERIAL_NUMBER = new BtleGattCharacteristic(
+        serviceUuid: _SERVICE_UUID,
+        uuid: Guid("00002a25-0000-1000-8000-00805f9b34fb")
     );
 }

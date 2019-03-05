@@ -22,40 +22,38 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.module;
 
-import com.mbientlab.metawear.ConfigEditorBase;
-import com.mbientlab.metawear.Configurable;
-import com.mbientlab.metawear.ForcedDataProducer;
-import com.mbientlab.metawear.MetaWearBoard.Module;
+import 'package:flutter_metawear/MetaWearBoard.dart';
+
+/**
+ * Photodiodes the sensor should use for proximity detection
+ * @author Eric Tsai
+ */
+enum ReceiverDiode {
+    /** Use the channel 0 diode, which is responsive to both visible and infrared light */
+    CHANNEL_0,
+    /** Use the channel 1 diode, which is responsive primarily to infrared light */
+    CHANNEL_1,
+    /** Use both photodiodes */
+    BOTH
+}
+/**
+ * Amount of current to drive the sensor
+ * @author Eric Tsai
+ */
+enum TransmitterDriveCurrent {
+    CURRENT_100MA,
+    CURRENT_50MA,
+    CURRENT_25MA,
+    CURRENT_12_5MA,
+}
 
 /**
  * Digital proximity detector for short-distance detection by AMS
  * @author Eric Tsai
  */
-public interface ProximityTsl2671 extends Module, Configurable<ProximityTsl2671.ConfigEditor> {
-    /**
-     * Photodiodes the sensor should use for proximity detection
-     * @author Eric Tsai
-     */
-    enum ReceiverDiode {
-        /** Use the channel 0 diode, which is responsive to both visible and infrared light */
-        CHANNEL_0,
-        /** Use the channel 1 diode, which is responsive primarily to infrared light */
-        CHANNEL_1,
-        /** Use both photodiodes */
-        BOTH
-    }
-    /**
-     * Amount of current to drive the sensor
-     * @author Eric Tsai
-     */
-    enum TransmitterDriveCurrent {
-        CURRENT_100MA,
-        CURRENT_50MA,
-        CURRENT_25MA,
-        CURRENT_12_5MA,
-    }
+abstract class ProximityTsl2671 extends Module, Configurable<ProximityTsl2671.ConfigEditor> {
+
     /**
      * Interface for configuring the sensor
      * @author Eric Tsai

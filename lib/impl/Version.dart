@@ -22,41 +22,41 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.impl;
 
-import java.io.Serializable;
-import java.util.Locale;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import 'dart:core';
+
+import 'package:sprintf/sprintf.dart';
 
 /**
  * Created by etsai on 9/5/16.
  */
-class Version implements Comparable<Version>, Serializable {
-    private static final Pattern VERSION_STRING_PATTERN = Pattern.compile("(\\d+)\\.(\\d+)\\.(\\d+)");
-    private static final long serialVersionUID = -6928626294821091652L;
+class Version implements Comparable<Version> {
+    static final RegExp VERSION_STRING_PATTERN = RegExp(
+        "(\\d+)\\.(\\d+)\\.(\\d+)");
 
-    private final int major, minor, step;
+//    static final long serialVersionUID = -6928626294821091652L;
 
-    Version(int major, int minor, int step) {
-        this.major= major;
-        this.minor= minor;
-        this.step= step;
-    }
+    final int major;
+    final int minor;
+    final int step;
 
-    Version(String versionString) {
-        Matcher m= VERSION_STRING_PATTERN.matcher(versionString);
+    Version(this.major, this.minor, this.step);
 
-        if (!m.matches()) {
-            throw new RuntimeException("Version string: \'" + versionString + "\' does not match pattern X.Y.Z");
+    factory Version.fromString(String versionString){
+        Match matches = VERSION_STRING_PATTERN.firstMatch(versionString);
+
+        if (matches == null) {
+            throw new Exception(
+                "Version string: $versionString does not match pattern X.Y.Z");
         }
+        int major = int.parse(matches.group(1));
+        int minor = int.parse(matches.group(2));
+        int step = int.parse(matches.group(3));
 
-        major= Integer.valueOf(m.group(1));
-        minor= Integer.valueOf(m.group(2));
-        step= Integer.valueOf(m.group(3));
+        return Version(major, minor, step);
     }
 
-    private int weightedCompare(int left, int right) {
+    int weightedCompare(int left, int right) {
         if (left < right) {
             return -1;
         } else if (left > right) {
@@ -65,10 +65,11 @@ class Version implements Comparable<Version>, Serializable {
         return 0;
     }
 
-    @Override
-    public int compareTo(Version version) {
-        int sum= 4 * weightedCompare(major, version.major) + 2 * weightedCompare(minor, version.minor) + weightedCompare(step, version.step);
-
+    @override
+    int compareTo(Version other) {
+        int sum = 4 * weightedCompare(major, other.major) +
+            2 * weightedCompare(minor, other.minor) +
+            weightedCompare(step, other.step);
         if (sum < 0) {
             return -1;
         } else if (sum > 0) {
@@ -77,8 +78,11 @@ class Version implements Comparable<Version>, Serializable {
         return 0;
     }
 
-    @Override
-    public String toString() {
-        return String.format(Locale.US, "%d.%d.%d", major, minor, step);
+
+
+    @override
+    String toString() {
+        return sprintf("%d.%d.%d", [major, minor, step]);
     }
+
 }

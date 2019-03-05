@@ -23,10 +23,18 @@
  */
 
 
+import 'package:flutter_metawear/DataToken.dart';
+import 'package:flutter_metawear/Subscriber.dart';
 import 'package:flutter_metawear/builder/RouteMulticast.dart';
 import 'package:flutter_metawear/builder/RouteSplit.dart';
+import 'package:flutter_metawear/builder/filter/Comparison.dart';
+import 'package:flutter_metawear/builder/filter/ComparisonOutput.dart';
+import 'package:flutter_metawear/builder/filter/DifferentialOutput.dart';
+import 'package:flutter_metawear/builder/filter/Passthrough.dart';
 import 'package:flutter_metawear/builder/filter/ThresholdOutput.dart';
+import 'package:flutter_metawear/builder/function/Function1.dart';
 import 'package:flutter_metawear/builder/function/Function2.dart';
+import 'package:flutter_metawear/builder/predicate/PulseOutput.dart';
 
 /**
  * Similar to a {@link CodeBlock} except this interface is specifically for
@@ -41,6 +49,20 @@ abstract class Action {
     void execute(DataToken token);
 }
 
+
+/**
+ * Types of information the accounter processor can append to the data
+ * @author Eric Tsai
+ */
+enum AccountType {
+    /**
+     * Append a looping counter to all data.
+     * The counter's value is accessed by calling {@link Data#extra(Class)} with the <code>Long</code> type
+     */
+    COUNT,
+    /** Extra information used to calculate actual timestamps for streamed data */
+    TIME
+}
 
 /**
  * Component in a route definition
@@ -134,14 +156,14 @@ abstract class RouteComponent {
      * @param nSamples    Number of previous data samples to compare against
      * @return Object representing the high pass output
      */
-    RouteComponent highpass(byte nSamples);
+    RouteComponent highpass(int nSamples);
     /**
      * Applies a low pass filter over the input data.  Starting in firmware v1.3.4, can be used with
      * multi-component data e.g. acceleration values.
      * @param nSamples    Number of previous data samples to compare against
      * @return Object representing the low pass output
      */
-    RouteComponent lowpass(byte nSamples);
+    RouteComponent lowpass(int nSamples);
     /**
      * Computes a moving average over the previous N samples.  This component will not output data
      * until the first average i.e. until N samples have been received.
@@ -149,14 +171,14 @@ abstract class RouteComponent {
      * @return Object representing the output of the averager
      * @deprecated Renamed to {@link #lowpass(byte) lowpass} in SDK v3.1
      */
-    @Deprecated
-    RouteComponent average(byte nSamples);
+    @deprecated
+    RouteComponent average(int nSamples);
     /**
      * Stops data from leaving until at least N samples have been collected.
      * @param samples    Number of samples to collect
      * @return Object representing the output of the sample delay component
      */
-    RouteComponent delay(byte samples);
+    RouteComponent delay(int samples);
 
     /**
      * Apply a 1 input function to all of the input data
@@ -170,7 +192,7 @@ abstract class RouteComponent {
      * @param rhs   Second input for the function
      * @return Object representing the output of the mapper
      */
-    RouteComponent map(Function2 fn, Number rhs);
+    RouteComponent map(Function2 fn, num rhs);
     /**
      * Variant of {@link #map(Function2, Number)} where the rhs value is the output of another
      * sensor or processor
@@ -178,7 +200,7 @@ abstract class RouteComponent {
      * @param dataNames   Keys identifying which sensor or processor data to feed into the mapper
      * @return Object representing the output of the mapper
      */
-    RouteComponent map(Function2 fn, String ... dataNames);
+    RouteComponent map(Function2 fn, List<String> dataNames);
 
     /**
      * Reduce the amount of data allowed through such that the output data rate matches the delay
@@ -192,7 +214,7 @@ abstract class RouteComponent {
      * @param value    Initial value to set the passthrough limiter to
      * @return Object representing the output of the limiter
      */
-    RouteComponent limit(Passthrough type, short value);
+    RouteComponent limit(Passthrough type, int value);
 
     /**
      * Scans the input data for a pulse.  When one is detected, output a summary of the scanned data
@@ -201,7 +223,7 @@ abstract class RouteComponent {
      * @param samples      Minimum number of samples that must be above the threshold for a valid pulse
      * @return Object representing the output of the pulse finder
      */
-    RouteComponent find(PulseOutput output, Number threshold, short samples);
+    RouteComponent find(PulseOutput output, num threshold, int samples);
 
     /**
      * Remove data from the route that does not satisfy the comparison
@@ -210,7 +232,7 @@ abstract class RouteComponent {
      *                      is on firmware v1.2.3 or later
      * @return Object representing the output of the comparator filter
      */
-    RouteComponent filter(Comparison op, Number ... references);
+    RouteComponent filter(Comparison op, List<num>  references);
     /**
      * Variant of the {@link #filter(Comparison, Number...)} function where the reference values are outputs
      * from other sensors or processors
@@ -219,7 +241,7 @@ abstract class RouteComponent {
      *                    new values are produced
      * @return Object representing the output of the comparator filter
      */
-    RouteComponent filter(Comparison op, String ... dataNames);
+    RouteComponent filter(Comparison op, List<String> dataNames);
     /**
      * Variant of {@link #filter(Comparison, Number...)} where the filter can output values providing
      * additional details about the comparison.  This variant component is only supported starting with
@@ -249,7 +271,7 @@ abstract class RouteComponent {
      * @param threshold    Threshold boundary the data must cross
      * @return Object representing the output of the threshold filter
      */
-    RouteComponent filter(ThresholdOutput output, Number threshold);
+    RouteComponent filter(ThresholdOutput output, num threshold);
     /**
      * Variant of {@link #filter(ThresholdOutput, Number)} with a configurable hysteresis value for data
      * that frequently oscillates around the threshold boundary
@@ -258,7 +280,7 @@ abstract class RouteComponent {
      * @param hysteresis   Minimum distance between the boundary and value that indicates a successful crossing
      * @return Object representing the output of the threshold filter
      */
-    RouteComponent filter(ThresholdOutput output, Number threshold, Number hysteresis);
+    RouteComponent filter(ThresholdOutput output, num threshold, num hysteresis);
     /**
      * Removes data that it is not a minimum distance away from a reference value.  The reference value is
      * continually updated to be the previous passing value
@@ -266,28 +288,15 @@ abstract class RouteComponent {
      * @param distance      Minimum distance from the reference value
      * @return Object representing the output of the differential filter
      */
-    RouteComponent filter(DifferentialOutput output, Number distance);
+    RouteComponent filter(DifferentialOutput output, num distance);
 
     /**
      * Packs multiple input values into 1 BTLE packet.  Used to reduce the number of packets broadcasted over the link.
      * @param count    Number of input values to pack
      * @return Object representing the output of the packer
      */
-    RouteComponent pack(byte count);
+    RouteComponent pack(int count);
 
-    /**
-     * Types of information the accounter processor can append to the data
-     * @author Eric Tsai
-     */
-    enum AccountType {
-        /**
-         * Append a looping counter to all data.
-         * The counter's value is accessed by calling {@link Data#extra(Class)} with the <code>Long</code> type
-         */
-        COUNT,
-        /** Extra information used to calculate actual timestamps for streamed data */
-        TIME
-    }
     /**
      * Variant of {@link #account(AccountType)} that defaults to recalculating timestamps
      * @return Object representing the accounter output

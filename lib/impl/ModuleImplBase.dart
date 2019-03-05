@@ -22,16 +22,12 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.impl;
-
-import java.io.Serializable;
-
 /**
  * Created by etsai on 9/20/16.
  */
-abstract class ModuleImplBase implements Serializable {
-    private static final long serialVersionUID = -8904360854647238719L;
-    protected transient MetaWearBoardPrivate mwPrivate;
+abstract class ModuleImplBase{
+//    private static final long serialVersionUID = -8904360854647238719L;
+    MetaWearBoardPrivate mwPrivate;
 
     ModuleImplBase(MetaWearBoardPrivate mwPrivate) {
         this.mwPrivate= mwPrivate;

@@ -22,10 +22,6 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.impl;
-
-import com.mbientlab.metawear.impl.Constant.Module;
-
 /**
  * Created by etsai on 2/28/17.
  */

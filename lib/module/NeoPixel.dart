@@ -22,109 +22,105 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.module;
+import 'package:flutter_metawear/MetaWearBoard.dart';
 
-import com.mbientlab.metawear.MetaWearBoard.Module;
+/**
+ * Color ordering for the NeoPixel color values
+ * @author Eric Tsai
+ */
+enum ColorOrdering {
+    /** Red, green, blue order */
+    MW_WS2811_RGB,
+    /** Red, blue, green order */
+    MW_WS2811_RBG,
+    /** Green, red, blue order */
+    MW_WS2811_GRB,
+    /** Green, blue, red order */
+    MW_WS2811_GBR
+}
+
+/**
+ * Operating speeds for a NeoPixel strand
+ * @author Eric Tsai
+ */
+enum StrandSpeed {
+    /** 400 kHz */
+    SLOW,
+    /** 800 kHz */
+    FAST
+}
+
+
+/**
+ * Enumeration of rotation directions
+ * @author Eric Tsai
+ */
+enum RotationDirection {
+    /** Move LED color patterns towards the board */
+    TOWARDS,
+    /** Move LED color patterns away from the board */
+    AWAY
+}
+
+/**
+ * Represents a NeoPixel strand
+ * @author Eric Tsai
+ */
+abstract class Strand {
+
+    /**
+     * Free resources allocated by the firmware for this strand.  After calling free,
+     * this object is no longer valid and should be discarded
+     */
+    void free();
+    /**
+     * Enables strand holding.  When enabled, the strand will not refresh with any LED changes until the hold
+     * is disabled.  This allows you to form complex LED patterns without having the strand refresh with partial changes.
+     */
+    void hold();
+    /**
+     * Disables strand holding.  The strand will be refreshed with any LED changes programmed while the hold was active
+     */
+    void release();
+    /**
+     * Clears the LEDs in the given range
+     * @param start Led index to start clearing from
+     * @param end   Led index to clear to, exclusive
+     */
+    void clear(int start, int end);
+    /**
+     * Set and LED's rgb values
+     * @param index LED index to set, from [0, nLeds - 1]
+     * @param red Red value, between [0, 255]
+     * @param green Green value, between [0, 255]
+     * @param blue Blue value, between [0, 255]
+     */
+    void setRgb(int index, int red, int green, int blue);
+
+    /**
+     * Rotate the LED color patterns on a strand indefinitely
+     * @param direction Rotation direction
+     * @param period Amount of time, in milliseconds, between rotations
+     */
+    void rotate(RotationDirection direction, int period,[int repetitions]);
+    /**
+     * Stops the LED rotation
+     */
+    void stopRotation();
+
+    /**
+     * Return the number of Leds initialized for the strand
+     * @return Number of initialized LEDs
+     */
+    int nLeds();
+}
+
 
 /**
  * A brand of RGB led strips by Adafruit
  * @author Eric Tsai
  */
-public interface NeoPixel extends Module {
-    /**
-     * Color ordering for the NeoPixel color values
-     * @author Eric Tsai
-     */
-    enum ColorOrdering {
-        /** Red, green, blue order */
-        MW_WS2811_RGB,
-        /** Red, blue, green order */
-        MW_WS2811_RBG,
-        /** Green, red, blue order */
-        MW_WS2811_GRB,
-        /** Green, blue, red order */
-        MW_WS2811_GBR
-    }
-
-    /**
-     * Operating speeds for a NeoPixel strand
-     * @author Eric Tsai
-     */
-    enum StrandSpeed {
-        /** 400 kHz */
-        SLOW,
-        /** 800 kHz */
-        FAST
-    }
-
-    /**
-     * Represents a NeoPixel strand
-     * @author Eric Tsai
-     */
-    interface Strand {
-        /**
-         * Enumeration of rotation directions
-         * @author Eric Tsai
-         */
-        enum RotationDirection {
-            /** Move LED color patterns towards the board */
-            TOWARDS,
-            /** Move LED color patterns away from the board */
-            AWAY
-        }
-
-        /**
-         * Free resources allocated by the firmware for this strand.  After calling free,
-         * this object is no longer valid and should be discarded
-         */
-        void free();
-        /**
-         * Enables strand holding.  When enabled, the strand will not refresh with any LED changes until the hold
-         * is disabled.  This allows you to form complex LED patterns without having the strand refresh with partial changes.
-         */
-        void hold();
-        /**
-         * Disables strand holding.  The strand will be refreshed with any LED changes programmed while the hold was active
-         */
-        void release();
-        /**
-         * Clears the LEDs in the given range
-         * @param start Led index to start clearing from
-         * @param end   Led index to clear to, exclusive
-         */
-        void clear(byte start, byte end);
-        /**
-         * Set and LED's rgb values
-         * @param index LED index to set, from [0, nLeds - 1]
-         * @param red Red value, between [0, 255]
-         * @param green Green value, between [0, 255]
-         * @param blue Blue value, between [0, 255]
-         */
-        void setRgb(byte index, byte red, byte green, byte blue);
-        /**
-         * Rotate the LED color patterns on a strand
-         * @param direction Rotation direction
-         * @param repetitions Number of times to repeat the rotation
-         * @param period Amount of time, in milliseconds, between rotations
-         */
-        void rotate(RotationDirection direction, byte repetitions, short period);
-        /**
-         * Rotate the LED color patterns on a strand indefinitely
-         * @param direction Rotation direction
-         * @param period Amount of time, in milliseconds, between rotations
-         */
-        void rotate(RotationDirection direction, short period);
-        /**
-         * Stops the LED rotation
-         */
-        void stopRotation();
-
-        /**
-         * Return the number of Leds initialized for the strand
-         * @return Number of initialized LEDs
-         */
-        int nLeds();
-    }
+abstract class NeoPixel extends Module {
 
     /**
      * Initialize memory on the MetaWear board for a NeoPixel strand
@@ -135,11 +131,11 @@ public interface NeoPixel extends Module {
      * @param length Number of LEDs to use
      * @return Object representing the initialized strand
      */
-    Strand initializeStrand(byte strand, ColorOrdering ordering, StrandSpeed speed, byte gpioPin, byte length);
+    Strand initializeStrand(int strand, ColorOrdering ordering, StrandSpeed speed, int gpioPin, int length);
     /**
      * Find the object corresponding to the strand number
      * @param strand    Strand number to look up
      * @return Strand object matching the number, null if no match is found
      */
-    Strand lookupStrand(byte strand);
+    Strand lookupStrand(int strand);
 }

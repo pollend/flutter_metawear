@@ -26,8 +26,11 @@
 import 'dart:io';
 
 import 'package:flutter_blue/flutter_blue.dart';
+import 'package:flutter_metawear/AnonymousRoute.dart';
 import 'package:flutter_metawear/DeviceInformation.dart';
 import 'package:flutter_metawear/Model.dart';
+import 'package:flutter_metawear/Observer.dart';
+import 'package:flutter_metawear/Route.dart';
 
 /**
  * Object representing a MetaWear board
@@ -124,13 +127,14 @@ abstract class MetaWearBoard {
      * Establishes a Bluetooth Low Energy connection to the MetaWear board
      * @return Task holding the result of the connect attempt
      */
-    Future<void> connectAsync();
+    Future<void> connectAsync([int delay]);
     /**
      * Establishes a Bluetooth Low Energy connection to the MetaWear board
      * @param delay    How long to wait (in milliseconds) before attempting to connect
      * @return Task holding the result of the connect attempt
      */
-    Future<void> connectAsync(long delay);
+//    Future<void> connectAsync();
+
     /**
      * Disconnects from the board and cancels pending {@link #connectAsync()} tasks
      * @return Task holding the result of the disconnect attempt
@@ -147,13 +151,13 @@ abstract class MetaWearBoard {
      * Gets the connection state
      * @return True if a btle connection is active, false otherwise
      */
-    boolean isConnected();
+    bool isConnected();
     /**
      * Checks if the board is in the MetaBoot (bootloader) mode.  If it is, you will not be able to interact
      * with the board outside of reading RSSI values and updating firmware.
      * @return True if the board is in MetaBoot mode, false otherwise
      */
-    boolean inMetaBootMode();
+    bool inMetaBootMode();
 
     /**
      * Retrieves a reference to the requested module if supported.  You must connected to the board before
@@ -162,7 +166,7 @@ abstract class MetaWearBoard {
      * @param <T>           Runtime type the return value is casted as
      * @return Reference to the requested module, null if the board is not connected, module not supported, or board is in MetaBoot mode
      */
-    <T extends Module> T getModule(Class<T> moduleClass);
+    T getModule<T extends Module>(Type moduleClass);
     /**
      * Retrieves a reference to the requested module if supported, throws a checked exception if the function fails.
      * You must connected to the board before calling this function and the board must not be in MetaBoot mode
@@ -171,13 +175,13 @@ abstract class MetaWearBoard {
      * @return Reference to the requested module
      * @throws UnsupportedModuleException If the requested module is not supported or the board is in MetaBoot mode
      */
-    <T extends Module> T getModuleOrThrow(Class<T> moduleClass) throws UnsupportedModuleException;
+    T getModuleOrThrow<T extends Module> (Type moduleClass);
 
     /**
      * Reads the current state of the board and creates anonymous routes based on what data is being logged
      * @return Task that is completed when the anonymous routes are created
      */
-    Task<AnonymousRoute[]> createAnonymousRoutesAsync();
+    Future<List<AnonymousRoute>> createAnonymousRoutesAsync();
     /**
      * Retrieves a route
      * @param id    Numerical ID to look up

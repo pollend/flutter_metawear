@@ -23,15 +23,17 @@
  */
 
 
+import 'package:flutter_metawear/Data.dart';
+
 /**
  * Handles data that is sent to the local device
  * @author Eric Tsai
  */
-abstract class Subscriber extends Serializable {
+abstract class Subscriber{
     /**
      * Called when data from the corresponding producer has arrived
      * @param data   Data received from the sensor
      * @param env   Extra variables needed to process the message, set by {@link Route#setEnvironment(int, Object...)}
      */
-    void apply(Data data, Object ... env);
+    void apply(Data data, List<Object> env);
 }

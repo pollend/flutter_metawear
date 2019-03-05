@@ -22,15 +22,6 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.impl;
-
-import com.mbientlab.metawear.Data;
-
-import java.nio.ByteBuffer;
-import java.util.Calendar;
-
-import static com.mbientlab.metawear.impl.Constant.Module.DATA_PROCESSOR;
-
 /**
  * Created by etsai on 9/5/16.
  */

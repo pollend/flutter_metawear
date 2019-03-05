@@ -22,58 +22,63 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.impl;
 
-import org.json.JSONObject;
+import 'dart:typed_data';
 
-import java.io.Serializable;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import 'package:flutter_metawear/impl/Util.dart';
 
 /**
  * Created by etsai on 8/31/16.
  */
-class ModuleInfo implements Serializable {
-    private static final long serialVersionUID = -8120230312302254264L;
+class ModuleInfo{
+//    private static final long serialVersionUID = -8120230312302254264L;
 
-    final byte id, implementation, revision;
-    final byte[] extra;
+    final int id, implementation, revision;
+    final Uint8List extra;
 
-    ModuleInfo(byte[] response) {
-        id= response[0];
+    ModuleInfo._(this.id,this.implementation,this.revision,this.extra);
+
+    factory ModuleInfo(Uint8List response){
+        int id = response[0];
+        int implementation;
+        int revision;
+        Uint8List extra;
+
         if (response.length > 2) {
             implementation = response[2];
             revision = response[3];
         } else {
-            implementation= (byte) 0xff;
-            revision= (byte) 0xff;
+            implementation= 0xff;
+            revision= 0xff;
         }
-
         if (response.length > 4) {
-            extra= new byte[response.length - 4];
-            System.arraycopy(response, 4, extra, 0, extra.length);
+            extra = Uint8List(response.length - 4);
+            extra.setAll(0, response.skip(4));
         } else {
-            extra= new byte[0];
+            extra= Uint8List(0);
         }
+
+        return ModuleInfo._(id, implementation, revision, extra);
     }
 
-    boolean present() {
-        return implementation != (byte) 0xff && revision != (byte) 0xff;
+
+    bool present() {
+        return implementation != 0xff && revision != 0xff;
     }
 
-    JSONObject toJSON() {
+    Map<String,dynamic> toJSON() {
         if (!present()) {
-            return new JSONObject();
+            return Map();
         }
 
-        Map<String, Object> attributes = new LinkedHashMap<>();
-        attributes.put("implementation", implementation);
-        attributes.put("revision", revision);
+        Map<String,dynamic> attributes = Map();
+        attributes["implementation"] =  implementation;
+        attributes["revision"] =  revision;
 
         if (extra.length > 0) {
-            attributes.put("extra", Util.arrayToHexString(extra));
+            attributes["extra"] =  Util.arrayToHexString(extra);
         }
 
-        return new JSONObject(attributes);
+        return attributes;
     }
 }

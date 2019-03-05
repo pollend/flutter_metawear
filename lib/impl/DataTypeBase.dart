@@ -23,6 +23,8 @@
  */
 
 
+import 'package:flutter_metawear/DataToken.dart';
+
 /**
  * Created by etsai on 9/4/16.
  */
