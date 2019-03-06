@@ -29,7 +29,7 @@ import 'package:flutter_metawear/DataProducer.dart';
  * a periodic read can be programmed onto the board to avoid having to repeatedly send the command from the local device.
  * @author Eric Tsai
  */
-abstract class ForcedDataProducer extends DataProducer {
+abstract class ForcedDataProducer implements DataProducer {
     /**
      * Sends a read command to the producer
      */

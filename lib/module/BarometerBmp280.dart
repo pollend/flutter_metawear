@@ -21,74 +21,82 @@
  * Should you have any questions regarding your right to use this Software, contact MbientLab via email:
  * hello@mbientlab.com.
  */
+import 'package:flutter_metawear/module/BarometerBosch.dart' as BarometerBosch;
 
-package com.mbientlab.metawear.module;
+/**
+ * Supported stand by times on the BMP280 sensor
+ * @author Eric Tsai
+ */
+class StandbyTime {
+    /** 0.5ms */
+    static const TIME_0_5 = StandbyTime._(0.5);
+
+    /** 62.5ms */
+    static const TIME_62_5 = StandbyTime._(62.5);
+
+    /** 125ms */
+    static const TIME_125 = StandbyTime._(125);
+
+    /** 250ms */
+    static const TIME_250 = StandbyTime._(250);
+
+    /** 500ms */
+    static const TIME_500 = StandbyTime._(500);
+
+    /** 1000ms */
+    static const TIME_1000 = StandbyTime._(1000);
+
+    /** 2000ms */
+    static const TIME_2000 = StandbyTime._(2000);
+
+    /** 4000ms */
+    static const TIME_4000 = StandbyTime._(4000);
+
+    final double time;
+
+    const StandbyTime._(this.time);
+
+    static List<StandbyTime> _entries = [
+        TIME_0_5,
+        TIME_62_5,
+        TIME_125,
+        TIME_250,
+        TIME_500,
+        TIME_1000,
+        TIME_2000,
+        TIME_4000
+    ];
+
+
+    static List<double> get times => _entries.map((t) => t.time);
+
+}
+
+/**
+ * Barometer configuration editor specific to the BMP280 barometer
+ * @author Eric Tsai
+ */
+abstract class ConfigEditor extends BarometerBosch.ConfigEditor<ConfigEditor> {
+/**
+ * Set the standby time
+ * @param time    New standby time
+ * @return Calling object
+ */
+ConfigEditor standbyTime(StandbyTime time);
+}
 
 /**
  * Extension of the {@link BarometerBosch} interface providing finer control over the barometer on
  * the BMP280 pressure sensor
  * @author Eric Tsai
  */
-public interface BarometerBmp280 extends BarometerBosch {
-    /**
-     * Supported stand by times on the BMP280 sensor
-     * @author Eric Tsai
-     */
-    enum StandbyTime {
-        /** 0.5ms */
-        TIME_0_5(0.5f),
-        /** 62.5ms */
-        TIME_62_5(62.5f),
-        /** 125ms */
-        TIME_125(125f),
-        /** 250ms */
-        TIME_250(250f),
-        /** 500ms */
-        TIME_500(500f),
-        /** 1000ms */
-        TIME_1000(1000f),
-        /** 2000ms */
-        TIME_2000(2000f),
-        /** 4000ms */
-        TIME_4000(4000f);
+abstract class BarometerBmp280 extends BarometerBosch.BarometerBosch<ConfigEditor> {
 
-        public final float time;
-
-        StandbyTime(float time) {
-            this.time= time;
-        }
-
-        public static float[] times() {
-            StandbyTime[] entries= StandbyTime.values();
-            float[] times= new float[entries.length];
-
-            int i= 0;
-            for(StandbyTime it: entries) {
-                times[i]= it.time;
-                i++;
-            }
-
-            return times;
-        }
-    }
-
-    /**
-     * Barometer configuration editor specific to the BMP280 barometer
-     * @author Eric Tsai
-     */
-    interface ConfigEditor extends BarometerBosch.ConfigEditor<ConfigEditor> {
-        /**
-         * Set the standby time
-         * @param time    New standby time
-         * @return Calling object
-         */
-        ConfigEditor standbyTime(StandbyTime time);
-    }
 
     /**
      * Configures BMP280 barometer
      * @return Editor object specific to the BMP280 barometer
      */
-    @Override
+    @override
     ConfigEditor configure();
 }

@@ -22,102 +22,107 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.module;
 
-import com.mbientlab.metawear.AsyncDataProducer;
-import com.mbientlab.metawear.ConfigEditorBase;
-import com.mbientlab.metawear.Configurable;
-import com.mbientlab.metawear.MetaWearBoard.Module;
+import 'package:flutter_metawear/AsyncDataProducer.dart';
+import 'package:flutter_metawear/ConfigEditorBase.dart';
+import 'package:flutter_metawear/Configurable.dart';
+import 'package:flutter_metawear/MetaWearBoard.dart';
+
+/**
+ * Controls the range and resolution of illuminance values
+ * @author Eric Tsai
+ */
+class Gain {
+    /** Illuminance range between [1, 64k] lux (default) */
+    static const LTR329_1X = Gain._(0);
+    /** Illuminance range between [0.5, 32k] lux */
+    static const LTR329_2X = Gain._(1);
+    /** Illuminance range between [0.25, 16k] lux */
+    static const LTR329_4X = Gain._(2);
+    /** Illuminance range between [0.125, 8k] lux */
+    static const LTR329_8X = Gain._(3);
+    /** Illuminance range between [0.02, 1.3k] lux */
+    static const LTR329_48X = Gain._(6);
+    /** Illuminance range between [0.01, 600] lux */
+    static const LTR329_96X = Gain._(7);
+
+    /** Bitmask representing the setting */
+    final int bitmask;
+
+    const Gain._(this.bitmask);
+}
+
+/**
+ * Measurement time for each cycle
+ * @author Eric Tsai
+ */
+class IntegrationTime {
+    static const LTR329_TIME_50MS = IntegrationTime._(1);
+
+    /** Default setting */
+    static const LTR329_TIME_100MS = IntegrationTime._(0);
+    static const LTR329_TIME_150MS = IntegrationTime._(4);
+    static const LTR329_TIME_200MS = IntegrationTime._(2);
+    static const LTR329_TIME_250MS = IntegrationTime._(5);
+    static const LTR329_TIME_300MS = IntegrationTime._(6);
+    static const LTR329_TIME_350MS = IntegrationTime._(7);
+    static const LTR329_TIME_400MS = IntegrationTime._(3);
+
+    final int bitmask;
+
+    const IntegrationTime._(this.bitmask);
+}
+
+/**
+ * How frequently to update the illuminance data.
+ * @author Eric Tsai
+ */
+enum MeasurementRate {
+    LTR329_RATE_50MS,
+    LTR329_RATE_100MS,
+    LTR329_RATE_200MS,
+    /** Default setting */
+    LTR329_RATE_500MS,
+    LTR329_RATE_1000MS,
+    LTR329_RATE_2000MS
+}
+
+
+/**
+ * Interface for configuring the LTR329 light sensor
+ * @author Eric Tsai
+ */
+abstract class ConfigEditor extends ConfigEditorBase {
+    /**
+     * Set the gain setting
+     * @param sensorGain    New gain setting to use
+     * @return Calling object
+     */
+    ConfigEditor gain(Gain sensorGain);
+
+    /**
+     * Set the integration time
+     * @param time    New integration time to use
+     * @return Calling object
+     */
+    ConfigEditor integrationTime(IntegrationTime time);
+
+    /**
+     * Set the measurement rate
+     * @param rate    New measurement rate to use, chosen rate must be greater than or equal to the
+     *                integration time
+     * @return Calling object
+     */
+    ConfigEditor measurementRate(MeasurementRate rate);
+}
 
 /**
  * Lite-On sensor converting light intensity to a digital signal
  * @author Eric Tsai
  */
-public interface AmbientLightLtr329 extends Module, Configurable<AmbientLightLtr329.ConfigEditor> {
-    /**
-     * Controls the range and resolution of illuminance values
-     * @author Eric Tsai
-     */
-    enum Gain {
-        /** Illuminance range between [1, 64k] lux (default) */
-        LTR329_1X((byte) 0),
-        /** Illuminance range between [0.5, 32k] lux */
-        LTR329_2X((byte) 1),
-        /** Illuminance range between [0.25, 16k] lux */
-        LTR329_4X((byte) 2),
-        /** Illuminance range between [0.125, 8k] lux */
-        LTR329_8X((byte) 3),
-        /** Illuminance range between [0.02, 1.3k] lux */
-        LTR329_48X((byte) 6),
-        /** Illuminance range between [0.01, 600] lux */
-        LTR329_96X((byte) 7);
+abstract class AmbientLightLtr329 extends Module implements Configurable<ConfigEditor> {
 
-        /** Bitmask representing the setting */
-        public final byte bitmask;
 
-        Gain(byte mask) {
-            this.bitmask= mask;
-        }
-    }
-    /**
-     * Measurement time for each cycle
-     * @author Eric Tsai
-     */
-    enum IntegrationTime {
-        LTR329_TIME_50MS((byte) 1),
-        /** Default setting */
-        LTR329_TIME_100MS((byte) 0),
-        LTR329_TIME_150MS((byte) 4),
-        LTR329_TIME_200MS((byte) 2),
-        LTR329_TIME_250MS((byte) 5),
-        LTR329_TIME_300MS((byte) 6),
-        LTR329_TIME_350MS((byte) 7),
-        LTR329_TIME_400MS((byte) 3);
-
-        public final byte bitmask;
-        IntegrationTime(byte mask) {
-            this.bitmask= mask;
-        }
-    }
-    /**
-     * How frequently to update the illuminance data.
-     * @author Eric Tsai
-     */
-    enum MeasurementRate {
-        LTR329_RATE_50MS,
-        LTR329_RATE_100MS,
-        LTR329_RATE_200MS,
-        /** Default setting */
-        LTR329_RATE_500MS,
-        LTR329_RATE_1000MS,
-        LTR329_RATE_2000MS
-    }
-
-    /**
-     * Interface for configuring the LTR329 light sensor
-     * @author Eric Tsai
-     */
-    interface ConfigEditor extends ConfigEditorBase {
-        /**
-         * Set the gain setting
-         * @param sensorGain    New gain setting to use
-         * @return Calling object
-         */
-        ConfigEditor gain(Gain sensorGain);
-        /**
-         * Set the integration time
-         * @param time    New integration time to use
-         * @return Calling object
-         */
-        ConfigEditor integrationTime(IntegrationTime time);
-        /**
-         * Set the measurement rate
-         * @param rate    New measurement rate to use, chosen rate must be greater than or equal to the
-         *                integration time
-         * @return Calling object
-         */
-        ConfigEditor measurementRate(MeasurementRate rate);
-    }
     /**
      * Get an implementation of the AsyncDataProducer interface for illuminance data, represented as
      * a float with units of lux (lx).

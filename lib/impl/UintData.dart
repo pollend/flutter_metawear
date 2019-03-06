@@ -23,11 +23,12 @@
  */
 
 
+import 'package:flutter_metawear/impl/DataTypeBase.dart';
+
 /**
  * Created by etsai on 9/4/16.
  */
 class UintData extends DataTypeBase {
-    private static final long serialVersionUID = -7137342633916883852L;
 
     UintData(Constant.Module module, byte register, byte id, DataAttributes attributes) {
         super(module, register, id, attributes);

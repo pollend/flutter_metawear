@@ -29,7 +29,8 @@ import 'package:flutter_metawear/data/TapType.dart';
 import 'package:flutter_metawear/module/Accelerometer.dart';
 import 'package:quiver/core.dart';
 import 'package:sprintf/sprintf.dart';
-
+import 'package:flutter_metawear/AsyncDataProducer.dart';
+import 'package:flutter_metawear/Configurable.dart';
 /**
  * Available data ranges
  * @author Eric Tsai
@@ -108,7 +109,7 @@ abstract class FlatConfigEditor<T> implements ConfigEditorBase {
      * @param time    Delay time for a stable value
      * @return Calling object
      */
-    T holdTime(double time);
+    //T holdTime(double time);
     /**
      * Set the threshold defining a flat position
      * @param angle    Threshold angle, between [0, 44.8] degrees
@@ -262,7 +263,7 @@ abstract class LowHighConfigEditor extends ConfigEditorBase {
  * a {@link SensorOrientation} object.
  * @author Eric Tsai
  */
-abstract class OrientationDataProducer implements AsyncDataProducer, Configurable<OrientationConfigEditor> { }
+abstract class OrientationDataProducer with AsyncDataProducer implements  Configurable<OrientationConfigEditor> { }
 
 
 
@@ -270,7 +271,10 @@ abstract class OrientationDataProducer implements AsyncDataProducer, Configurabl
  * On-board algorithm that detects when low (i.e. free fall) or high g acceleration is measured
  * @author Eric Tsai
  */
-abstract class LowHighDataProducer implements AsyncDataProducer, Configurable<LowHighConfigEditor> { }
+abstract class LowHighDataProducer with AsyncDataProducer implements Configurable<LowHighConfigEditor> { }
+
+
+
 
 /**
  * Configuration editor for no-motion detection
@@ -294,7 +298,7 @@ abstract class NoMotionConfigEditor implements ConfigEditorBase {
  * Detects when the slope of acceleration data is below a threshold for a period of time.
  * @author Eric Tsai
  */
-abstract class NoMotionDataProducer implements MotionDetection, AsyncDataProducer, Configurable<NoMotionConfigEditor> { }
+abstract class NoMotionDataProducer with AsyncDataProducer, MotionDetection implements Configurable<NoMotionConfigEditor> { }
 
 /**
  * Wrapper class encapsulating interrupts from any motion detection
@@ -354,7 +358,8 @@ AnyMotionConfigEditor threshold(double threshold);
  * Detects when a number of consecutive slope data points is above a threshold.
  * @author Eric Tsai
  */
-abstract class AnyMotionDataProducer implements MotionDetection, AsyncDataProducer, Configurable<AnyMotionConfigEditor> { }
+abstract class AnyMotionDataProducer with MotionDetection, AsyncDataProducer implements Configurable<AnyMotionConfigEditor> { }
+
 /**
  * Configuration editor for slow-motion detection
  * @author Eric Tsai
@@ -378,7 +383,7 @@ abstract class SlowMotionConfigEditor implements ConfigEditorBase {
  * Similar to any motion detection except no information is stored regarding what triggered the interrupt.
  * @author Eric Tsai
  */
-abstract class  SlowMotionDataProducer extends MotionDetection, AsyncDataProducer, Configurable<SlowMotionConfigEditor> { }
+abstract class  SlowMotionDataProducer with MotionDetection, AsyncDataProducer implements Configurable<SlowMotionConfigEditor> { }
 
 /**
  * Wrapper class encapsulating responses from tap detection
@@ -387,20 +392,22 @@ abstract class  SlowMotionDataProducer extends MotionDetection, AsyncDataProduce
 class Tap {
     /** Tap type of the response */
     final TapType type;
+
     /** Sign of the triggering signal */
     final Sign sign;
 
     Tap(this.type, this.sign);
 
     @override
-  bool operator ==(other) {
-    return other is Tap && this.type == other.type && this.sign == other.sign;
-  }
+    bool operator ==(other) {
+        return other is Tap && this.type == other.type &&
+            this.sign == other.sign;
+    }
 
-  @override
-  String toString() {
-      return sprintf("{type: %s, direction: %s}", [type, sign]);
-  }
+    @override
+    String toString() {
+        return sprintf("{type: %s, direction: %s}", [type, sign]);
+    }
 
 }
 /**
@@ -489,13 +496,15 @@ abstract class TapConfigEditor extends ConfigEditorBase {
  * On-board algorithm that detects taps
  * @author Eric Tsai
  */
-abstract class  TapDataProducer implements AsyncDataProducer, Configurable<TapConfigEditor> { }
+abstract class  TapDataProducer implements /*AsyncDataProducer,*/ Configurable<TapConfigEditor> {
+
+}
 
 /**
  * On-board algorithm that detects whether the senor is laying flat or not
  * @author Eric Tsai
  */
-abstract class FlatDataProducer implements AsyncDataProducer, Configurable<FlatConfigEditor<? extends FlatConfigEditor>> { }
+abstract class FlatDataProducer<T extends FlatConfigEditor> with AsyncDataProducer implements Configurable<T> { }
 
 
 /**
@@ -538,7 +547,7 @@ abstract class AccelerometerBosch extends Accelerometer {
      * @param <T>            Runtime type the returned value is casted as
      * @return MotionDetection object, null if the motion detection type is not supported
      */
-    <T extends MotionDetection> T motion(Class<T> motionClass);
+    T motion<T extends MotionDetection>(Type motionClass);
 
 
     /**

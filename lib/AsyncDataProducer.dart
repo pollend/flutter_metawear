@@ -40,3 +40,4 @@ abstract class AsyncDataProducer implements DataProducer {
      */
     void stop();
 }
+

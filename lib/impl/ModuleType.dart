@@ -25,7 +25,8 @@
 
 class ModuleType {
     static final int RESPONSE_TIMEOUT = 1000;
-    static final int COMMAND_LENGTH = 18, MAX_BTLE_LENGTH = COMMAND_LENGTH + 2;
+    static final int COMMAND_LENGTH = 18,
+        MAX_BTLE_LENGTH = COMMAND_LENGTH + 2;
 
     final int id;
     final String friendlyName;
@@ -44,7 +45,7 @@ class ModuleType {
     static const EVENT = const ModuleType._interal(0x0a, "Event");
     static const LOGGING = const ModuleType._interal(0x0b, "Logging");
     static const TIMER = const ModuleType._interal(0x0c, "Timer");
-    static const SERIAL_PASSTHROUGH = const ModuleType._interal( 0x0d, "SerialPassthrough");
+    static const SERIAL_PASSTHROUGH = const ModuleType._interal(0x0d, "SerialPassthrough");
     static const MACRO = const ModuleType._interal(0x0f, "Macro");
     static const GSR = const ModuleType._interal(0x10, "Conductance");
     static const SETTINGS = const ModuleType._interal(0x11, "Settings");
@@ -58,36 +59,36 @@ class ModuleType {
     static const SENSOR_FUSION = const ModuleType._interal(0x19, "SensorFusion");
     static const DEBUG = const ModuleType._interal(0xfe, "Debug");
 
+    static List<ModuleType> entries = List.unmodifiable([
+        SWITCH,
+        LED,
+        ACCELEROMETER,
+        TEMPERATURE,
+        GPIO,
+        NEO_PIXEL,
+        IBEACON,
+        HAPTIC,
+        DATA_PROCESSOR,
+        EVENT,
+        LOGGING,
+        TIMER,
+        SERIAL_PASSTHROUGH,
+        MACRO,
+        GSR,
+        SERIAL_PASSTHROUGH,
+        BAROMETER,
+        GYRO,
+        AMBIENT_LIGHT,
+        MAGNETOMETER,
+        HUMIDITY,
+        COLOR_DETECTOR,
+        PROXIMITY,
+        SENSOR_FUSION,
+        DEBUG
+    ]);
 
-    static final Map<int, ModuleType> _byteToEnum = {
-        SWITCH.id: SWITCH,
-        LED.id: LED,
-        ACCELEROMETER.id: ACCELEROMETER,
-        TEMPERATURE.id: TEMPERATURE,
-        GPIO.id: GPIO,
-        NEO_PIXEL.id: NEO_PIXEL,
-        IBEACON.id: IBEACON,
-        HAPTIC.id: HAPTIC,
-        DATA_PROCESSOR.id: DATA_PROCESSOR,
-        EVENT.id: EVENT,
-        LOGGING.id: LOGGING,
-        TIMER.id: TIMER,
-        SERIAL_PASSTHROUGH.id: SERIAL_PASSTHROUGH,
-        MACRO.id: MACRO,
-        GSR.id: GSR,
-        SETTINGS.id: SETTINGS,
-        BAROMETER.id: BAROMETER,
-        GYRO.id: GYRO,
-        AMBIENT_LIGHT.id: AMBIENT_LIGHT,
-        MAGNETOMETER.id: MAGNETOMETER,
-        HUMIDITY.id: HUMIDITY,
-        COLOR_DETECTOR.id: COLOR_DETECTOR,
-        PROXIMITY.id: PROXIMITY,
-        SENSOR_FUSION.id: SENSOR_FUSION,
-        DEBUG.id: DEBUG
-    };
 
-    static ModuleType lookupEnum(int id){
-        return _byteToEnum[id];
+    static ModuleType lookupEnum(int id) {
+        return entries.singleWhere((el) => el.id == id);
     }
 }

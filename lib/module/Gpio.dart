@@ -139,18 +139,16 @@ abstract class Gpio extends Module {
     /** Value indicating that the delay is unused for {@link Analog#read(byte, byte, short, byte)} */
     static final int UNUSED_READ_DELAY = 0;
 
-
-
     /**
      * Retrieves a {@link Pin} object representing a physical GPIO pin
      * @param index    Index to retrieve
      * @return Object for a physical pin, null if index represents a non-existent pin
      */
-    Pin pin(byte index);
+    Pin pin(int index);
     /**
      * Gets an object representing a virtual pin for data directed to it by the {@link Analog#read(byte, byte, short, byte)} method
      * @param index    Index the virtual pin is using
      * @return Virtual pin
      */
-    Pin getVirtualPin(byte index);
+    Pin getVirtualPin(int index);
 }

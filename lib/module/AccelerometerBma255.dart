@@ -23,9 +23,11 @@
  */
 
 
+import 'dart:math';
+
 import 'package:flutter_metawear/module/Accelerometer.dart' as Accelerometer;
 import 'package:flutter_metawear/module/AccelerometerBosch.dart';
-
+import 'package:flutter_metawear/module/AccelerometerBosch.dart' as AccelerometerBosch;
 /**
  * Operating frequencies of the accelerometer
  * @author Eric Tsai
@@ -105,6 +107,11 @@ class FlatHoldTime {
         FHT_2048_MS
     ];
 
+    static FlatHoldTime nearest(double value) {
+        var dist = _entires.map((e) => (e.delay - value).abs()).toList();
+        return _entires[dist.indexOf(dist.reduce(min))];
+    }
+
     static List<double> delays() {
         return _entires.map((e) => e.delay);
     }
@@ -132,42 +139,43 @@ abstract class ConfigEditor extends Accelerometer.ConfigEditor<ConfigEditor> {
 }
 
 /**
+ * Configuration editor specific to BMA255 flat detection
+ * @author Eric Tsai
+ */
+abstract class FlatConfigEditor implements AccelerometerBosch.FlatConfigEditor<FlatConfigEditor> {
+    FlatConfigEditor holdTime(FlatHoldTime time);
+}
+/**
+ * Extension of the {@link AccelerometerBosch.FlatDataProducer} interface providing
+ * configuration options specific to the BMA255 accelerometer
+ * @author Eric Tsai
+ */
+abstract class FlatDataProducer implements AccelerometerBosch.FlatDataProducer {
+    /**
+     * Configure the flat detection algorithm
+     * @return BMA255 specific configuration editor object
+     */
+    @override
+    FlatConfigEditor configure();
+}
+
+/**
  * Extension of the {@link AccelerometerBosch} interface providing finer control of the BMA255 accelerometer
  * @author Eric Tsai
  */
-abstract class AccelerometerBma255 extends AccelerometerBosch {
+abstract class AccelerometerBma255 extends AccelerometerBosch.AccelerometerBosch {
 
     /**
      * Configure the BMA255 accelerometer
      * @return Editor object specific to the BMA255 accelerometer
      */
-    @Override
+    @override
     ConfigEditor configure();
 
-    /**
-     * Configuration editor specific to BMA255 flat detection
-     * @author Eric Tsai
-     */
-    interface FlatConfigEditor extends AccelerometerBosch.FlatConfigEditor<FlatConfigEditor> {
-        FlatConfigEditor holdTime(FlatHoldTime time);
-    }
-    /**
-     * Extension of the {@link AccelerometerBosch.FlatDataProducer} interface providing
-     * configuration options specific to the BMA255 accelerometer
-     * @author Eric Tsai
-     */
-    interface FlatDataProducer extends AccelerometerBosch.FlatDataProducer {
-        /**
-         * Configure the flat detection algorithm
-         * @return BMA255 specific configuration editor object
-         */
-        @Override
-        FlatConfigEditor configure();
-    }
     /**
      * Get an implementation of the BMA255 specific FlatDataProducer interface
      * @return BMA255 specific FlatDataProducer object
      */
-    @Override
+    @override
     FlatDataProducer flat();
 }

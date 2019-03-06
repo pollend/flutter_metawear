@@ -397,7 +397,7 @@ abstract class SensorFusionBosch implements Module, Configurable<ConfigEditor> {
      * @param updateHandler     Handler for calibration state updates
      * @return Task containing the calibration data
      */
-    Future<CalibrationData> calibrate(CancellationToken ct, long pollingPeriod, CalibrationStateUpdateHandler updateHandler);
+    Future<CalibrationData> calibrate(CancellationToken ct, int pollingPeriod, CalibrationStateUpdateHandler updateHandler);
     /**
      * Variant of {@link #calibrate(CancellationToken, long, CalibrationStateUpdateHandler)} with polling period set to 1000ms
      * @param ct                The cancellation token that will be checked before reading the calibration state
@@ -411,7 +411,7 @@ abstract class SensorFusionBosch implements Module, Configurable<ConfigEditor> {
      * @param pollingPeriod     How frequently poll the calibration state in milliseconds
      * @return @return Task containing the calibration data
      */
-    Future<CalibrationData> calibrate(CancellationToken ct, long pollingPeriod);
+    Future<CalibrationData> calibrate(CancellationToken ct, int pollingPeriod);
     /**
      * Variant of {@link #calibrate(CancellationToken, long, CalibrationStateUpdateHandler)} with polling period set to 1000ms and no calibration state updates
      * @param ct                The cancellation token that will be checked before reading the calibration state

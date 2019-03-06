@@ -22,19 +22,7 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.impl;
 
-import com.mbientlab.metawear.ForcedDataProducer;
-import com.mbientlab.metawear.Route;
-import com.mbientlab.metawear.builder.RouteBuilder;
-import com.mbientlab.metawear.module.Gsr;
-
-import java.io.Serializable;
-import java.util.Locale;
-
-import bolts.Task;
-
-import static com.mbientlab.metawear.impl.Constant.Module.GSR;
 
 /**
  * Created by etsai on 9/21/16.

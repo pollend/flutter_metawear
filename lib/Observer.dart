@@ -39,3 +39,4 @@ abstract class Observer {
      */
     void remove();
 }
+
