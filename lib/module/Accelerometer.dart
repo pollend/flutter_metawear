@@ -24,6 +24,8 @@
 
 import 'package:flutter_metawear/AsyncDataProducer.dart';
 import 'package:flutter_metawear/MetaWearBoard.dart';
+import 'package:flutter_metawear/ConfigEditorBase.dart';
+import 'package:flutter_metawear/Configurable.dart';
 
 /**
  * Reports measured acceleration values from the accelerometer.  Combined xyz acceleration data is represented
@@ -49,6 +51,27 @@ abstract class AccelerationDataProducer extends AsyncDataProducer {
 }
 
 /**
+ * Accelerometer agnostic interface for configuring the sensor
+ * @param <T>    Type of accelerometer config editor
+ */
+abstract class ConfigEditor<T> extends ConfigEditorBase {
+    /**
+     * Generic function for setting the output data rate.  The closest, valid frequency will be chosen
+     * depending on the underlying sensor
+     * @param odr    New output data rate, in Hz
+     * @return Calling object
+     */
+    T odr(double odr);
+    /**
+     * Generic function for setting the data range.  The closest, valid range will be chosen
+     * depending on the underlying sensor
+     * @param fsr    New data range, in g's
+     * @return Calling object
+     */
+    T range(double fsr);
+}
+
+/**
  * Measures sources of acceleration, such as gravity or motion.  This interface is provides general
  * access to an accelerometer. If you know specifically which accelerometer is on your board, use the
  * appropriate subclass instead.
@@ -57,7 +80,7 @@ abstract class AccelerationDataProducer extends AsyncDataProducer {
  * @see AccelerometerBmi160
  * @see AccelerometerMma8452q
  */
-abstract class Accelerometer extends Module, Configurable<Accelerometer.ConfigEditor<? extends Accelerometer.ConfigEditor>> {
+abstract class Accelerometer<T extends ConfigEditor> extends Module implements Configurable<T> {
     /**
      * Get an implementation of the {@link AccelerationDataProducer} interface
      * @return AccelerationDataProducer object
@@ -80,38 +103,18 @@ abstract class Accelerometer extends Module, Configurable<Accelerometer.ConfigEd
     void stop();
 
     /**
-     * Accelerometer agnostic interface for configuring the sensor
-     * @param <T>    Type of accelerometer config editor
-     */
-    interface ConfigEditor<T extends ConfigEditor> extends ConfigEditorBase {
-        /**
-         * Generic function for setting the output data rate.  The closest, valid frequency will be chosen
-         * depending on the underlying sensor
-         * @param odr    New output data rate, in Hz
-         * @return Calling object
-         */
-        T odr(float odr);
-        /**
-         * Generic function for setting the data range.  The closest, valid range will be chosen
-         * depending on the underlying sensor
-         * @param fsr    New data range, in g's
-         * @return Calling object
-         */
-        T range(float fsr);
-    }
-    /**
      * Get the output data rate.  The returned value is only meaningful if the API has configured the sensor
      * @return Selected output data rate
      */
-    float getOdr();
+    double getOdr();
     /**
      * Get the data range.  The returned value is only meaningful if the API has configured the sensor
      * @return Selected data range
      */
-    float getRange();
+    double getRange();
     /**
      * Pulls the current accelerometer output data rate and data range from the sensor
      * @return Task that is completed when the settings are received
      */
-    Task<Void> pullConfigAsync();
+    Future<void> pullConfigAsync();
 }

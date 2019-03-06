@@ -22,16 +22,42 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.module;
 
-import com.mbientlab.metawear.AsyncDataProducer;
-import com.mbientlab.metawear.ConfigEditorBase;
-import com.mbientlab.metawear.Configurable;
-import com.mbientlab.metawear.data.Sign;
-import com.mbientlab.metawear.data.SensorOrientation;
-import com.mbientlab.metawear.data.TapType;
+/**
+ * Available data ranges
+ * @author Eric Tsai
+ */
+class AccRange {
 
-import java.util.HashMap;
+    final int bitmask;
+    final double scale, range;
+
+    const AccRange._(this.bitmask, this.scale, this.range);
+
+    // +-2g
+    static const AR_2G = const AccRange._(0x3, 16384, 2.0);
+    // +-4g
+    static const AR_4G = const AccRange._(0x5, 8192, 4.0;
+    // +-5g
+    static const AR_8G = const AccRange._(0x8, 4096, 8.0);
+    // +-16g
+    static const AR_16G = const AccRange._(0xc, 2048, 16);
+
+    static final Map<int, AccRange> _bitMaskToRange= {
+        AR_2G.bitmask: AR_2G,
+        AR_4G.bitmask: AR_4G,
+        AR_8G.bitmask: AR_8G,
+        AR_16G.bitmask: AR_16G
+    };
+
+    static AccRange bitMaskToRange(int bitmask) {
+        return _bitMaskToRange[bitmask];
+    }
+
+    static List<double> ranges(){
+      return [AR_2G.range, AR_4G.range, AR_8G.range, AR_16G.range];
+    }
+}
 
 /**
  * Extension of the {@link Accelerometer} providing general access to a Bosch accelerometer.  If you know specifically which
@@ -40,52 +66,8 @@ import java.util.HashMap;
  * @see AccelerometerBma255
  * @see AccelerometerBmi160
  */
-public interface AccelerometerBosch extends Accelerometer {
-    /**
-     * Available data ranges
-     * @author Eric Tsai
-     */
-    enum AccRange {
-        /** +/-2g */
-        AR_2G((byte) 0x3, 16384f, 2f),
-        /** +/-4g */
-        AR_4G((byte) 0x5, 8192f, 4f),
-        /** +/-8g */
-        AR_8G((byte) 0x8, 4096, 8f),
-        /** +/-16g */
-        AR_16G((byte) 0xc, 2048f, 16f);
+abstract class AccelerometerBosch extends Accelerometer {
 
-        public final byte bitmask;
-        public final float scale, range;
-
-        private static final HashMap<Byte, AccRange> bitMasksToRange;
-        static {
-            bitMasksToRange= new HashMap<>();
-            for(AccRange it: values()) {
-                bitMasksToRange.put(it.bitmask, it);
-            }
-        }
-
-        AccRange(byte bitmask, float scale, float range) {
-            this.bitmask = bitmask;
-            this.scale = scale;
-            this.range= range;
-        }
-
-        public static AccRange bitMaskToRange(byte bitMask) {
-            return bitMasksToRange.get(bitMask);
-        }
-
-        public static float[] ranges() {
-            AccRange[] values= values();
-            float[] ranges= new float[values.length];
-            for(byte i= 0; i < ranges.length; i++) {
-                ranges[i]= values[i].range;
-            }
-
-            return ranges;
-        }
-    }
 
     /**
      * Calculation modes controlling the conditions that determine the sensor's orientation

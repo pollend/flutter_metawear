@@ -22,13 +22,15 @@
  * hello@mbientlab.com.
  */
 
+import 'dart:typed_data';
+
 /**
  * Created by etsai on 9/1/16.
  */
 class AccelerometerBma255Impl extends AccelerometerBoschImpl implements AccelerometerBma255 {
-    final static byte IMPLEMENTATION= 0x3;
-    private static final long serialVersionUID = -2958342250951886414L;
-    private static final byte[] DEFAULT_MOTION_CONFIG = new byte[] {0x00, 0x14, 0x14};
+    static final int IMPLEMENTATION= 0x3;
+//    private static final long serialVersionUID = -2958342250951886414L;
+    static final Uint8List DEFAULT_MOTION_CONFIG = [0x00, 0x14, 0x14];
 
     private final byte[] accDataConfig= new byte[] {0x0b, 0x03};
 
