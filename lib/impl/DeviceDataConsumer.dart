@@ -22,30 +22,17 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.impl;
+import 'package:flutter_metawear/Subscriber.dart';
 
-import com.mbientlab.metawear.Data;
-import com.mbientlab.metawear.Subscriber;
-
-import java.io.Serializable;
 /**
  * Created by etsai on 10/9/16.
  */
-abstract class DeviceDataConsumer implements Serializable {
-    private static final long serialVersionUID = 5246407290090031120L;
+abstract class DeviceDataConsumer {
+     Subscriber subscriber;
+     final DataTypeBase source;
+     List<Object> environment;
 
-    public Subscriber subscriber;
-    public final DataTypeBase source;
-    public transient Object[] environment;
-
-    DeviceDataConsumer(DataTypeBase source) {
-        this.source= source;
-    }
-
-    DeviceDataConsumer(DataTypeBase source, Subscriber subscriber) {
-        this(source);
-        this.subscriber= subscriber;
-    }
+    DeviceDataConsumer(this.source,[this.subscriber]);
 
     void call(Data msg) {
         subscriber.apply(msg, environment);

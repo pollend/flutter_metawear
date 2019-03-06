@@ -22,38 +22,31 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.module;
-
-import com.mbientlab.metawear.DataToken;
-import com.mbientlab.metawear.builder.RouteComponent.Action;
-import com.mbientlab.metawear.CodeBlock;
-import com.mbientlab.metawear.MetaWearBoard.Module;
-
-import bolts.Task;
+import 'package:flutter_metawear/MetaWearBoard.dart';
 
 /**
  * Auxiliary functions, for advanced use only
  * @author Eric Tsai
  */
-public interface Debug extends Module {
+abstract class Debug extends Module {
     /**
      * Issues a firmware reset command to the board
      * @return Task that is completed when connection is lost, or cancelled if the function is called
      * within the {@link CodeBlock#program()} or {@link Action#execute(DataToken)} methods
      */
-    Task<Void> resetAsync();
+    Future<void> resetAsync();
     /**
      * Commands the board to terminate the BLE link
      * @return Task that is completed when connection is lost, or cancelled if the function is called
      * within the {@link CodeBlock#program()} or {@link Action#execute(DataToken)} methods
      */
-    Task<Void> disconnectAsync();
+    Future<void> disconnectAsync();
     /**
      * Restarts the board in MetaBoot mode.  This function must be called in order to update the firmware.
      * @return Task that is completed when connection is lost, or cancelled if the function is called
      * within the {@link CodeBlock#program()} or {@link Action#execute(DataToken)} methods
      */
-    Task<Void> jumpToBootloaderAsync();
+    Future<void> jumpToBootloaderAsync();
     /**
      * Tells the board to reset after performing garbage collection.  Use this function in lieu of
      * {@link #resetAsync()} to reset the board after erasing macros or log data.
@@ -69,11 +62,11 @@ public interface Debug extends Module {
      * Reads the temp value written by {@link #writeTmpValue(int)}
      * @return Task that is completed once the value is received
      */
-    Task<Integer> readTmpValueAsync();
+    Future<int> readTmpValueAsync();
 
     /**
      * Places the board in a powered down state after the next reset.  When in power save mode, press the switch to wake the board up.
      * @return True if feature is supported, false if powersave cannot be enabled
      */
-    boolean enablePowersave();
+    bool enablePowersave();
 }

@@ -24,6 +24,7 @@
 
 
 import 'package:flutter_metawear/DataToken.dart';
+import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
 
 /**
  * Created by etsai on 9/4/16.

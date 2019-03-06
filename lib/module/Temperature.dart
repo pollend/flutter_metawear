@@ -60,20 +60,20 @@ abstract class  Sensor extends ForcedDataProducer {
  * @author Eric Tsai
  */
 abstract class  ExternalThermistor extends Sensor {
-/**
- * Configures the settings for the thermistor
- * @param dataPin           GPIO pin that reads the data
- * @param pulldownPin       GPIO pin the pulldown resistor is connected to
- * @param activeHigh        True if the pulldown pin is active high
- */
-void configure(int dataPin, int pulldownPin, bool activeHigh);
+    /**
+     * Configures the settings for the thermistor
+     * @param dataPin           GPIO pin that reads the data
+     * @param pulldownPin       GPIO pin the pulldown resistor is connected to
+     * @param activeHigh        True if the pulldown pin is active high
+     */
+    void configure(int dataPin, int pulldownPin, bool activeHigh);
 }
 
 /**
  * Accesses the temperature sensors
  * @author Eric Tsai
  */
-abstract class Temperature extends Module {
+abstract class Temperature implements Module {
 
     /**
      * Get an array of available temperature sensors

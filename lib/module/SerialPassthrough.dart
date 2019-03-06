@@ -172,7 +172,7 @@ abstract class SerialPassthrough extends Module {
      * @param length          How many bytes to read
      * @return Task holding the returned value
      */
-    Future<Uint8List> readI2cAsync(int deviceAddr, int registerAddr, byte length);
+    Future<Uint8List> readI2cAsync(int deviceAddr, int registerAddr, int length);
 
     /**
      * Get an object representing the SPI data corresponding to the id.  If the id value cannot be matched

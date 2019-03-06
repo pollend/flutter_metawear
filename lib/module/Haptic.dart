@@ -22,29 +22,28 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.module;
 
-import com.mbientlab.metawear.MetaWearBoard.Module;
+import 'package:flutter_metawear/MetaWearBoard.dart';
 
 /**
  * Provides haptic feedback in the form of a vibrational motor or buzzer
  * @author Eric Tsai
  */
-public interface Haptic extends Module {
+abstract class Haptic extends Module {
     /**
      * Start pulsing a motor with a duty cycle of 100%
      * @param pulseWidth How long to run the motor (ms)
      */
-    void startMotor(short pulseWidth);
+    void startMotor(int pulseWidth, [double dutyCycle]);
     /**
      * Start pulsing a motor
      * @param dutyCycle Strength of the motor, between [0, 100] percent
      * @param pulseWidth How long to run the motor (ms)
      */
-    void startMotor(float dutyCycle, short pulseWidth);
+//    void startMotor(double dutyCycle, int pulseWidth);
     /**
      * Start pulsing a buzzer
      * @param pulseWidth How long to run the buzzer (ms)
      */
-    void startBuzzer(short pulseWidth);
+    void startBuzzer(int pulseWidth);
 }

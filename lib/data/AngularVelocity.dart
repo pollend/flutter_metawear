@@ -59,6 +59,7 @@ class AngularVelocity extends FloatVector {
         return vector[2];
     }
 
+
     @override
     String toString() {
         return sprintf("{x: %.3f%s, y: %.3f%s, z: %.3f%s}", [

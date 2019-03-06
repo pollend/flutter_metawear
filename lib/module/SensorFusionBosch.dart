@@ -23,9 +23,21 @@
  */
 
 
-import 'package:flutter_metawear/ConfigEditorBase.dart';
-import 'package:flutter_metawear/MetaWearBoard.dart';
+import 'dart:typed_data';
 
+import 'package:flutter_metawear/AsyncDataProducer.dart';
+import 'package:flutter_metawear/ConfigEditorBase.dart';
+import 'package:flutter_metawear/Configurable.dart';
+import 'package:flutter_metawear/MetaWearBoard.dart';
+import 'package:flutter_metawear/data/Acceleration.dart';
+import 'package:flutter_metawear/data/AngularVelocity.dart';
+import 'package:flutter_metawear/data/MagneticField.dart';
+import 'package:flutter_metawear/impl/Util.dart';
+import 'package:flutter_metawear/module/SensorFusionBosch.dart';
+import 'package:flutter_metawear/module/SensorFusionBosch.dart';
+import 'package:sprintf/sprintf.dart';
+import 'package:quiver/core.dart';
+import 'package:collection/collection.dart';
 
 /**
  * Supported data ranges for accelerometer data
@@ -83,36 +95,225 @@ enum Mode {
  * @author Eric Tsai
  */
 abstract class ConfigEditor extends ConfigEditorBase {
+    /**
+     * Sets the sensor fusion mode
+     * @param mode    New sensor fusion mode
+     * @return Calling object
+     */
+    ConfigEditor mode(Mode mode);
+
+    /**
+     * Sets the accelerometer data range
+     * @param range    New data range
+     * @return Calling object
+     */
+    ConfigEditor accRange(AccRange range);
+
+    /**
+     * Sets the gyro data range
+     * @param range    New data range
+     * @return Calling object
+     */
+    ConfigEditor gyroRange(GyroRange range);
+
+    /**
+     * Extra configuration settings for the accelerometer
+     * @param settings Additional accelerometer settings
+     * @return Calling object
+     */
+    ConfigEditor accExtra(List<Object> settings);
+
+    /**
+     * Extra configuration settings for the gyroscope
+     * @param settings Additional gyroscope settings
+     * @return Calling object
+     */
+    ConfigEditor gyroExtra(List<Object> settings);
+}
+
 /**
- * Sets the sensor fusion mode
- * @param mode    New sensor fusion mode
- * @return Calling object
+ * Handler for processing download updates
  */
-ConfigEditor mode(Mode mode);
+abstract class CalibrationStateUpdateHandler {
 /**
- * Sets the accelerometer data range
- * @param range    New data range
- * @return Calling object
+ * Called when the current calibration state is received
+ * @param state     Currentt calibration state
  */
-ConfigEditor accRange(AccRange range);
+void receivedUpdate(CalibrationState state);
+}
+
 /**
- * Sets the gyro data range
- * @param range    New data range
- * @return Calling object
+ * Tuple wrapping the calibration state of the IMU sensors
+ * @author Eric Tsai
  */
-ConfigEditor gyroRange(GyroRange range);
+class CalibrationState {
+    /**
+     * Current calibration accuracy for the accelerometer, gyroscope, and magnetometer
+     */
+    final CalibrationAccuracy accelerometer, gyroscope, magnetometer;
+
+    CalibrationState(this.accelerometer, this.gyroscope, this.magnetometer);
+
+    @override
+    bool operator ==(other) {
+        return other is CalibrationState &&
+            other.magnetometer == this.magnetometer &&
+            other.gyroscope == this.gyroscope &&
+            this.accelerometer == accelerometer;
+    }
+
+
+    @override
+    // TODO: implement hashCode
+    int get hashCode =>
+        hash3(this.accelerometer.hashCode, this.gyroscope.hashCode,
+            this.magnetometer.hashCode);
+
+    @override
+    String toString() {
+        return sprintf(
+            "CalibrationState: {accelerometer: %s, gyroscope: %s, magnetometer: %s}",
+            [
+                accelerometer.toString(),
+                gyroscope.toString(),
+                magnetometer.toString()
+            ]);
+    }
+
+}
 /**
- * Extra configuration settings for the accelerometer
- * @param settings Additional accelerometer settings
- * @return Calling object
+ * Container class holding corrected acceleration data, in units of g's
+ * @author Eric Tsai
  */
-ConfigEditor accExtra(Object ... settings);
+class CorrectedAcceleration extends Acceleration {
+    final CalibrationAccuracy accuracy;
+
+    factory CorrectedAcceleration(double x, double y, double z, int index){
+        return CorrectedAcceleration._(
+            x, y, z, CalibrationAccuracy.values[index]);
+    }
+
+    CorrectedAcceleration._(double x, double y, double z, this.accuracy)
+        : super(x, y, z);
+
+    @override
+    String toString() {
+        return sprintf("{x: %.3fg, y: %.3fg, z: %.3fg, accuracy: %s}",
+            [x(), y(), z(), accuracy.toString()]);
+    }
+
+    @override
+    bool operator ==(other) {
+        return other is CorrectedAcceleration &&
+            other.accuracy == this.accuracy;
+    }
+
+    @override
+    int get hashCode => hash2(super.hashCode, accuracy);
+
+}
+
 /**
- * Extra configuration settings for the gyroscope
- * @param settings Additional gyroscope settings
- * @return Calling object
+ * Container class holding corrected angular velocity data, in degrees per second
+ * @author Eric Tsai
  */
-ConfigEditor gyroExtra(Object ... settings);
+class CorrectedAngularVelocity extends AngularVelocity {
+    final CalibrationAccuracy accuracy;
+
+    CorrectedAngularVelocity._(double x, double y, double z, this.accuracy)
+        :super(x, y, z);
+
+    factory CorrectedAngularVelocity(double x, double y, double z, int index){
+        return CorrectedAngularVelocity._(
+            x, y, z, CalibrationAccuracy.values[index]);
+    }
+
+    @override
+    String toString() =>
+        sprintf("{x: %.3f%s, y: %.3f%s, z: %.3f%s, accuracy: %s}", [
+            x(), AngularVelocity.DEGS_PER_SEC,
+            y(), AngularVelocity.DEGS_PER_SEC,
+            z(), AngularVelocity.DEGS_PER_SEC,
+        ]);
+
+
+    @override
+    bool operator ==(other) {
+        return other is CorrectedAngularVelocity &&
+            other.accuracy == this.accuracy;
+    }
+
+    @override
+    int get hashCode => hash2(super.hashCode, accuracy);
+}
+/**
+ * Container class holding corrected magnetic field strength data, in micro teslas
+ * @author Eric Tsai
+ */
+class CorrectedMagneticField extends MagneticField {
+    final CalibrationAccuracy accuracy;
+
+    CorrectedMagneticField._(double x, double y, double z, this.accuracy)
+        :super(x, y, z);
+
+    factory CorrectedMagneticField(double x, double y, double z, int index){
+        return CorrectedMagneticField._(
+            x, y, z, CalibrationAccuracy.values[index]);
+    }
+
+
+    @override
+    String toString() =>
+        sprintf("{x: %.9fT, y: %.9fT, z: %.9fT, accuracy: %s}",
+            [x(), y(), z(), accuracy.toString()]);
+
+    @override
+    int get hashCode => hash2(accuracy, super.hashCode);
+
+    @override
+    bool operator ==(other) {
+        return other is CorrectedMagneticField && this.accuracy == accuracy;
+    }
+
+}
+
+/**
+ * Tuple class holding the IMU calibration data
+ * @author Eric Tsai
+ */
+class CalibrationData {
+    /**
+     * Current calibration accuracy values for the accelerometer, gyroscope, and magnetometer respectively
+     */
+    final Uint8List accelerometer, gyroscope, magnetometer;
+
+    CalibrationData(this.accelerometer, this.gyroscope, this.magnetometer);
+
+
+    @override
+    int get hashCode =>
+        hash3(hashObjects(accelerometer), hashObjects(gyroscope),
+            hashObjects(magnetometer));
+
+    @override
+    bool operator ==(other) {
+        return other is CalibrationData &&
+            ListEquality().equals(accelerometer, other.accelerometer) &&
+            ListEquality().equals(gyroscope, other.gyroscope) &&
+            ListEquality().equals(magnetometer, other.magnetometer);
+    }
+
+    @override
+    String toString() {
+        // TODO: implement toString
+        return sprintf(
+            "CalibrationData: {accelerometer: %s, gyroscope: %s, magnetometer: %s}",
+            [
+                Util.arrayToHexString(accelerometer),
+                Util.arrayToHexString(gyroscope),
+                Util.arrayToHexString(magnetometer)
+            ]);
+    }
 }
 
 /**
@@ -121,229 +322,8 @@ ConfigEditor gyroExtra(Object ... settings);
  * the algorithm will automatically configure those sensors based on the selected fusion mode.
  * @author Eric Tsai
  */
-abstract class SensorFusionBosch extends Module, Configurable<ConfigEditor> {
-    /**
-     * Handler for processing download updates
-     */
-    interface CalibrationStateUpdateHandler {
-        /**
-         * Called when the current calibration state is received
-         * @param state     Currentt calibration state
-         */
-        void receivedUpdate(CalibrationState state);
-    }
+abstract class SensorFusionBosch implements Module, Configurable<ConfigEditor> {
 
-    /**
-     * Container class holding corrected acceleration data, in units of g's
-     * @author Eric Tsai
-     */
-    final class CorrectedAcceleration extends Acceleration {
-        private final CalibrationAccuracy accuracy;
-
-        public CorrectedAcceleration(float x, float y, float z, byte accuracy) {
-            super(x, y, z);
-            this.accuracy = CalibrationAccuracy.values()[accuracy];
-        }
-
-        public CalibrationAccuracy accuracy() {
-            return accuracy;
-        }
-
-        @Override
-        public String toString() {
-            return String.format(Locale.US, "{x: %.3fg, y: %.3fg, z: %.3fg, accuracy: %s}", x(), y(), z(), accuracy.toString());
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            if (!super.equals(o)) return false;
-
-            CorrectedAcceleration that = (CorrectedAcceleration) o;
-
-            return accuracy == that.accuracy;
-
-        }
-
-        @Override
-        public int hashCode() {
-            int result = super.hashCode();
-            result = 31 * result + accuracy.hashCode();
-            return result;
-        }
-    }
-    /**
-     * Container class holding corrected angular velocity data, in degrees per second
-     * @author Eric Tsai
-     */
-    final class CorrectedAngularVelocity extends AngularVelocity {
-        private final CalibrationAccuracy accuracy;
-
-        public CorrectedAngularVelocity(float x, float y, float z, byte accuracy) {
-            super(x, y, z);
-            this.accuracy = CalibrationAccuracy.values()[accuracy];
-        }
-
-        public CalibrationAccuracy accuracy() {
-            return accuracy;
-        }
-
-        @Override
-        public String toString() {
-            return String.format(Locale.US, "{x: %.3f%s, y: %.3f%s, z: %.3f%s, accuracy: %s}",
-                    x(), DEGS_PER_SEC,
-                    y(), DEGS_PER_SEC,
-                    z(), DEGS_PER_SEC,
-                    accuracy.toString()
-            );
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            if (!super.equals(o)) return false;
-
-            CorrectedAngularVelocity that = (CorrectedAngularVelocity) o;
-
-            return accuracy == that.accuracy;
-
-        }
-
-        @Override
-        public int hashCode() {
-            int result = super.hashCode();
-            result = 31 * result + accuracy.hashCode();
-            return result;
-        }
-    }
-    /**
-     * Container class holding corrected magnetic field strength data, in micro teslas
-     * @author Eric Tsai
-     */
-    final class CorrectedMagneticField extends MagneticField {
-        private final CalibrationAccuracy accuracy;
-
-        public CorrectedMagneticField(float x, float y, float z, byte accuracy) {
-            super(x, y, z);
-            this.accuracy = CalibrationAccuracy.values()[accuracy];
-        }
-
-        public CalibrationAccuracy accuracy() {
-            return accuracy;
-        }
-
-        @Override
-        public String toString() {
-            return String.format(Locale.US, "{x: %.9fT, y: %.9fT, z: %.9fT, accuracy: %s}",
-                    x(), y(), z(), accuracy.toString()
-            );
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            if (!super.equals(o)) return false;
-
-            CorrectedMagneticField that = (CorrectedMagneticField) o;
-
-            return accuracy == that.accuracy;
-
-        }
-
-        @Override
-        public int hashCode() {
-            int result = super.hashCode();
-            result = 31 * result + accuracy.hashCode();
-            return result;
-        }
-    }
-    /**
-     * Tuple wrapping the calibration state of the IMU sensors
-     * @author Eric Tsai
-     */
-    final class CalibrationState {
-        /**
-         * Current calibration accuracy for the accelerometer, gyroscope, and magnetometer
-         */
-        public final CalibrationAccuracy accelerometer, gyroscope, magnetometer;
-
-        public CalibrationState(CalibrationAccuracy accelerometer, CalibrationAccuracy gyroscope, CalibrationAccuracy magnetometer) {
-            this.accelerometer = accelerometer;
-            this.gyroscope = gyroscope;
-            this.magnetometer = magnetometer;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            CalibrationState that = (CalibrationState) o;
-            return accelerometer == that.accelerometer &&
-                    gyroscope == that.gyroscope &&
-                    magnetometer == that.magnetometer;
-        }
-
-        @Override
-        public int hashCode() {
-            int result = accelerometer.hashCode();
-            result = 31 * result + gyroscope.hashCode();
-            result = 31 * result + magnetometer.hashCode();
-            return result;
-        }
-
-        @Override
-        public String toString() {
-            return String.format(Locale.US, "CalibrationState: {accelerometer: %s, gyroscope: %s, magnetometer: %s}",
-                    accelerometer.name(), gyroscope.name(), magnetometer.name());
-        }
-    }
-    /**
-     * Tuple class holding the IMU calibration data
-     * @author Eric Tsai
-     */
-    final class CalibrationData {
-        /**
-         * Current calibration accuracy values for the accelerometer, gyroscope, and magnetometer respectively
-         */
-        public final byte[] accelerometer, gyroscope, magnetometer;
-
-        public CalibrationData(byte[] accelerometer, byte[] gyroscope, byte[] magnetometer) {
-            this.accelerometer = accelerometer;
-            this.gyroscope = gyroscope;
-            this.magnetometer = magnetometer;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            //< Generated by IntelliJ
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            CalibrationData that = (CalibrationData) o;
-
-            return Arrays.equals(accelerometer, that.accelerometer) &&
-                    Arrays.equals(gyroscope, that.gyroscope) &&
-                    Arrays.equals(magnetometer, that.magnetometer);
-        }
-
-        @Override
-        public int hashCode() {
-            //< Generated by IntelliJ
-            int result = Arrays.hashCode(accelerometer);
-            result = 31 * result + Arrays.hashCode(gyroscope);
-            result = 31 * result + Arrays.hashCode(magnetometer);
-            return result;
-        }
-
-        @Override
-        public String toString() {
-            return String.format(Locale.US, "CalibrationData: {accelerometer: %s, gyroscope: %s, magnetometer: %s}",
-                    Util.arrayToHexString(accelerometer), Util.arrayToHexString(gyroscope), Util.arrayToHexString(magnetometer));
-        }
-    }
 
 
     /**
@@ -402,13 +382,13 @@ abstract class SensorFusionBosch extends Module, Configurable<ConfigEditor> {
      * Pulls the current sensor fusion configuration from the sensor
      * @return Task that is completed when the settings are received
      */
-    Task<Void> pullConfigAsync();
+    Future<void> pullConfigAsync();
     /**
      * Reads the current calibration state from the sensor fusion algorithm.  This function cannot be
      * called until the sensor fusion algorithm is running and is only available on firmware v1.4.1 and newer.
      * @return Task containing the calibration status
      */
-    Task<CalibrationState> readCalibrationStateAsync();
+    Future<CalibrationState> readCalibrationStateAsync();
 
     /**
      * Convenience method to continuously poll the calibration state until the required IMUs are in a high accuracy state
@@ -417,27 +397,27 @@ abstract class SensorFusionBosch extends Module, Configurable<ConfigEditor> {
      * @param updateHandler     Handler for calibration state updates
      * @return Task containing the calibration data
      */
-    Task<CalibrationData> calibrate(CancellationToken ct, long pollingPeriod, CalibrationStateUpdateHandler updateHandler);
+    Future<CalibrationData> calibrate(CancellationToken ct, long pollingPeriod, CalibrationStateUpdateHandler updateHandler);
     /**
      * Variant of {@link #calibrate(CancellationToken, long, CalibrationStateUpdateHandler)} with polling period set to 1000ms
      * @param ct                The cancellation token that will be checked before reading the calibration state
      * @param updateHandler     Handler for calibration state updates
      * @return @return Task containing the calibration data
      */
-    Task<CalibrationData> calibrate(CancellationToken ct, CalibrationStateUpdateHandler updateHandler);
+    Future<CalibrationData> calibrate(CancellationToken ct, CalibrationStateUpdateHandler updateHandler);
     /**
      * Variant of {@link #calibrate(CancellationToken, long, CalibrationStateUpdateHandler)} with no calibration state updates
      * @param ct                The cancellation token that will be checked before reading the calibration state
      * @param pollingPeriod     How frequently poll the calibration state in milliseconds
      * @return @return Task containing the calibration data
      */
-    Task<CalibrationData> calibrate(CancellationToken ct, long pollingPeriod);
+    Future<CalibrationData> calibrate(CancellationToken ct, long pollingPeriod);
     /**
      * Variant of {@link #calibrate(CancellationToken, long, CalibrationStateUpdateHandler)} with polling period set to 1000ms and no calibration state updates
      * @param ct                The cancellation token that will be checked before reading the calibration state
      * @return @return Task containing the calibration data
      */
-    Task<CalibrationData> calibrate(CancellationToken ct);
+    Future<CalibrationData> calibrate(CancellationToken ct);
     /**
      * Writes calibration data to the sensor fusion algorithm, only for firmware v1.4.2+.
      * Combine this function with the {@link Macro} module to write the data at boot time

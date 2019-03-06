@@ -40,12 +40,19 @@ import 'package:flutter_metawear/module/Timer.dart';
 
 import 'package:tuple/tuple.dart';
 
+class WithDataToken{
+    final DataToken token;
+    final int dest;
+
+  WithDataToken(this.token, this.dest);
+}
+
 /**
  * Created by etsai on 8/31/16.
  */
 abstract class MetaWearBoardPrivate {
     Future<void> boardDisconnect();
-    void sendCommand(Uint8List command,[int dest, DataToken input]);
+    void sendCommand(Uint8List command,[WithDataToken token]);
 //    void sendCommand(Uint8List command, int dest, DataToken input);
 
     void sendCommandForModule(ModuleType module, int register, List<int> parameters,[int id]);
@@ -70,7 +77,7 @@ abstract class MetaWearBoardPrivate {
     void removeEventManager(int id);
 
     Future<Route> queueRouteBuilder(RouteBuilder builder, String producerTag);
-    Future<Timer.ScheduledTask> queueTaskManager(CodeBlock mwCode, byte[] timerConfig);
+    Future<ScheduledTask> queueTaskManager(CodeBlock mwCode, Uint8List timerConfig);
     Future<Observer> queueEvent(DataTypeBase owner, CodeBlock codeBlock);
 
     void logWarn(String message);

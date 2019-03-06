@@ -270,7 +270,7 @@ abstract class BatteryDataProducer extends ForcedDataProducer {
  * Configures Bluetooth settings and auxiliary hardware and firmware features
  * @author Eric Tsai
  */
-abstract class Settings extends Module {
+abstract class Settings implements Module {
 
     /**
      * Starts ble advertising

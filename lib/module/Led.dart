@@ -22,113 +22,113 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.module;
+import 'package:flutter_metawear/MetaWearBoard.dart';
 
-import com.mbientlab.metawear.MetaWearBoard.Module;
+/**
+ * Enumeration of available colors on the LED
+ * @author Eric Tsai
+ */
+enum Color {
+    GREEN,
+    RED,
+    BLUE
+}
+
+/**
+ * Enumeration of patterns from the <a href="http://projects.mbientlab.com/?p=656">blog post</a>
+ * @author Eric Tsai
+ */
+enum PatternPreset {
+    BLINK,
+    PULSE,
+    SOLID
+}
+
+
+/**
+ * Interface to edit pattern attributes
+ * @author Eric Tsai
+ */
+abstract class PatternEditor {
+    /**
+     * Set the intensity value of the high state
+     * @param intensity LED intensity the high state should be in, between [0 - 31]
+     * @return Calling object
+     */
+    PatternEditor highIntensity(int intensity);
+    /**
+     * Set the intensity value of the low state
+     * @param intensity LED intensity the low state should be in, between [0 - 31]
+     * @return Calling object
+     */
+    PatternEditor lowIntensity(int intensity);
+    /**
+     * Set how long the transition should take from low to high state, in milliseconds
+     * @param time Transition time (ms) from low to high state
+     * @return Calling object
+     */
+    PatternEditor riseTime(int time);
+    /**
+     * Set how long the pulse stays in the high state
+     * @param time Length of time (ms) to spend in the high state
+     * @return Calling object
+     */
+    PatternEditor highTime(int time);
+    /**
+     * Set how long the transition should take from high to low state, in milliseconds
+     * @param time Length of time (ms) from high to low state
+     * @return Calling object
+     */
+    PatternEditor fallTime(int time);
+    /**
+     * Set the duration of one pulse
+     * @param duration Length of one pulse (ms)
+     * @return Calling object
+     */
+    PatternEditor pulseDuration(int duration);
+    /**
+     * Set how long to wait before starting the pattern.  This setting is ignored on boards running firmware
+     * older than v1.2.3
+     * @param delay    Length of the delay (ms)
+     * @return Calling object
+     */
+    PatternEditor delay(int delay);
+    /**
+     * Set how many times to repeat a pulse pattern
+     * @param count Number of repetitions, use {@link #PATTERN_REPEAT_INDEFINITELY} to repeat forever
+     * @return Calling object
+     */
+    PatternEditor repeatCount(int count);
+
+    /** Write the settings to the board */
+    void commit();
+}
 
 /**
  * Ultra bright RGB light emitting diode
  * @author Eric Tsai
  */
-public interface Led extends Module {
+abstract class Led extends Module {
     /**
      * Constant for PatternEditor.setRepeatCount indicating the pattern should repeat forever
      * @see PatternEditor#repeatCount(byte)
      */
-    byte PATTERN_REPEAT_INDEFINITELY= -1;
+    static final PATTERN_REPEAT_INDEFINITELY= -1;
 
-    /**
-     * Enumeration of available colors on the LED
-     * @author Eric Tsai
-     */
-    enum Color {
-        GREEN,
-        RED,
-        BLUE
-    }
-
-    /**
-     * Enumeration of patterns from the <a href="http://projects.mbientlab.com/?p=656">blog post</a>
-     * @author Eric Tsai
-     */
-    enum PatternPreset {
-        BLINK,
-        PULSE,
-        SOLID
-    }
-
-    /**
-     * Interface to edit pattern attributes
-     * @author Eric Tsai
-     */
-    interface PatternEditor {
-        /**
-         * Set the intensity value of the high state
-         * @param intensity LED intensity the high state should be in, between [0 - 31]
-         * @return Calling object
-         */
-        PatternEditor highIntensity(byte intensity);
-        /**
-         * Set the intensity value of the low state
-         * @param intensity LED intensity the low state should be in, between [0 - 31]
-         * @return Calling object
-         */
-        PatternEditor lowIntensity(byte intensity);
-        /**
-         * Set how long the transition should take from low to high state, in milliseconds
-         * @param time Transition time (ms) from low to high state
-         * @return Calling object
-         */
-        PatternEditor riseTime(short time);
-        /**
-         * Set how long the pulse stays in the high state
-         * @param time Length of time (ms) to spend in the high state
-         * @return Calling object
-         */
-        PatternEditor highTime(short time);
-        /**
-         * Set how long the transition should take from high to low state, in milliseconds
-         * @param time Length of time (ms) from high to low state
-         * @return Calling object
-         */
-        PatternEditor fallTime(short time);
-        /**
-         * Set the duration of one pulse
-         * @param duration Length of one pulse (ms)
-         * @return Calling object
-         */
-        PatternEditor pulseDuration(short duration);
-        /**
-         * Set how long to wait before starting the pattern.  This setting is ignored on boards running firmware
-         * older than v1.2.3
-         * @param delay    Length of the delay (ms)
-         * @return Calling object
-         */
-        PatternEditor delay(short delay);
-        /**
-         * Set how many times to repeat a pulse pattern
-         * @param count Number of repetitions, use {@link #PATTERN_REPEAT_INDEFINITELY} to repeat forever
-         * @return Calling object
-         */
-        PatternEditor repeatCount(byte count);
-
-        /** Write the settings to the board */
-        void commit();
-    }
 
     /**
      * Edit the pattern attributes for the desired color
      * @param ledColor    Color to configure
      * @return Editor object to configure the pattern attributes
      */
-    PatternEditor editPattern(Color ledColor);
-    /**
-     * Edit the pattern attributes for the desired color using a preset pattern as the initial attribute parameters
-     * @param ledColor    Color to configure
-     * @param preset      Pattern preset to use
-     * @return Editor object to configure the pattern attributes
-     */
-    PatternEditor editPattern(Color ledColor, PatternPreset preset);
+    PatternEditor editPattern(Color ledColor, [PatternPreset preset]);
+//    /**
+//     * Edit the pattern attributes for the desired color using a preset pattern as the initial attribute parameters
+//     * @param ledColor    Color to configure
+//     * @param preset      Pattern preset to use
+//     * @return Editor object to configure the pattern attributes
+//     */
+//    PatternEditor editPattern(Color ledColor, PatternPreset preset);
 
     /**
      * Play any programmed patterns and immediately plays patterns programmed later
@@ -147,5 +147,5 @@ public interface Led extends Module {
      * Stop playing LED patterns
      * @param clear    True if the patterns should be cleared as well
      */
-    void stop(boolean clear);
+    void stop(bool clear);
 }

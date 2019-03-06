@@ -54,22 +54,7 @@ abstract class AccelerationDataProducer extends AsyncDataProducer {
  * Accelerometer agnostic interface for configuring the sensor
  * @param <T>    Type of accelerometer config editor
  */
-abstract class ConfigEditor<T> extends ConfigEditorBase {
-    /**
-     * Generic function for setting the output data rate.  The closest, valid frequency will be chosen
-     * depending on the underlying sensor
-     * @param odr    New output data rate, in Hz
-     * @return Calling object
-     */
-    T odr(double odr);
-    /**
-     * Generic function for setting the data range.  The closest, valid range will be chosen
-     * depending on the underlying sensor
-     * @param fsr    New data range, in g's
-     * @return Calling object
-     */
-    T range(double fsr);
-}
+abstract class ConfigEditor<T> extends ConfigEditorBase {}
 
 /**
  * Measures sources of acceleration, such as gravity or motion.  This interface is provides general

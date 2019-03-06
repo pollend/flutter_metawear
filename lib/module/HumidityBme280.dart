@@ -22,27 +22,29 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.module;
 
-import com.mbientlab.metawear.ForcedDataProducer;
-import com.mbientlab.metawear.MetaWearBoard.Module;
+import 'package:flutter_metawear/ForcedDataProducer.dart';
+import 'package:flutter_metawear/MetaWearBoard.dart';
+
+/**
+ * Available oversampling settings for the sensor
+ * @author Eric Tsai
+ */
+enum OversamplingMode {
+    SETTING_1X,
+    SETTING_2X,
+    SETTING_4X,
+    SETTING_8X,
+    SETTING_16X
+}
+
 
 /**
  * Sensor on the BME280 environmental sensor measuring relative humidity
  * @author Eric Tsai
  */
-public interface HumidityBme280 extends Module {
-    /**
-     * Available oversampling settings for the sensor
-     * @author Eric Tsai
-     */
-    enum OversamplingMode {
-        SETTING_1X,
-        SETTING_2X,
-        SETTING_4X,
-        SETTING_8X,
-        SETTING_16X
-    }
+abstract class HumidityBme280 extends Module {
+
     /**
      * Set oversampling mode
      * @param mode    New mode to use

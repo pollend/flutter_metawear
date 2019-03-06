@@ -25,6 +25,7 @@
 import 'package:flutter_metawear/AsyncDataProducer.dart';
 import 'package:flutter_metawear/ConfigEditorBase.dart';
 import 'package:flutter_metawear/MetaWearBoard.dart';
+import 'package:flutter_metawear/Configurable.dart';
 
 /**
  * Recommended configurations for the magnetometer as outlined in the specs sheet.
@@ -101,20 +102,20 @@ enum OutputDataRate {
  * configurations be used.
  * @author Eric Tsai
  */
-abstract class  ConfigEditor extends ConfigEditorBase {
+abstract class ConfigEditor extends ConfigEditorBase {
     /**
      * Sets the number of repetitions on the XY axis
      * @param reps    nXY repetitions, between [1, 511]
      * @return Calling object
      */
-    ConfigEditor xyReps(short reps);
+    ConfigEditor xyReps(int reps);
 
     /**
      * sets the number of repetitions on the Z axis
      * @param reps    nZ repetitions, between [1, 256]
      * @return Calling object
      */
-    ConfigEditor zReps(short reps);
+    ConfigEditor zReps(int reps);
 
     /**
      * Sets the output data rate
@@ -152,7 +153,7 @@ abstract class MagneticFieldDataProducer extends AsyncDataProducer {
  * Bosch sensor measuring magnetic field strength
  * @author Eric Tsai
  */
-abstract class MagnetometerBmm150 extends Module, Configurable<MagnetometerBmm150.ConfigEditor> {
+abstract class MagnetometerBmm150 implements Configurable<ConfigEditor> , Module{
 
     /**
      * Sets the power mode to one of the preset configurations

@@ -21,96 +21,90 @@
  * Should you have any questions regarding your right to use this Software, contact MbientLab via email:
  * hello@mbientlab.com.
  */
+import 'package:flutter_metawear/module/Accelerometer.dart' as Accelerometer;
+import 'package:flutter_metawear/module/AccelerometerBosch.dart';
 
-package com.mbientlab.metawear.module;
 
-import com.mbientlab.metawear.AsyncDataProducer;
-import com.mbientlab.metawear.ConfigEditorBase;
-import com.mbientlab.metawear.Configurable;
-import com.mbientlab.metawear.ForcedDataProducer;
+enum FilterMode {
+    OSR4,
+    OSR2,
+    NORMAL
+}
+/**
+ * Operating frequencies of the BMI160 accelerometer
+ * @author Eric Tsai
+ */
+class OutputDataRate {
+
+
+    /** Frequency represented as a float value */
+    final double frequency;
+    const OutputDataRate._(this.frequency);
+
+    /** 0.78125 Hz */
+    static const ODR_0_78125_HZ = OutputDataRate._(0.78125);
+    /** 1.5625 Hz */
+    static const ODR_1_5625_HZ = OutputDataRate._(1.5625);
+    /** 3.125 Hz */
+    static const ODR_3_125_HZ= OutputDataRate._(3.125);
+    /** 6.25 Hz */
+    static const ODR_6_25_HZ= OutputDataRate._(6.25);
+    /** 12.5 Hz */
+    static const ODR_12_5_HZ= OutputDataRate._(12.5);
+    /** 25 Hz */
+    static const ODR_25_HZ= OutputDataRate._(25);
+    /** 50 Hz */
+    static const ODR_50_HZ= OutputDataRate._(50);
+    /** 100 Hz */
+    static const ODR_100_HZ= OutputDataRate._(100);
+    /** 200 Hz */
+    static const ODR_200_HZ= OutputDataRate._(200);
+    /** 400 Hz */
+    static const ODR_400_HZ= OutputDataRate._(400);
+    /** 800 Hz */
+    static const ODR_800_HZ= OutputDataRate._(800);
+    /** 1600 Hz */
+    static const ODR_1600_HZ= OutputDataRate._(1600);
+
+    static List<OutputDataRate> _entries = [ODR_0_78125_HZ,ODR_1_5625_HZ,ODR_3_125_HZ,ODR_6_25_HZ,ODR_12_5_HZ,ODR_25_HZ,ODR_50_HZ,ODR_100_HZ,ODR_200_HZ,
+    ODR_400_HZ,ODR_800_HZ,ODR_1600_HZ];
+
+    static List<double> get frequences{
+        return _entries.map((e) => e.frequency);
+    }
+}
+
+/**
+ * Accelerometer configuration editor specific to the BMI160 accelerometer
+ * @author Eric Tsai
+ */
+abstract class ConfigEditor extends Accelerometer.ConfigEditor<ConfigEditor> {
+/**
+ * Set the output data rate
+ * @param odr    New output data rate
+ * @return Calling object
+ */
+ConfigEditor odr(OutputDataRate odr);
+/**
+ * Set the data range
+ * @param fsr    New data range
+ * @return Calling object
+ */
+ConfigEditor range(AccRange fsr);
+/**
+ * Set the filter mode.  This parameter is ignored if the data rate is less than 12.5Hz
+ * @param mode New filter mode
+ * @return Calling object
+ */
+ConfigEditor filter(FilterMode mode);
+}
 
 /**
  * Extension of the {@link AccelerometerBosch} interface providing finer control of the BMI160 accelerometer features
  * @author Eric Tsai
  */
-public interface AccelerometerBmi160 extends AccelerometerBosch {
-    enum FilterMode {
-        OSR4,
-        OSR2,
-        NORMAL
-    }
-    /**
-     * Operating frequencies of the BMI160 accelerometer
-     * @author Eric Tsai
-     */
-    enum OutputDataRate {
-        /** 0.78125 Hz */
-        ODR_0_78125_HZ(0.78125f),
-        /** 1.5625 Hz */
-        ODR_1_5625_HZ(1.5625f),
-        /** 3.125 Hz */
-        ODR_3_125_HZ(3.125f),
-        /** 6.25 Hz */
-        ODR_6_25_HZ(6.25f),
-        /** 12.5 Hz */
-        ODR_12_5_HZ(12.5f),
-        /** 25 Hz */
-        ODR_25_HZ(25f),
-        /** 50 Hz */
-        ODR_50_HZ(50f),
-        /** 100 Hz */
-        ODR_100_HZ(100f),
-        /** 200 Hz */
-        ODR_200_HZ(200f),
-        /** 400 Hz */
-        ODR_400_HZ(400f),
-        /** 800 Hz */
-        ODR_800_HZ(800f),
-        /** 1600 Hz */
-        ODR_1600_HZ(1600f);
+abstract class AccelerometerBmi160 extends AccelerometerBosch {
 
-        /** Frequency represented as a float value */
-        public final float frequency;
-
-        OutputDataRate(float frequency) {
-            this.frequency = frequency;
-        }
-
-        public static float[] frequencies() {
-            OutputDataRate[] values= values();
-            float[] freqs= new float[values.length];
-            for(byte i= 0; i < freqs.length; i++) {
-                freqs[i]= values[i].frequency;
-            }
-
-            return freqs;
-        }
-    }
-
-    /**
-     * Accelerometer configuration editor specific to the BMI160 accelerometer
-     * @author Eric Tsai
-     */
-    interface ConfigEditor extends Accelerometer.ConfigEditor<ConfigEditor> {
-        /**
-         * Set the output data rate
-         * @param odr    New output data rate
-         * @return Calling object
-         */
-        ConfigEditor odr(OutputDataRate odr);
-        /**
-         * Set the data range
-         * @param fsr    New data range
-         * @return Calling object
-         */
-        ConfigEditor range(AccRange fsr);
-        /**
-         * Set the filter mode.  This parameter is ignored if the data rate is less than 12.5Hz
-         * @param mode New filter mode
-         * @return Calling object
-         */
-        ConfigEditor filter(FilterMode mode);
-    }
 
     /**
      * Configure the BMI160 accelerometer

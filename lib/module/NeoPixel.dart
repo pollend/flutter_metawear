@@ -120,7 +120,7 @@ abstract class Strand {
  * A brand of RGB led strips by Adafruit
  * @author Eric Tsai
  */
-abstract class NeoPixel extends Module {
+abstract class NeoPixel implements Module {
 
     /**
      * Initialize memory on the MetaWear board for a NeoPixel strand

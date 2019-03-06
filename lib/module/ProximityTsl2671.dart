@@ -23,7 +23,11 @@
  */
 
 
+import 'package:flutter_metawear/ConfigEditorBase.dart';
+import 'package:flutter_metawear/Configurable.dart';
+import 'package:flutter_metawear/ForcedDataProducer.dart';
 import 'package:flutter_metawear/MetaWearBoard.dart';
+import 'package:flutter_metawear/module/ProximityTsl2671.dart';
 
 /**
  * Photodiodes the sensor should use for proximity detection
@@ -49,41 +53,41 @@ enum TransmitterDriveCurrent {
 }
 
 /**
+ * Interface for configuring the sensor
+ * @author Eric Tsai
+ */
+abstract class ConfigEditor extends ConfigEditorBase {
+    /**
+     * Set the integration time
+     * @param time    Period of time, in milliseconds, the internal ADC converts the analog signal into digital counts.  Minimum 2.72ms
+     * @return Calling object
+     */
+    ConfigEditor integrationTime(double time);
+    /**
+     * Set the pulse count.  Sensitivity grows by the square root of the number of pulses
+     * @param nPulses    Number of pulses to use for detection, between [1, 255]
+     * @return Calling object
+     */
+    ConfigEditor pulseCount(int nPulses);
+    /**
+     * Set the photodiode for responding to light
+     * @param diode    Photodiode to use
+     * @return Calling object
+     */
+    ConfigEditor receiverDiode(ReceiverDiode diode);
+    /**
+     * Set the led drive current.  For boards powered by the CR2032 battery, it is recommended to use 25mA or less.
+     * @param current    Current driving the sensor
+     * @return Calling object
+     */
+    ConfigEditor transmitterDriveCurrent(TransmitterDriveCurrent current);
+}
+
+/**
  * Digital proximity detector for short-distance detection by AMS
  * @author Eric Tsai
  */
-abstract class ProximityTsl2671 extends Module, Configurable<ProximityTsl2671.ConfigEditor> {
-
-    /**
-     * Interface for configuring the sensor
-     * @author Eric Tsai
-     */
-    interface ConfigEditor extends ConfigEditorBase {
-        /**
-         * Set the integration time
-         * @param time    Period of time, in milliseconds, the internal ADC converts the analog signal into digital counts.  Minimum 2.72ms
-         * @return Calling object
-         */
-        ConfigEditor integrationTime(float time);
-        /**
-         * Set the pulse count.  Sensitivity grows by the square root of the number of pulses
-         * @param nPulses    Number of pulses to use for detection, between [1, 255]
-         * @return Calling object
-         */
-        ConfigEditor pulseCount(byte nPulses);
-        /**
-         * Set the photodiode for responding to light
-         * @param diode    Photodiode to use
-         * @return Calling object
-         */
-        ConfigEditor receiverDiode(ReceiverDiode diode);
-        /**
-         * Set the led drive current.  For boards powered by the CR2032 battery, it is recommended to use 25mA or less.
-         * @param current    Current driving the sensor
-         * @return Calling object
-         */
-        ConfigEditor transmitterDriveCurrent(TransmitterDriveCurrent current);
-    }
+abstract class ProximityTsl2671 extends Module implements Configurable<ConfigEditor> {
 
     /**
      * Get an implementation of the ForcedDataProducer interface for proximity ADC values, represented as
@@ -92,3 +96,4 @@ abstract class ProximityTsl2671 extends Module, Configurable<ProximityTsl2671.Co
      */
     ForcedDataProducer adc();
 }
+

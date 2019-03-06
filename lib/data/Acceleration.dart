@@ -24,6 +24,7 @@
 
 
 import 'package:flutter_metawear/data/FloatVector.dart';
+import 'package:quiver/core.dart';
 import 'package:sprintf/sprintf.dart';
 
 /**

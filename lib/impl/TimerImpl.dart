@@ -22,23 +22,6 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.impl;
-
-import com.mbientlab.metawear.CodeBlock;
-import com.mbientlab.metawear.impl.platform.TimedTask;
-import com.mbientlab.metawear.module.Timer;
-
-import java.io.Serializable;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-
-import bolts.Task;
-
-import static com.mbientlab.metawear.impl.Constant.Module.TIMER;
-
 /**
  * Created by etsai on 9/17/16.
  */

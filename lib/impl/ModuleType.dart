@@ -23,7 +23,6 @@
  */
 
 
-
 class ModuleType {
     static final int RESPONSE_TIMEOUT = 1000;
     static final int COMMAND_LENGTH = 18, MAX_BTLE_LENGTH = COMMAND_LENGTH + 2;
@@ -58,6 +57,7 @@ class ModuleType {
     static const PROXIMITY = const ModuleType._interal(0x18, "Proximity");
     static const SENSOR_FUSION = const ModuleType._interal(0x19, "SensorFusion");
     static const DEBUG = const ModuleType._interal(0xfe, "Debug");
+
 
     static final Map<int, ModuleType> _byteToEnum = {
         SWITCH.id: SWITCH,

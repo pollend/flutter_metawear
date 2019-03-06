@@ -22,143 +22,141 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.module;
+import 'package:flutter_metawear/AsyncDataProducer.dart';
+import 'package:flutter_metawear/ConfigEditorBase.dart';
+import 'package:flutter_metawear/Configurable.dart';
+import 'package:flutter_metawear/MetaWearBoard.dart';
 
-import com.mbientlab.metawear.AsyncDataProducer;
-import com.mbientlab.metawear.ConfigEditorBase;
-import com.mbientlab.metawear.Configurable;
-import com.mbientlab.metawear.MetaWearBoard.Module;
-import com.mbientlab.metawear.data.AngularVelocity;
+enum FilterMode {
+    OSR4,
+    OSR2,
+    NORMAL
+}
+/**
+ * Operating frequency of the gyro
+ * @author Eric Tsai
+ */
+class OutputDataRate {
+    final int bitmask;
 
-import java.util.HashMap;
+    const OutputDataRate._(this.bitmask);
 
-import bolts.Task;
+    // 25Hz
+    static const ODR_25_HZ = const OutputDataRate._(0x06);
+    /** 50Hz */
+    static const ODR_50_HZ = const OutputDataRate._(0x07);
+    /** 100Hz */
+    static const ODR_100_HZ = const OutputDataRate._(0x08);
+    /** 200Hz */
+    static const ODR_200_HZ = const OutputDataRate._(0x09);
+    /** 400Hz */
+    static const ODR_400_HZ = const OutputDataRate._(0x0a);
+    /** 800Hz */
+    static const ODR_800_HZ = const OutputDataRate._(0x0b);
+    /** 1600Hz */
+    static const ODR_1600_HZ = const OutputDataRate._(0x0c);
+    /** 3200Hz */
+    static const ODR_3200_HZ = const OutputDataRate._(0x0d);
+
+}
+
+/**
+ * Supported angular rate measurement range
+ * @author Eric Tsai
+ */
+class Range {
+    final double scale;
+    final int bitmask;
+
+    const Range._(this.scale,this.bitmask);
+
+    /** +/- 2000 degrees / second */
+    static const FSR_2000 = Range._(16.4,0x00);
+    /** +/- 1000 degrees / second */
+    static const FSR_1000 = Range._(32.8,0x01);
+    /** +/- 500 degrees / second */
+    static const FSR_500 = Range._(65.6,0x02);
+    /** +/- 250 degrees / second */
+    static const FSR_250 = Range._(131.2,0x03);
+    /** +/- 125 degrees / second */
+    static const FSR_125 = Range._(262.4,0x04);
+
+
+    static final Map<int,Range> _bitMaskToRanges = {
+        FSR_2000.bitmask: FSR_2000,
+        FSR_1000.bitmask: FSR_1000,
+        FSR_500.bitmask: FSR_500,
+        FSR_250.bitmask: FSR_250,
+        FSR_125.bitmask: FSR_125
+
+    };
+
+    static Range bitMaskToRange(int mask){
+        return _bitMaskToRanges[mask];
+    }
+
+}
+
+/**
+ * Interface to configure parameters for measuring angular velocity
+ * @author Eric Tsai
+ */
+abstract class ConfigEditor extends ConfigEditorBase {
+    /**
+     * Set the measurement range
+     * @param range    New range to use
+     * @return Calling object
+     */
+    ConfigEditor range(Range range);
+    /**
+     * Set the output date rate
+     * @param odr    New output data rate to use
+     * @return Calling object
+     */
+    ConfigEditor odr(OutputDataRate odr);
+    /**
+     * Set the filter mode
+     * @param mode New filter mode
+     * @return Calling object
+     */
+    ConfigEditor filter(FilterMode mode);
+}
+
+/**
+ * Reports measured angular velocity values from the gyro.  Combined XYZ data is represented as an
+ * {@link AngularVelocity} object while split data is interpreted as a float.
+ * @author Eric Tsai
+ */
+abstract class AngularVelocityDataProducer extends AsyncDataProducer {
+    /**
+     * Get the name for x-axis data
+     * @return X-axis data name
+     */
+    String xAxisName();
+    /**
+     * Get the name for y-axis data
+     * @return Y-axis data name
+     */
+    String yAxisName();
+    /**
+     * Get the name for z-axis data
+     * @return Z-axis data name
+     */
+    String zAxisName();
+}
 
 /**
  * Sensor on the BMI160 IMU measuring angular velocity
  * @author Eric Tsai
  */
-public interface GyroBmi160 extends Module, Configurable<GyroBmi160.ConfigEditor> {
-    enum FilterMode {
-        OSR4,
-        OSR2,
-        NORMAL
-    }
-    /**
-     * Operating frequency of the gyro
-     * @author Eric Tsai
-     */
-    enum OutputDataRate {
-        /** 25Hz */
-        ODR_25_HZ,
-        /** 50Hz */
-        ODR_50_HZ,
-        /** 100Hz */
-        ODR_100_HZ,
-        /** 200Hz */
-        ODR_200_HZ,
-        /** 400Hz */
-        ODR_400_HZ,
-        /** 800Hz */
-        ODR_800_HZ,
-        /** 1600Hz */
-        ODR_1600_HZ,
-        /** 3200Hz */
-        ODR_3200_HZ;
+abstract class GyroBmi160 extends Module implements Configurable<ConfigEditor> {
 
-        public final byte bitmask;
-
-        OutputDataRate() {
-            this.bitmask= (byte) (ordinal() + 6);
-        }
-    }
-    /**
-     * Supported angular rate measurement range
-     * @author Eric Tsai
-     */
-    enum Range {
-        /** +/- 2000 degrees / second */
-        FSR_2000(16.4f),
-        /** +/- 1000 degrees / second */
-        FSR_1000(32.8f),
-        /** +/- 500 degrees / second */
-        FSR_500(65.6f),
-        /** +/- 250 degrees / second */
-        FSR_250(131.2f),
-        /** +/- 125 degrees / second */
-        FSR_125(262.4f);
-
-        public final float scale;
-        public final byte bitmask;
-
-        Range(float scale) {
-            this.scale= scale;
-            this.bitmask= (byte) ordinal();
-        }
-
-        private static final HashMap<Byte, Range> bitMaskToRanges;
-        static {
-            bitMaskToRanges= new HashMap<>();
-            for(Range it: Range.values()) {
-                bitMaskToRanges.put(it.bitmask, it);
-            }
-        }
-        public static Range bitMaskToRange(byte mask) {
-            return bitMaskToRanges.get(mask);
-        }
-    }
-    /**
-     * Interface to configure parameters for measuring angular velocity
-     * @author Eric Tsai
-     */
-    interface ConfigEditor extends ConfigEditorBase {
-        /**
-         * Set the measurement range
-         * @param range    New range to use
-         * @return Calling object
-         */
-        ConfigEditor range(Range range);
-        /**
-         * Set the output date rate
-         * @param odr    New output data rate to use
-         * @return Calling object
-         */
-        ConfigEditor odr(OutputDataRate odr);
-        /**
-         * Set the filter mode
-         * @param mode New filter mode
-         * @return Calling object
-         */
-        ConfigEditor filter(FilterMode mode);
-    }
     /**
      * Pulls the current gyro output data rate and data range from the sensor
      * @return Task that is completed when the settings are received
      */
-    Task<Void> pullConfigAsync();
+    Future<void> pullConfigAsync();
 
-    /**
-     * Reports measured angular velocity values from the gyro.  Combined XYZ data is represented as an
-     * {@link AngularVelocity} object while split data is interpreted as a float.
-     * @author Eric Tsai
-     */
-    interface AngularVelocityDataProducer extends AsyncDataProducer {
-        /**
-         * Get the name for x-axis data
-         * @return X-axis data name
-         */
-        String xAxisName();
-        /**
-         * Get the name for y-axis data
-         * @return Y-axis data name
-         */
-        String yAxisName();
-        /**
-         * Get the name for z-axis data
-         * @return Z-axis data name
-         */
-        String zAxisName();
-    }
     /**
      * Get an implementation of the AngularVelocityDataProducer interface
      * @return AngularVelocityDataProducer object

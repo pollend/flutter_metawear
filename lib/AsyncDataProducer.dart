@@ -30,7 +30,7 @@ import 'package:flutter_metawear/DataProducer.dart';
  * and {@link #stop()} to terminate the data measuring.
  * @author Eric Tsai
  */
-abstract class AsyncDataProducer extends DataProducer {
+abstract class AsyncDataProducer implements DataProducer {
     /**
      * Starts data creation
      */

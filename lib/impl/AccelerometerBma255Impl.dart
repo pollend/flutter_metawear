@@ -24,25 +24,29 @@
 
 import 'dart:typed_data';
 
+import 'package:flutter_metawear/AsyncDataProducer.dart';
+import 'package:flutter_metawear/impl/AccelerometerBoschImpl.dart';
+import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
+import 'package:flutter_metawear/impl/platform/TimedTask.dart';
+import 'package:flutter_metawear/module/AccelerometerBma255.dart';
+
 /**
  * Created by etsai on 9/1/16.
  */
 class AccelerometerBma255Impl extends AccelerometerBoschImpl implements AccelerometerBma255 {
     static final int IMPLEMENTATION= 0x3;
-//    private static final long serialVersionUID = -2958342250951886414L;
-    static final Uint8List DEFAULT_MOTION_CONFIG = [0x00, 0x14, 0x14];
+    static final Uint8List DEFAULT_MOTION_CONFIG = Uint8List.fromList([0x00, 0x14, 0x14]);
 
-    private final byte[] accDataConfig= new byte[] {0x0b, 0x03};
+    static final Uint8List accDataConfig= Uint8List.fromList([0x0b, 0x03]);
 
-    private transient AsyncDataProducer flat, lowhigh, noMotion, slowMotion, anyMotion;
-    private transient TimedTask<byte[]> pullConfigTask;
+    AsyncDataProducer _flat, _lowhigh, _noMotion, _slowMotion, _anyMotion;
+    TimedTask<Uint8List> _pullConfigTask;
 
-    AccelerometerBma255Impl(MetaWearBoardPrivate mwPrivate) {
-        super(mwPrivate);
-    }
+    AccelerometerBma255Impl(MetaWearBoardPrivate mwPrivate): super(mwPrivate);
 
-    @Override
-    protected void init() {
+
+    @override
+    void init() {
         pullConfigTask = new TimedTask<>();
 
         mwPrivate.addResponseHandler(new Pair<>(ACCELEROMETER.id, Util.setRead(DATA_CONFIG)), response -> pullConfigTask.setResult(response));

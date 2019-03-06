@@ -22,37 +22,29 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.module;
-
-import com.mbientlab.metawear.MetaWearBoard.Module;
-
-import bolts.Task;
+import 'package:flutter_metawear/MetaWearBoard.dart';
 
 /**
  * Firmware feature that saves MetaWear commands to the on-board flash memory
  * @author Eric Tsai
  */
-public interface Macro extends Module {
+abstract class Macro extends Module {
     /**
      * Variant of {@link #startRecord(boolean)} with {@code execOnBoot} set to true
      */
-    void startRecord();
-    /**
-     * Begin macro recording.  Every MetaWear command issued will be recorded to the flash memory.
-     * @param execOnBoot    True if the commands should be executed when the board powers on
-     */
-    void startRecord(boolean execOnBoot);
+    void startRecord([bool execOnBoot]);
+
     /**
      * Ends macro recording
      * @return Task containing the id of the recorded task
      */
-    Task<Byte> endRecordAsync();
+    Future<int> endRecordAsync();
 
     /**
      * Execute the commands corresponding to the macro ID
      * @param id        Numerical ID of the macro to execute
      */
-    void execute(byte id);
+    void execute(int id);
     /**
      * Remove all macros on the flash memory.  The erase operation will not be performed until
      * you disconnect from the board.  If you wish to reset the board after the erase operation,

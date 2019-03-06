@@ -63,7 +63,7 @@ abstract class ScheduledTask {
  * On-board scheduler for executing MetaWear commands in the future
  * @author Eric Tsai
  */
-abstract class Timer extends Module {
+abstract class Timer implements Module {
 
     /**
      * Schedule a task to be indefinitely executed on-board at fixed intervals

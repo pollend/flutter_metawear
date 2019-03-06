@@ -24,52 +24,31 @@
 
 import 'dart:core';
 
+import 'package:quiver/core.dart';
+
 /**
  * Generic container holding a vector of float values
  * @author Eric Tsai
  */
 class FloatVector {
 //    final float[] vector;
-    List<double> vector = [];
+  List<double> vector = [];
 
-    FloatVector(double x0, double x1, double x2, [double x3]){
-        if(x3 != null)
-            this.vector = List.unmodifiable([x0,x1,x2,x3]);
-        else
-            this.vector = List.unmodifiable([x0,x1,x2]);
+  FloatVector(double x0, double x1, double x2, [double x3]) {
+    if (x3 != null)
+      this.vector = List.unmodifiable([x0, x1, x2, x3]);
+    else
+      this.vector = List.unmodifiable([x0, x1, x2]);
+  }
 
-
-    }
-
-
-    @override
-    int get hashCode => vector.hashCode;
-
-
+  @override
+  bool operator ==(other) {
+    return other is FloatVector && this.vector.length == other.vector.length &&
+        this.hashCode == other.hashCode;
+  }
 
 
+  @override
+  int get hashCode => hashObjects(vector);
 
-//    FloatVector(float x0, float x1, float x2) {
-//        this.vector = new float[] {x0, x1, x2};
-//    }
-//
-//    FloatVector(float x0, float x1, float x2, float x3) {
-//        this.vector = new float[] {x0, x1, x2, x3};
-//    }
-//
-//    @Override
-//    public boolean equals(Object o) {
-//        if (this == o) return true;
-//        if (o == null || getClass() != o.getClass()) return false;
-//
-//        FloatVector that = (FloatVector) o;
-//
-//        return Arrays.equals(vector, that.vector);
-//
-//    }
-//
-//    @Override
-//    public int hashCode() {
-//        return Arrays.hashCode(vector);
-//    }
 }

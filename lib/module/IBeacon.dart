@@ -22,23 +22,124 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.module;
 
-import com.mbientlab.metawear.ConfigEditorBase;
-import com.mbientlab.metawear.Configurable;
-import com.mbientlab.metawear.DataToken;
-import com.mbientlab.metawear.MetaWearBoard.Module;
+import 'dart:core';
 
-import java.util.Locale;
-import java.util.UUID;
+import 'package:flutter_blue/flutter_blue.dart';
+import 'package:flutter_metawear/ConfigEditorBase.dart';
+import 'package:flutter_metawear/DataToken.dart';
+import 'package:flutter_metawear/MetaWearBoard.dart';
+import 'package:sprintf/sprintf.dart';
+import 'package:flutter_metawear/Configurable.dart';
 
-import bolts.Task;
+/**
+ * Interface for configuring IBeacon settings
+ * @author Eric Tsai
+ */
+abstract class ConfigEditor extends ConfigEditorBase {
+    /**
+     * Set the advertising UUID
+     * @param adUuid    New advertising UUID
+     * @return Calling object
+     */
+    ConfigEditor uuid(Guid adUuid);
+    /**
+     * Set the advertising major number
+     * @param major    New advertising major number
+     * @return Calling object
+     */
+    ConfigEditor major(int major);
+    /**
+     * Set the advertising major number
+     * @param major    New advertising major number
+     * @return Calling object
+     */
+    ConfigEditor majorAsToken(DataToken major);
+    /**
+     * Set the advertising minor number
+     * @param minor    New advertising minor number
+     * @return Calling object
+     */
+    ConfigEditor minor(int minor);
+    /**
+     * Set the advertising minor number
+     * @param minor    New advertising minor number
+     * @return Calling object
+     */
+    ConfigEditor minorAsToken(DataToken minor);
+    /**
+     * Set the advertising receiving power
+     * @param power    New advertising receiving power
+     * @return Calling object
+     */
+    ConfigEditor rxPower(int power);
+    /**
+     * Set the advertising transmitting power
+     * @param power    New advertising transmitting power
+     * @return Calling object
+     */
+    ConfigEditor txPower(int power);
+    /**
+     * Set the advertising period
+     * @param period    New advertising period, in milliseconds
+     * @return Calling object
+     */
+    ConfigEditor period(int period);
+}
+
+/**
+ * Wrapper class encapsulating the IBeacon configuration
+ * @author Eric Tsai
+ */
+class Configuration {
+    /** Advertising UUID */
+     Guid uuid;
+    /** Advertising major value */
+     int major;
+    /** Advertising minor value */
+     int minor;
+    /** Advertising period */
+     int period;
+    /** Advertising receiving power */
+     int rxPower;
+    /** Advertising transmitting power */
+     int txPower;
+
+    Configuration.Empty();
+    Configuration(this.uuid, this.major, this.minor, this.period, this.rxPower, this.txPower);
+
+    @override
+  String toString() {
+    // TODO: implement toString
+    return sprintf("{uuid: %s, major: %d, minor: %d, rx: %d, tx: %d, period: %d}",[uuid, major, minor, rxPower, txPower, period]);
+  }
+
+  @override
+  int get hashCode{
+        int result = uuid.hashCode;
+        result = 31 * result + major;
+        result = 31 * result + minor;
+        result = 31 * result + period;
+        result = 31 * result + rxPower;
+        result = 31 * result + txPower;
+        return result;
+  }
+
+  @override
+  bool operator ==(other) {
+      if (this == other) return true;
+      if (other == null || other is! Configuration) return false;
+      Configuration that = other as Configuration;
+      return major == that.major && minor == that.minor && period == that.period && rxPower == that.rxPower && txPower == that.txPower && uuid == that.uuid;
+  }
+
+}
 
 /**
  * Apple developed protocol for Bluetooth LE proximity sensing
  * @author Eric Tsai
  */
-public interface IBeacon extends Module, Configurable<IBeacon.ConfigEditor> {
+abstract class IBeacon extends Module implements Configurable<ConfigEditor> {
     /**
      * Enable IBeacon advertising.  You will need to disconnect from the board to advertise as an IBeacon
      */
@@ -49,123 +150,8 @@ public interface IBeacon extends Module, Configurable<IBeacon.ConfigEditor> {
     void disable();
 
     /**
-     * Interface for configuring IBeacon settings
-     * @author Eric Tsai
-     */
-    interface ConfigEditor extends ConfigEditorBase {
-        /**
-         * Set the advertising UUID
-         * @param adUuid    New advertising UUID
-         * @return Calling object
-         */
-        ConfigEditor uuid(UUID adUuid);
-        /**
-         * Set the advertising major number
-         * @param major    New advertising major number
-         * @return Calling object
-         */
-        ConfigEditor major(short major);
-        /**
-         * Set the advertising major number
-         * @param major    New advertising major number
-         * @return Calling object
-         */
-        ConfigEditor major(DataToken major);
-        /**
-         * Set the advertising minor number
-         * @param minor    New advertising minor number
-         * @return Calling object
-         */
-        ConfigEditor minor(short minor);
-        /**
-         * Set the advertising minor number
-         * @param minor    New advertising minor number
-         * @return Calling object
-         */
-        ConfigEditor minor(DataToken minor);
-        /**
-         * Set the advertising receiving power
-         * @param power    New advertising receiving power
-         * @return Calling object
-         */
-        ConfigEditor rxPower(byte power);
-        /**
-         * Set the advertising transmitting power
-         * @param power    New advertising transmitting power
-         * @return Calling object
-         */
-        ConfigEditor txPower(byte power);
-        /**
-         * Set the advertising period
-         * @param period    New advertising period, in milliseconds
-         * @return Calling object
-         */
-        ConfigEditor period(short period);
-    }
-    /**
-     * Wrapper class encapsulating the IBeacon configuration
-     * @author Eric Tsai
-     */
-    class Configuration {
-        /** Advertising UUID */
-        public UUID uuid;
-        /** Advertising major value */
-        public short major;
-        /** Advertising minor value */
-        public short minor;
-        /** Advertising period */
-        public short period;
-        /** Advertising receiving power */
-        public byte rxPower;
-        /** Advertising transmitting power */
-        public byte txPower;
-
-        public Configuration() {
-
-        }
-
-        public Configuration(UUID uuid, short major, short minor, short period, byte rxPower, byte txPower) {
-            this.uuid = uuid;
-            this.major = major;
-            this.minor = minor;
-            this.period = period;
-            this.rxPower = rxPower;
-            this.txPower = txPower;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            // Generated by IntelliJ
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            Configuration that = (Configuration) o;
-
-            return major == that.major && minor == that.minor && period == that.period && rxPower == that.rxPower && txPower == that.txPower && uuid.equals(that.uuid);
-        }
-
-        @Override
-        public int hashCode() {
-            // Generated by IntelliJ
-            int result = uuid.hashCode();
-            result = 31 * result + (int) major;
-            result = 31 * result + (int) minor;
-            result = 31 * result + (int) period;
-            result = 31 * result + (int) rxPower;
-            result = 31 * result + (int) txPower;
-            return result;
-        }
-
-        @Override
-        public String toString() {
-            return String.format(Locale.US, "{uuid: %s, major: %d, minor: %d, rx: %d, tx: %d, period: %d}",
-                    uuid, major, minor, rxPower, txPower, period);
-        }
-    }
-
-    /**
      * Read the current IBeacon configuration
      * @return Configuration object that will be available when the read operation completes
      */
-    Task<Configuration> readConfigAsync();
+    Future<Configuration> readConfigAsync();
 }

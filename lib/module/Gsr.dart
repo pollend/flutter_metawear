@@ -22,6 +22,9 @@
  * hello@mbientlab.com.
  */
 
+import 'package:flutter_metawear/ConfigEditorBase.dart';
+import 'package:flutter_metawear/Configurable.dart';
+import 'package:flutter_metawear/ForcedDataProducer.dart';
 import 'package:flutter_metawear/MetaWearBoard.dart';
 
 /**
@@ -62,14 +65,14 @@ ConfigEditor gain(Gain gain);
  * Interacts with a GSR (galvanic skin response) sensor
  * @author Eric Tsai
  */
-abstract class Gsr extends Module, Configurable<Gsr.ConfigEditor;> {
+abstract class Gsr extends Module implements Configurable<ConfigEditor> {
 
 
     /**
      * Gets a list of available conductance channels
      * @return List of available conductance channels
      */
-    ForcedDataProducer[] channels();
+    List<ForcedDataProducer> channels();
     /**
      * Initiates automatic calibration.  This should be done before the first conductance read or
      * if there are changes in temperature
