@@ -22,13 +22,16 @@
  * hello@mbientlab.com.
  */
 
+import 'package:flutter_metawear/MetaWearBoard.dart';
+import 'package:flutter_metawear/impl/DataTypeBase.dart';
+import 'package:flutter_metawear/impl/DataTypeBase.dart';
+import 'package:flutter_metawear/impl/SFloatData.dart';
+
 /**
  * Created by etsai on 2/28/17.
  */
 class MilliUnitsSFloatData extends SFloatData {
-    private static final long serialVersionUID = -4224516456171919741L;
-
-    MilliUnitsSFloatData(DataTypeBase input, Module module, byte register, byte id, DataAttributes attributes) {
+    MilliUnitsSFloatData(DataTypeBase input, Module module, int register, DataAttributes attributes, [int  id]) {
         super(input, module, register, id, attributes);
     }
 

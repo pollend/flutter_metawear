@@ -130,7 +130,7 @@ class Util {
             if (!first) {
                 builder.write(":");
             }
-            builder.write(DataTypeBase.createUri(parents.removeLast(), mwPrivate));
+            builder.write(DataTypeBase.createUri(parents.removeFirst(), mwPrivate));
             first = false;
         }
 

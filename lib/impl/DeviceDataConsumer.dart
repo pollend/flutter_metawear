@@ -22,7 +22,10 @@
  * hello@mbientlab.com.
  */
 
+import 'package:flutter_metawear/Data.dart';
 import 'package:flutter_metawear/Subscriber.dart';
+import 'package:flutter_metawear/impl/DataTypeBase.dart';
+import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
 
 /**
  * Created by etsai on 10/9/16.
@@ -38,7 +41,7 @@ abstract class DeviceDataConsumer {
         subscriber.apply(msg, environment);
     }
 
-    public abstract void enableStream(final MetaWearBoardPrivate mwPrivate);
-    public abstract void disableStream(MetaWearBoardPrivate mwPrivate);
-    public abstract void addDataHandler(final MetaWearBoardPrivate mwPrivate);
+    void enableStream(final MetaWearBoardPrivate mwPrivate);
+    void disableStream(MetaWearBoardPrivate mwPrivate);
+    void addDataHandler(final MetaWearBoardPrivate mwPrivate);
 }

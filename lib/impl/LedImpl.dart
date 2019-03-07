@@ -22,140 +22,144 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.impl;
+import 'dart:typed_data';
 
-import com.mbientlab.metawear.module.Led;
+import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
+import 'package:flutter_metawear/impl/ModuleImplBase.dart';
+import 'package:flutter_metawear/module/Led.dart';
+import 'package:flutter_metawear/impl/ModuleType.dart';
 
-import static com.mbientlab.metawear.impl.Constant.Module.LED;
+class _PatternEditor extends PatternEditor {
+
+    final Uint8List command = Uint8List(17);
+    final MetaWearBoardPrivate mwPrivate;
+
+    _PatternEditor(Color color, this.mwPrivate) {
+        command.setAll(0, Uint8List.fromList(
+            [ModuleType.LED.id, LedImpl.CONFIG, color.index, 0x2]));
+    }
+
+    @override
+    PatternEditor highIntensity(int intensity) {
+        command[4] = intensity;
+        return this;
+    }
+
+    @override
+    PatternEditor lowIntensity(int intensity) {
+        command[5] = intensity;
+        return this;
+    }
+
+    @override
+    PatternEditor riseTime(int time) {
+        command[7] = ((time >> 8) & 0xff);
+        command[6] = (time & 0xff);
+        return this;
+    }
+
+    @override
+    PatternEditor highTime(int time) {
+        command[9] = ((time >> 8) & 0xff);
+        command[8] = (time & 0xff);
+        return this;
+    }
+
+    @override
+    PatternEditor fallTime(int time) {
+        command[11] = ((time >> 8) & 0xff);
+        command[10] = (time & 0xff);
+        return this;
+    }
+
+    @override
+    PatternEditor pulseDuration(int duration) {
+        command[13] = ((duration >> 8) & 0xff);
+        command[12] = (duration & 0xff);
+        return this;
+    }
+
+    @override
+    PatternEditor delay(int delay) {
+        if (mwPrivate
+            .lookupModuleInfo(ModuleType.LED)
+            .revision >= LedImpl.REVISION_LED_DELAYED) {
+            command[15] = ((delay >> 8) & 0xff);
+            command[14] = (delay & 0xff);
+        } else {
+            command[15] = 0;
+            command[14] = 0;
+        }
+        return this;
+    }
+
+    @override
+    PatternEditor repeatCount(int count) {
+        command[16] = count;
+        return this;
+    }
+
+    @override
+    void commit() {
+        mwPrivate.sendCommand(command);
+    }
+}
 
 /**
  * Created by etsai on 8/31/16.
  */
 class LedImpl extends ModuleImplBase implements Led {
-    private static final byte PLAY= 0x1, STOP= 0x2, CONFIG= 0x3;
-    private static final byte REVISION_LED_DELAYED= 1;
-    private static final long serialVersionUID = 5937697572396920500L;
+    static const int PLAY = 0x1,
+        STOP = 0x2,
+        CONFIG = 0x3;
+    static const int REVISION_LED_DELAYED = 1;
 
-    LedImpl(MetaWearBoardPrivate mwPrivate) {
-        super(mwPrivate);
-    }
+    LedImpl(MetaWearBoardPrivate mwPrivate) :super(mwPrivate);
 
-    @Override
-    public PatternEditor editPattern(Color ledColor) {
-        final byte[] command= new byte[17];
-        byte[] initial= {LED.id, CONFIG, (byte) ledColor.ordinal(), 0x2};
-        System.arraycopy(initial, 0, command, 0, initial.length);
-
-        return new PatternEditor() {
-            @Override
-            public PatternEditor highIntensity(byte intensity) {
-                command[4]= intensity;
-                return this;
-            }
-
-            @Override
-            public PatternEditor lowIntensity(byte intensity) {
-                command[5]= intensity;
-                return this;
-            }
-
-            @Override
-            public PatternEditor riseTime(short time) {
-                command[7]= (byte)((time >> 8) & 0xff);
-                command[6]= (byte)(time & 0xff);
-                return this;
-            }
-
-            @Override
-            public PatternEditor highTime(short time) {
-                command[9]= (byte)((time >> 8) & 0xff);
-                command[8]= (byte)(time & 0xff);
-                return this;
-            }
-
-            @Override
-            public PatternEditor fallTime(short time) {
-                command[11]= (byte)((time >> 8) & 0xff);
-                command[10]= (byte)(time & 0xff);
-                return this;
-            }
-
-            @Override
-            public PatternEditor pulseDuration(short duration) {
-                command[13]= (byte)((duration >> 8) & 0xff);
-                command[12]= (byte)(duration & 0xff);
-                return this;
-            }
-
-            @Override
-            public PatternEditor delay(short delay) {
-                if (mwPrivate.lookupModuleInfo(Constant.Module.LED).revision >= REVISION_LED_DELAYED) {
-                    command[15]= (byte)((delay >> 8) & 0xff);
-                    command[14]= (byte)(delay & 0xff);
-                } else {
-                    command[15]= 0;
-                    command[14]= 0;
-                }
-                return this;
-            }
-
-            @Override
-            public PatternEditor repeatCount(byte count) {
-                command[16]= count;
-                return this;
-            }
-
-            @Override
-            public void commit() {
-                mwPrivate.sendCommand(command);
-            }
-        };
-    }
-
-    @Override
-    public PatternEditor editPattern(Color ledColor, PatternPreset preset) {
-        PatternEditor editor= editPattern(ledColor);
-
-        switch(preset) {
-            case BLINK:
-                editor.highIntensity((byte) 31)
-                        .highTime((short) 50)
-                        .pulseDuration((short) 500);
+    @override
+    PatternEditor editPattern(Color ledColor, [PatternPreset preset]) {
+        PatternEditor editor = _PatternEditor(ledColor, mwPrivate);
+        switch (preset) {
+            case PatternPreset.BLINK:
+                editor.highIntensity(31)
+                    .highTime(50)
+                    .pulseDuration(500);
                 break;
-            case PULSE:
-                editor.highIntensity((byte) 31)
-                        .riseTime((short) 725)
-                        .highTime((short) 500)
-                        .fallTime((short) 725)
-                        .pulseDuration((short) 2000);
+            case PatternPreset.PULSE:
+                editor.highIntensity(31)
+                    .riseTime(725)
+                    .highTime(500)
+                    .fallTime(725)
+                    .pulseDuration(2000);
                 break;
-            case SOLID:
-                editor.highIntensity((byte) 31)
-                        .lowIntensity((byte) 31)
-                        .highTime((short) 500)
-                        .pulseDuration((short) 1000);
+            case PatternPreset.SOLID:
+                editor.highIntensity(31)
+                    .lowIntensity(31)
+                    .highTime(500)
+                    .pulseDuration(1000);
                 break;
         }
         return editor;
     }
 
-    @Override
-    public void autoplay() {
-        mwPrivate.sendCommand(new byte[] {LED.id, PLAY, 2});
+    @override
+    void autoplay() {
+        mwPrivate.sendCommand(Uint8List.fromList([ModuleType.LED.id, PLAY, 2]));
     }
 
-    @Override
-    public void play() {
-        mwPrivate.sendCommand(new byte[] {LED.id, PLAY, 1});
+    @override
+    void play() {
+        mwPrivate.sendCommand(Uint8List.fromList([ModuleType.LED.id, PLAY, 1]));
     }
 
-    @Override
-    public void pause() {
-        mwPrivate.sendCommand(new byte[] {LED.id, PLAY, 0});
+    @override
+    void pause() {
+        mwPrivate.sendCommand(Uint8List.fromList([ModuleType.LED.id, PLAY, 0]));
     }
 
-    @Override
-    public void stop(boolean clear) {
-        mwPrivate.sendCommand(new byte[] {LED.id, STOP, (byte) (clear ? 1 : 0)});
+    @override
+    void stop(bool clear) {
+        mwPrivate.sendCommand(
+            Uint8List.fromList([ModuleType.LED.id, STOP, (clear ? 1 : 0)]));
     }
 }

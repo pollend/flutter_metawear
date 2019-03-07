@@ -22,22 +22,13 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.impl;
 
-import com.mbientlab.metawear.Data;
-import com.mbientlab.metawear.builder.filter.DifferentialOutput;
-
-import java.nio.ByteBuffer;
-import java.util.Calendar;
-
-import static com.mbientlab.metawear.impl.Constant.Module.DATA_PROCESSOR;
+import 'package:flutter_metawear/impl/DataTypeBase.dart';
 
 /**
  * Created by etsai on 9/5/16.
  */
 class UFloatData extends DataTypeBase {
-    private static final long serialVersionUID = -7247066455362777661L;
-
     UFloatData(Constant.Module module, byte register, byte id, DataAttributes attributes) {
         super(module, register, id, attributes);
     }

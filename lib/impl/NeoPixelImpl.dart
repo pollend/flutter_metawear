@@ -22,22 +22,22 @@
  * hello@mbientlab.com.
  */
 
+import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
+import 'package:flutter_metawear/impl/ModuleImplBase.dart';
+import 'package:flutter_metawear/module/NeoPixel.dart';
+
 /**
  * Created by etsai on 9/18/16.
  */
 class NeoPixelImpl extends ModuleImplBase implements NeoPixel {
-    private static final byte INITIALIZE= 1,
+    static final int INITIALIZE= 1,
             HOLD= 2,
             CLEAR= 3, SET_COLOR= 4,
             ROTATE= 5,
             FREE= 6;
-    private static final long serialVersionUID = -3877020058618686105L;
-    private final HashMap<Byte, Byte> activeStrands= new HashMap<>();
+    final Map<int, int> activeStrands = Map();
 
-    NeoPixelImpl(MetaWearBoardPrivate mwPrivate) {
-        super(mwPrivate);
-        this.mwPrivate= mwPrivate;
-    }
+    NeoPixelImpl(MetaWearBoardPrivate mwPrivate): super(mwPrivate);
 
     @Override
     public Strand initializeStrand(byte strand, ColorOrdering ordering, StrandSpeed speed, byte gpioPin, byte length) {

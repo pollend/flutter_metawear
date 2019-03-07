@@ -65,7 +65,7 @@ public class FlutterMetawearPlugin implements MethodChannel.MethodCallHandler,Se
     }
 
     @Override
-    public boolean onRequestPermissionsResult(int i, String[] strings, int[] ints) {
+    public bool onRequestPermissionsResult(int i, String[] strings, int[] ints) {
         return false;
     }
 

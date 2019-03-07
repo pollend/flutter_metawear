@@ -23,14 +23,21 @@
  */
 
 
+import 'dart:collection';
+import 'dart:core';
 import 'dart:typed_data';
 
 import 'package:flutter_metawear/MetaWearBoard.dart';
+import 'package:flutter_metawear/Subscriber.dart';
+import 'package:flutter_metawear/impl/DeviceDataConsumer.dart';
+import 'package:flutter_metawear/impl/LoggingImpl.dart';
 import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
+import 'package:flutter_metawear/impl/Util.dart';
 import 'package:flutter_metawear/impl/Version.dart';
 import 'package:flutter_metawear/impl/ModuleType.dart';
 import 'package:flutter_metawear/impl/ModuleInfo.dart';
 import 'package:flutter_metawear/Route.dart';
+import 'package:flutter_metawear/module/Logging.dart';
 
 
 abstract class RegisterResponseHandler {
@@ -74,123 +81,106 @@ class RouteInner implements Route {
 
   MetaWearBoardPrivate mwPrivate;
 
-  RouteInner(this.eventCmdIds, this.consumers, this.dataprocessors, this.processorNames, this.id);
+//  RouteInner(this.eventCmdIds, this.consumers, this.dataprocessors, this.processorNames, this.id);
 
-//  RouteInner(LinkedList<Byte> eventCmdIds, ArrayList<DeviceDataConsumer> consumers, LinkedList<Byte> dataprocessors,
-//      HashSet<String> processorNames, int id, MetaWearBoardPrivate mwPrivate) {
-//    this.eventCmdIds= eventCmdIds;
-//    this.consumers = consumers;
-//    this.dataprocessors= dataprocessors;
-//    this.processorNames = processorNames;
-//    this.id= id;
-//    this.active= true;
-//    this.mwPrivate = mwPrivate;
-//  }
-//
-//  void restoreTransientVars(MetaWearBoardPrivate mwPrivate) {
-//    this.mwPrivate = mwPrivate;
-//
-//    for(DeviceDataConsumer it: consumers) {
-//      it.addDataHandler(mwPrivate);
-//    }
-//  }
-//
-//  @Override
-//  public String generateIdentifier(int pos) {
-//    try {
-//      return Util.createProducerChainString(consumers.get(pos).source, mwPrivate);
-//    } catch (IndexOutOfBoundsException ignored) {
-//    return null;
-//    }
-//  }
-//
-//  @Override
-//  public boolean setEnvironment(int pos, Object ... env) {
-//  try {
-//  consumers.get(pos).environment= env;
-//  return true;
-//  } catch (IndexOutOfBoundsException ignored) {
-//  return false;
-//  }
-//  }
-//
-//  @Override
-//  public boolean unsubscribe(int pos) {
-//    try {
-//      consumers.get(pos).disableStream(mwPrivate);
-//      return true;
-//    } catch (IndexOutOfBoundsException ignored) {
-//    return false;
-//    }
-//  }
-//
-//  @Override
-//  public boolean resubscribe(int pos) {
-//    try {
-//      consumers.get(pos).enableStream(mwPrivate);
-//      return true;
-//    } catch (IndexOutOfBoundsException ignored) {
-//    return false;
-//    }
-//  }
-//
-//  @Override
-//  public boolean resubscribe(int pos, Subscriber subscriber) {
-//    try {
-//      consumers.get(pos).subscriber= subscriber;
-//      consumers.get(pos).enableStream(mwPrivate);
-//      return true;
-//    } catch (IndexOutOfBoundsException ignored) {
-//    return false;
-//    }
-//  }
-//
-//  void remove(boolean sync) {
-//    if (active) {
-//      active = false;
-//      for(String it: processorNames) {
-//        mwPrivate.removeProducerTag(it);
-//      }
-//
-//      LoggingImpl logging= (LoggingImpl) mwPrivate.getModules().get(Logging.class);
-//      for(DeviceDataConsumer it: consumers) {
-//        if (it instanceof DataLogger) {
-//          logging.removeDataLogger(sync, (DataLogger) it);
-//        } else {
-//          it.disableStream(mwPrivate);
-//        }
-//      }
-//
-//      for(byte it: dataprocessors) {
-//        mwPrivate.removeProcessor(sync, it);
-//      }
-//      dataprocessors.clear();
-//
-//      if (sync) {
-//        EventImpl event = (EventImpl) mwPrivate.getModules().get(EventImpl.class);
-//        for(Byte it: eventCmdIds) {
-//          event.removeEventCommand(it);
-//        }
-//
-//        mwPrivate.removeRoute(id);
-//      }
-//    }
-//  }
-//
-//  @Override
-//  public void remove() {
-//    remove(true);
-//  }
-//
-//  @Override
-//  public boolean isActive() {
-//    return active;
-//  }
-//
-//  @Override
-//  public int id() {
-//    return id;
-//  }
+  RouteInner(this.eventCmdIds,this.consumers,this.dataprocessors,this.processorNames,this.id,this.mwPrivate): active = true;
+
+  void restoreTransientVars(MetaWearBoardPrivate mwPrivate) {
+    this.mwPrivate = mwPrivate;
+
+    for(DeviceDataConsumer it: consumers) {
+      it.addDataHandler(mwPrivate);
+    }
+  }
+
+  @override
+  String generateIdentifier(int pos) {
+    try {
+      return Util.createProducerChainString(consumers[pos].source, mwPrivate);
+    } on RangeError {
+      return null;
+    }
+  }
+
+  @override
+  bool setEnvironment(int pos, List<Object> env) {
+  try {
+  consumers[pos].environment= env;
+  return true;
+  }  on RangeError {
+  return false;
+  }
+  }
+
+  @override
+  bool unsubscribe(int pos) {
+    try {
+      consumers[pos].disableStream(mwPrivate);
+      return true;
+    } on RangeError {
+      return false;
+    }
+  }
+
+  @override
+  bool resubscribe(int pos,[Subscriber subscriber]) {
+
+    try {
+      if(subscriber != null)
+        consumers[pos].subscriber = subscriber;
+      consumers[pos].enableStream(mwPrivate);
+      return true;
+    } on RangeError {
+      return false;
+    }
+  }
+
+  void remove([bool sync]) {
+    if (active) {
+      active = false;
+      for(String it in processorNames) {
+        mwPrivate.removeProducerTag(it);
+      }
+
+      var logging=  mwPrivate.getModules()[Logging];
+      for(DeviceDataConsumer it in consumers) {
+        if (it is DataLogger) {
+          logging.removeDataLogger(sync, (DataLogger) it);
+        } else {
+          it.disableStream(mwPrivate);
+        }
+      }
+
+      for(byte it: dataprocessors) {
+        mwPrivate.removeProcessor(sync, it);
+      }
+      dataprocessors.clear();
+
+      if (sync) {
+        EventImpl event = (EventImpl) mwPrivate.getModules().get(EventImpl.class);
+        for(Byte it: eventCmdIds) {
+          event.removeEventCommand(it);
+        }
+
+        mwPrivate.removeRoute(id);
+      }
+    }
+  }
+
+  @override
+  void remove() {
+    remove(true);
+  }
+
+  @override
+  bool isActive() {
+    return active;
+  }
+
+  @override
+  int id() {
+    return id;
+  }
 }
 
 //

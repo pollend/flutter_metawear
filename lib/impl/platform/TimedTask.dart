@@ -1,14 +1,16 @@
 
+import 'dart:async';
+
 /**
  * Created by eric on 12/8/17.
  */
 class TimedTask<T> {
-    private TaskCompletionSource<T> taskSource;
-    private CancellationTokenSource cts;
+    final Future<T> taskSource;
+    CancellationTokenSource cts;
 
-    public TimedTask() { }
+    TimedTask() { }
 
-    public Task<T> execute(String msgFormat, long timeout, Runnable action) {
+     Future<T> execute(String msgFormat, int timeout, Runnable action) {
         if (taskSource != null && !taskSource.getTask().isCompleted()) {
             return taskSource.getTask();
         }
@@ -34,19 +36,19 @@ class TimedTask<T> {
         return taskSource.getTask();
     }
 
-    public boolean isCompleted() {
+    bool isCompleted() {
         return taskSource != null && taskSource.getTask().isCompleted();
     }
 
-    public void cancel() {
+    void cancel() {
         taskSource.trySetCancelled();
     }
 
-    public void setResult(T result) {
+    void setResult(T result) {
         taskSource.trySetResult(result);
     }
 
-    public void setError(Exception error) {
+    void setError(Exception error) {
         taskSource.trySetError(error);
     }
 }

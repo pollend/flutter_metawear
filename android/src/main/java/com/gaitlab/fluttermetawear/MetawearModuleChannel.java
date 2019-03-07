@@ -24,12 +24,12 @@ import io.flutter.plugin.common.PluginRegistry;
 public class MetawearModuleChannel implements MethodChannel.MethodCallHandler{
     private final PluginRegistry.Registrar registrar;
     private final MetawearChannel metawearChannel;
-    private boolean isReleased;
+    private bool isReleased;
     private final List<ModuleCallback> callbacks = new ArrayList<>();
-    private final boolean isRoot;
+    private final bool isRoot;
 
 
-    public MetawearModuleChannel(PluginRegistry.Registrar registrar, MetawearChannel channel,boolean isRoot) {
+    public MetawearModuleChannel(PluginRegistry.Registrar registrar, MetawearChannel channel,bool isRoot) {
         this.registrar = registrar;
         this.metawearChannel = channel;
         this.isReleased = false;
@@ -38,7 +38,7 @@ public class MetawearModuleChannel implements MethodChannel.MethodCallHandler{
 
 
 
-    public boolean isChannelReleased(){
+    public bool isChannelReleased(){
         if(metawearChannel == null)
             return true;
         return isReleased;

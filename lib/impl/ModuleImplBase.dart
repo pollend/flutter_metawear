@@ -22,6 +22,8 @@
  * hello@mbientlab.com.
  */
 
+import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
+
 /**
  * Created by etsai on 9/20/16.
  */
@@ -31,15 +33,15 @@ abstract class ModuleImplBase{
 
     ModuleImplBase(MetaWearBoardPrivate mwPrivate) {
         this.mwPrivate= mwPrivate;
-        init();
+        _init();
     }
 
     void restoreTransientVars(MetaWearBoardPrivate mwPrivate) {
         this.mwPrivate= mwPrivate;
-        init();
+        _init();
     }
 
-    protected void init() { }
-    public void tearDown() { }
-    public void disconnected() { }
+    void _init() { }
+    void tearDown() { }
+    void disconnected() { }
 }

@@ -23,40 +23,47 @@
  */
 
 
+import 'package:flutter_metawear/impl/DataPrivate.dart';
 import 'package:flutter_metawear/impl/DataTypeBase.dart';
+
+
+class _DataPrivate extends DataPrivate{
+  _DataPrivate(timestamp, byte) : super(timestamp, byte);
+
+}
 
 /**
  * Created by etsai on 9/4/16.
  */
 class UintData extends DataTypeBase {
 
-    UintData(Constant.Module module, byte register, byte id, DataAttributes attributes) {
-        super(module, register, id, attributes);
-    }
+//    UintData(Constant.Module module, byte register, byte id, DataAttributes attributes) {
+//        super(module, register, id, attributes);
+//    }
+//
+//    UintData(Constant.Module module, byte register, DataAttributes attributes) {
+//        super(module, register, attributes);
+//    }
+//
+//    UintData(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
+//        super(input, module, register, id, attributes);
+//    }
+//
+//    UintData(DataTypeBase input, Constant.Module module, byte register, DataAttributes attributes) {
+//        super(input, module, register, attributes);
+//    }
 
-    UintData(Constant.Module module, byte register, DataAttributes attributes) {
-        super(module, register, attributes);
-    }
-
-    UintData(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
-        super(input, module, register, id, attributes);
-    }
-
-    UintData(DataTypeBase input, Constant.Module module, byte register, DataAttributes attributes) {
-        super(input, module, register, attributes);
-    }
-
-    @Override
-    public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
+    @override
+    DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
         return new UintData(input, module, register, id, attributes);
     }
 
-    @Override
+    @override
     public Number convertToFirmwareUnits(MetaWearBoardPrivate mwPrivate, Number value) {
         return value;
     }
 
-    @Override
+    @override
     public Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, final byte[] data, final Calendar timestamp, DataPrivate.ClassToObject mapper) {
         final ByteBuffer buffer = Util.bytesToUIntBuffer(logData, data, attributes);
 
@@ -88,7 +95,7 @@ class UintData extends DataTypeBase {
         };
     }
 
-    @Override
+    @override
     Pair<? extends DataTypeBase, ? extends DataTypeBase> dataProcessorTransform(DataProcessorConfig config, DataProcessorImpl dpModule) {
         switch(config.id) {
             case DataProcessorConfig.Maths.ID: {

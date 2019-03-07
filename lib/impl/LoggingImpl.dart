@@ -22,48 +22,123 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.impl;
+import 'dart:collection';
+import 'dart:math';
+import 'dart:typed_data';
 
-import com.mbientlab.metawear.TaskTimeoutException;
-import com.mbientlab.metawear.impl.DataProcessorImpl.ProcessorEntry;
-import com.mbientlab.metawear.impl.platform.TimedTask;
-import com.mbientlab.metawear.module.DataProcessor;
-import com.mbientlab.metawear.module.Logging;
+import 'package:flutter_metawear/impl/DataTypeBase.dart';
+import 'package:flutter_metawear/impl/DeviceDataConsumer.dart';
+import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
+import 'package:flutter_metawear/impl/ModuleImplBase.dart';
+import 'package:flutter_metawear/impl/platform/TimedTask.dart';
+import 'package:flutter_metawear/module/Logging.dart';
+import 'package:sprintf/sprintf.dart';
+import 'package:flutter_metawear/impl/Util.dart';
+import 'package:flutter_metawear/impl/ModuleType.dart';
+import 'package:tuple/tuple.dart';
 
-import java.io.Serializable;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Queue;
-import java.util.TreeSet;
-import java.util.concurrent.atomic.AtomicReference;
+class DataLogger extends DeviceDataConsumer {
 
-import bolts.Capture;
-import bolts.Continuation;
-import bolts.Task;
-import bolts.TaskCompletionSource;
+    final Map<int, Queue<Uint8List>> logEntries = Map();
 
-import static com.mbientlab.metawear.impl.Constant.Module.DATA_PROCESSOR;
-import static com.mbientlab.metawear.impl.Constant.Module.LOGGING;
+    DataLogger(DataTypeBase source) : super(source);
+
+    void addId(int id) {
+        logEntries[id] = Queue();
+    }
+
+    void remove(MetaWearBoardPrivate mwPrivate) {
+        for (int id in logEntries.keys) {
+            mwPrivate.sendCommand(
+                Uint8List.fromList(
+                    [ModuleType.LOGGING.id, LoggingImpl.REMOVE, id]));
+        }
+    }
+
+    void register(Map<int, DataLogger> loggers) {
+        for (int id in logEntries.keys) {
+            loggers[id] = this;
+        }
+    }
+
+    void handleLogMessage(final MetaWearBoardPrivate mwPrivate, int logId,
+        final DateTime timestamp, Uint8List data,
+        Function(DownloadError errorType, int logId, DateTime timestamp, Uint8List data) handler) {
+        if (subscriber == null) {
+            if (handler != null) {
+                handler(
+                    DownloadError.UNHANDLED_LOG_DATA, logId, timestamp, data);
+            } else {
+                mwPrivate.logWarn(sprintf(
+                    "No subscriber to handle log data: {logId: %d, time: %d, data: %s}",
+                    [logId, timestamp.millisecond, Util.arrayToHexString(data)
+                    ]));
+            }
+
+            return;
+        }
+
+        if (logEntries.containsKey(logId)) {
+            logEntries[logId].add(data);
+        } else if (handler != null) {
+            handler(DownloadError.UNKNOWN_LOG_ENTRY, logId, timestamp, data);
+        }
+
+        bool noneEmpty = true;
+        for (Queue<Uint8List> cachedValues in logEntries.values) {
+            noneEmpty &= !cachedValues.isEmpty;
+        }
+
+        if (noneEmpty) {
+            List<Uint8List> entries = new List(logEntries.values.length);
+            for (Queue<Uint8List> cachedValues in logEntries.values) {
+                entries.add(cachedValues.removeFirst());
+            }
+
+            final Uint8List merged = Uint8List(source.attributes.length());
+            int offset = 0;
+            for (int i = 0; i < entries.length; i++) {
+                int copyLength = min(
+                    entries[i].length, source.attributes.length() - offset);
+                merged.setAll(offset, entries[i]);
+                //System.arraycopy(entries.get(i), 0, merged, offset, copyLength);
+                offset += entries[i].length;
+            }
+
+            call(
+                source.createMessage(true, mwPrivate, merged, timestamp, null));
+        }
+    }
+
+    @override
+    void enableStream(MetaWearBoardPrivate mwPrivate) {
+    }
+
+    @override
+    void disableStream(MetaWearBoardPrivate mwPrivate) {
+    }
+
+    @override
+    void addDataHandler(final MetaWearBoardPrivate mwPrivate) {
+    }
+}
+
+
+class TimeReference {
+    final int resetUid;
+    int tick;
+    final DateTime timestamp;
+
+    TimeReference(this.resetUid, this.tick, this.timestamp);
+}
 
 /**
  * Created by etsai on 9/4/16.
  */
 class LoggingImpl extends ModuleImplBase implements Logging {
-    private static final long serialVersionUID = 5585806147100904291L;
-    private final static double TICK_TIME_STEP= (48.0 / 32768.0) * 1000.0;
-    private static final byte LOG_ENTRY_SIZE= 4, REVISION_EXTENDED_LOGGING = 2;
-    private static final byte ENABLE = 1,
+    static const double TICK_TIME_STEP= (48.0 / 32768.0) * 1000.0;
+    static const int LOG_ENTRY_SIZE= 4, REVISION_EXTENDED_LOGGING = 2;
+    static const int ENABLE = 1,
             TRIGGER = 2,
             REMOVE = 3,
             TIME = 4,
@@ -73,120 +148,28 @@ class LoggingImpl extends ModuleImplBase implements Logging {
             CIRCULAR_BUFFER = 0xb,
             READOUT_PAGE_COMPLETED = 0xd, READOUT_PAGE_CONFIRM = 0xe;
 
-    private static class TimeReference implements Serializable {
-        private static final long serialVersionUID = -4058532490858952714L;
-
-        final byte resetUid;
-        long tick;
-        final Calendar timestamp;
-
-        TimeReference(byte resetUid, long tick, Calendar timestamp) {
-            this.timestamp= timestamp;
-            this.tick= tick;
-            this.resetUid= resetUid;
-        }
-    }
-    static class DataLogger extends DeviceDataConsumer implements Serializable {
-        private static final long serialVersionUID = -5621099865981017205L;
-
-        private final LinkedHashMap<Byte, LinkedList<byte[]>> logEntries= new LinkedHashMap<>();
-
-        DataLogger(DataTypeBase source) {
-            super(source);
-        }
-
-        void addId(byte id) {
-            logEntries.put(id, new LinkedList<>());
-        }
-
-        public void remove(MetaWearBoardPrivate mwPrivate) {
-            for(byte id: logEntries.keySet()) {
-                mwPrivate.sendCommand(new byte[]{Constant.Module.LOGGING.id, LoggingImpl.REMOVE, id});
-            }
-        }
-
-        void register(Map<Byte, DataLogger> loggers) {
-            for(byte id: logEntries.keySet()) {
-                loggers.put(id, this);
-            }
-        }
-
-        void handleLogMessage(final MetaWearBoardPrivate mwPrivate, byte logId, final Calendar timestamp, byte[] data, Logging.LogDownloadErrorHandler handler) {
-            if (subscriber == null) {
-                if (handler != null) {
-                    handler.receivedError(Logging.DownloadError.UNHANDLED_LOG_DATA, logId, timestamp, data);
-                } else {
-                    mwPrivate.logWarn(String.format(Locale.US, "No subscriber to handle log data: {logId: %d, time: %d, data: %s}",
-                            logId, timestamp.getTimeInMillis(), Util.arrayToHexString(data)));
-                }
-
-                return;
-            }
-
-            if (logEntries.containsKey(logId)) {
-                logEntries.get(logId).add(data);
-            } else if (handler != null) {
-                handler.receivedError(Logging.DownloadError.UNKNOWN_LOG_ENTRY, logId, timestamp, data);
-            }
-
-            boolean noneEmpty= true;
-            for(Queue<byte[]> cachedValues: logEntries.values()) {
-                noneEmpty&= !cachedValues.isEmpty();
-            }
-
-            if (noneEmpty) {
-                ArrayList<byte[]> entries= new ArrayList<>(logEntries.values().size());
-                for(Queue<byte[]> cachedValues: logEntries.values()) {
-                    entries.add(cachedValues.poll());
-                }
-
-                final byte[] merged= new byte[source.attributes.length()];
-                int offset= 0;
-                for(int i= 0; i < entries.size(); i++) {
-                    int copyLength= Math.min(entries.get(i).length, source.attributes.length() - offset);
-                    System.arraycopy(entries.get(i), 0, merged, offset, copyLength);
-                    offset+= entries.get(i).length;
-                }
-
-                call(source.createMessage(true, mwPrivate, merged, timestamp, null));
-            }
-        }
-
-        @Override
-        public void enableStream(MetaWearBoardPrivate mwPrivate) {
-        }
-
-        @Override
-        public void disableStream(MetaWearBoardPrivate mwPrivate) {
-        }
-
-        @Override
-        public void addDataHandler(final MetaWearBoardPrivate mwPrivate) {
-        }
-    }
-
     // Logger state
-    private final HashMap<Byte, TimeReference> logReferenceTicks= new HashMap<>();
-    private final HashMap<Byte, Long> lastTimestamp= new HashMap<>();
-    private TimeReference latestReference;
-    private final HashMap<Byte, DataLogger> dataLoggers= new HashMap<>();
-    private HashMap<Byte, Long> rollbackTimestamps = new HashMap<>();
+    final Map<int, TimeReference> logReferenceTicks= Map();
+    final HashMap<Byte, Long> lastTimestamp = Map();
+    TimeReference latestReference;
+    final HashMap<Byte, DataLogger> dataLoggers= Map();
+    HashMap<int, int> rollbackTimestamps = Map();
 
-    private transient long nLogEntries;
-    private transient int nUpdates;
-    private transient LogDownloadUpdateHandler updateHandler;
-    private transient LogDownloadErrorHandler errorHandler;
+    int nLogEntries;
+    int nUpdates;
+    LogDownloadUpdateHandler updateHandler;
+    LogDownloadErrorHandler errorHandler;
 
-    private transient AtomicReference<TaskCompletionSource<Void>> downloadTask;
-    private transient TimedTask<byte[]> createLoggerTask, syncLoggerConfigTask;
-    private transient TimedTask<Void> queryTimeTask;
+    AtomicReference<TaskCompletionSource<Void>> downloadTask;
+    TimedTask<Uint8List> createLoggerTask, syncLoggerConfigTask;
+    TimedTask<void> queryTimeTask;
 
     LoggingImpl(MetaWearBoardPrivate mwPrivate) {
         super(mwPrivate);
     }
 
-    @Override
-    public void disconnected() {
+    @override
+    void disconnected() {
         rollbackTimestamps.putAll(lastTimestamp);
         TaskCompletionSource<Void> taskSource = downloadTask.getAndSet(null);
         if (taskSource != null) {
@@ -194,17 +177,17 @@ class LoggingImpl extends ModuleImplBase implements Logging {
         }
     }
 
-    void removeDataLogger(boolean sync, DataLogger logger) {
+    void removeDataLogger(bool sync, DataLogger logger) {
         if (sync) {
             logger.remove(mwPrivate);
         }
 
-        for(byte id: logger.logEntries.keySet()) {
+        for (int id in logger.logEntries.keys) {
             dataLoggers.remove(id);
         }
     }
 
-    private void completeDownloadTask() {
+    void completeDownloadTask() {
         rollbackTimestamps.clear();
         TaskCompletionSource<Void> taskSource = downloadTask.getAndSet(null);
         if (taskSource != null) {
@@ -214,25 +197,25 @@ class LoggingImpl extends ModuleImplBase implements Logging {
         }
     }
 
-    @Override
-    public void tearDown() {
+    @override
+    void tearDown() {
         dataLoggers.clear();
 
-        mwPrivate.sendCommand(new byte[] {LOGGING.id, REMOVE_ALL});
+        mwPrivate.sendCommand(Uint8List.fromList([ModuleType.LOGGING.id, REMOVE_ALL]));
     }
 
-    private transient HashMap<Tuple3<Byte, Byte, Byte>, Byte> placeholder;
-    private DataTypeBase guessLogSource(Collection<DataTypeBase> producers, Tuple3<Byte, Byte, Byte> key, byte offset, byte length) {
-        List<DataTypeBase> possible = new ArrayList<>();
+    Map<Tuple3<int, int, int>, int> placeholder;
+    DataTypeBase guessLogSource(Iterable<DataTypeBase> producers, Tuple3<int, int, int> key, int offset, int length) {
+        List<DataTypeBase> possible = [];
 
-        for(DataTypeBase it: producers) {
-            if (it.eventConfig[0] == key.first && it.eventConfig[1] == key.second && it.eventConfig[2] == key.third) {
+        for(DataTypeBase it in producers) {
+            if (it.eventConfig[0] == key.item1 && it.eventConfig[1] == key.item2 && it.eventConfig[2] == key.item3) {
                 possible.add(it);
             }
         }
 
         DataTypeBase original = null;
-        boolean multipleEntries = false;
+        bool multipleEntries = false;
         for(DataTypeBase it: possible) {
             if (it.attributes.length() > 4) {
                 original = it;
@@ -245,7 +228,7 @@ class LoggingImpl extends ModuleImplBase implements Logging {
                 return original;
             }
             if (!placeholder.containsKey(key) && length == LOG_ENTRY_SIZE) {
-                placeholder.put(key, length);
+                placeholder[key] = length;
                 return original;
             }
             if (placeholder.containsKey(key)) {
@@ -265,8 +248,8 @@ class LoggingImpl extends ModuleImplBase implements Logging {
         return null;
     }
 
-    @Override
-    protected void init() {
+    @override
+    void init() {
         createLoggerTask = new TimedTask<>();
         syncLoggerConfigTask = new TimedTask<>();
 
@@ -343,19 +326,19 @@ class LoggingImpl extends ModuleImplBase implements Logging {
         }
     }
 
-    @Override
-    public void start(boolean overwrite) {
+    @override
+    void start(boolean overwrite) {
         mwPrivate.sendCommand(new byte[] {LOGGING.id, CIRCULAR_BUFFER, (byte) (overwrite ? 1 : 0)});
         mwPrivate.sendCommand(new byte[] {LOGGING.id, ENABLE, 1});
     }
 
-    @Override
-    public void stop() {
+    @override
+    void stop() {
         mwPrivate.sendCommand(new byte[] {LOGGING.id, ENABLE, 0});
     }
 
-    @Override
-    public Task<Void> downloadAsync(int nUpdates, LogDownloadUpdateHandler updateHandler, LogDownloadErrorHandler errorHandler) {
+    @override
+    Future<void> downloadAsync(int nUpdates, LogDownloadUpdateHandler updateHandler, LogDownloadErrorHandler errorHandler) {
         TaskCompletionSource<Void> taskSource = downloadTask.get();
         if (taskSource != null) {
             return taskSource.getTask();
@@ -377,36 +360,36 @@ class LoggingImpl extends ModuleImplBase implements Logging {
         return taskSource.getTask();
     }
 
-    @Override
-    public Task<Void> downloadAsync(int nUpdates, LogDownloadUpdateHandler updateHandler) {
+    @override
+    Future<void> downloadAsync(int nUpdates, LogDownloadUpdateHandler updateHandler) {
         return downloadAsync(nUpdates, updateHandler, null);
     }
 
-    @Override
-    public Task<Void> downloadAsync(LogDownloadErrorHandler errorHandler) {
+    @override
+    Future<void> downloadAsync(LogDownloadErrorHandler errorHandler) {
         return downloadAsync(0, null, errorHandler);
     }
 
-    @Override
-    public Task<Void> downloadAsync() {
+    @override
+    Future<void> downloadAsync() {
         return downloadAsync(0, null, null);
     }
 
-    @Override
-    public void clearEntries() {
+    @override
+    void clearEntries() {
         if (mwPrivate.lookupModuleInfo(LOGGING).revision >= REVISION_EXTENDED_LOGGING) {
             mwPrivate.sendCommand(new byte[] {LOGGING.id, READOUT_PAGE_COMPLETED, (byte) 1});
         }
         mwPrivate.sendCommand(new byte[] {LOGGING.id, REMOVE_ENTRIES, (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff});
     }
 
-    Task<Void> queryTime() {
+    Future<void> queryTime() {
         queryTimeTask = new TimedTask<>();
         return queryTimeTask.execute("Did not receive log reference response within %dms", Constant.RESPONSE_TIMEOUT,
                 () -> mwPrivate.sendCommand(new byte[] { Constant.Module.LOGGING.id, Util.setRead(LoggingImpl.TIME) }));
     }
 
-    Task<Queue<DataLogger>> queueLoggers(Queue<DataTypeBase> producers) {
+    Future<Queue<DataLogger>> queueLoggers(Queue<DataTypeBase> producers) {
         final Queue<DataLogger> loggers = new LinkedList<>();
         final Capture<Boolean> terminate = new Capture<>(false);
 
@@ -463,7 +446,7 @@ class LoggingImpl extends ModuleImplBase implements Logging {
     }
 
 
-    private void processLogData(byte[] logEntry) {
+    void processLogData(Uint8List logEntry) {
         final byte logId= (byte) (logEntry[0] & 0x1f), resetUid = (byte) (((logEntry[0] & ~0x1f) >> 5) & 0x7);
 
         byte[] padded= new byte[8];
@@ -482,7 +465,7 @@ class LoggingImpl extends ModuleImplBase implements Logging {
         }
     }
 
-    Calendar computeTimestamp(byte resetUid, long tick) {
+    DateTime computeTimestamp(int resetUid, int tick) {
         TimeReference reference= logReferenceTicks.containsKey(resetUid) ? logReferenceTicks.get(resetUid) : latestReference;
 
         if (lastTimestamp.containsKey(resetUid) && lastTimestamp.get(resetUid) > tick) {
@@ -504,8 +487,8 @@ class LoggingImpl extends ModuleImplBase implements Logging {
         return timestamp;
     }
 
-    private Task<Collection<DataLogger>> queryActiveLoggersInnerAsync(final byte id) {
-        final Map<DataTypeBase, Byte> nRemainingLoggers = new HashMap<>();
+    Future<Iterable<DataLogger>> queryActiveLoggersInnerAsync(final int id) {
+        final Map<DataTypeBase, int> nRemainingLoggers = new HashMap<>();
         final Capture<Byte> offset = new Capture<>();
         final Capture<byte[]> response = new Capture<>();
         final DataProcessorImpl dataprocessor = (DataProcessorImpl) mwPrivate.getModules().get(DataProcessor.class);
@@ -513,6 +496,7 @@ class LoggingImpl extends ModuleImplBase implements Logging {
         final Deque<Byte> fuserIds = new LinkedList<>();
         final Deque<Pair<DataTypeBase, ProcessorEntry>> fuserConfigs = new LinkedList<>();
         final Capture<Continuation<Deque<ProcessorEntry>, Task<DataTypeBase>>> onProcessorSynced = new Capture<>();
+
         onProcessorSynced.set(task -> {
             Deque<ProcessorEntry> result = task.getResult();
             ProcessorEntry first = result.peek();
@@ -627,7 +611,7 @@ class LoggingImpl extends ModuleImplBase implements Logging {
             return Task.forError(task.getError());
         });
     }
-    Task<Collection<DataLogger>> queryActiveLoggersAsync() {
+    Future<Iterable<DataLogger>> queryActiveLoggersAsync() {
         placeholder = new HashMap<>();
         return queryActiveLoggersInnerAsync((byte) 0);
     }

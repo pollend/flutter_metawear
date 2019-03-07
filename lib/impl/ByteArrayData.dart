@@ -22,19 +22,13 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.impl;
 
-import com.mbientlab.metawear.Data;
-import com.mbientlab.metawear.impl.Constant.Module;
-
-import java.util.Calendar;
+import 'package:flutter_metawear/impl/DataTypeBase.dart';
 
 /**
  * Created by etsai on 9/21/16.
  */
 class ByteArrayData extends DataTypeBase {
-    private static final long serialVersionUID = 4641172956282853649L;
-
     ByteArrayData(Module module, byte register, byte id, DataAttributes attributes) {
         super(module, register, id, attributes);
     }

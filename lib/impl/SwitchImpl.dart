@@ -22,70 +22,78 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.impl;
 
-import com.mbientlab.metawear.ActiveDataProducer;
-import com.mbientlab.metawear.Route;
-import com.mbientlab.metawear.builder.RouteBuilder;
-import com.mbientlab.metawear.impl.platform.TimedTask;
-import com.mbientlab.metawear.module.Switch;
+import 'package:flutter_metawear/ActiveDataProducer.dart';
+import 'package:flutter_metawear/Route.dart';
+import 'package:flutter_metawear/builder/RouteBuilder.dart';
+import 'package:flutter_metawear/impl/DataTypeBase.dart';
+import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
+import 'package:flutter_metawear/impl/ModuleImplBase.dart';
+import 'package:flutter_metawear/impl/ModuleType.dart';
+import 'package:flutter_metawear/impl/UintData.dart';
+import 'package:flutter_metawear/impl/Util.dart';
+import 'package:flutter_metawear/impl/platform/TimedTask.dart';
+import 'package:flutter_metawear/module/Switch.dart';
 
-import bolts.Task;
 
-import static com.mbientlab.metawear.impl.Constant.Module.SWITCH;
+import 'package:tuple/tuple.dart';
+
+
+
+class _ActiveDataProducer extends ActiveDataProducer {
+
+    final MetaWearBoardPrivate mwPrivate;
+
+    _ActiveDataProducer(this.mwPrivate);
+
+    @override
+    Future<Route> addRouteAsync(RouteBuilder builder) =>
+        mwPrivate.queueRouteBuilder(builder, SwitchImpl.PRODUCER);
+
+
+    @override
+    String name() => SwitchImpl.PRODUCER;
+}
 
 /**
  * Created by etsai on 9/4/16.
  */
 class SwitchImpl extends ModuleImplBase implements Switch {
+    static const String PRODUCER= "com.mbientlab.metawear.impl.SwitchImpl.PRODUCER";
+    static const int STATE= 0x1;
+
     static String createUri(DataTypeBase dataType) {
         switch (Util.clearRead(dataType.eventConfig[1])) {
-            case STATE:
+            case SwitchImpl.STATE:
                 return "switch";
             default:
                 return null;
         }
     }
 
-    private final static String PRODUCER= "com.mbientlab.metawear.impl.SwitchImpl.PRODUCER";
-    private final static byte STATE= 0x1;
-    private static final long serialVersionUID = -6054365836900403723L;
+    ActiveDataProducer _state;
+    TimedTask<int> _stateTasks;
 
-    private transient ActiveDataProducer state;
-    private transient TimedTask<Byte> stateTasks;
-
-    SwitchImpl(MetaWearBoardPrivate mwPrivate) {
-        super(mwPrivate);
-
-        this.mwPrivate.tagProducer(PRODUCER, new UintData(SWITCH, STATE, new DataAttributes(new byte[] {1}, (byte) 1, (byte) 0, false)));
+    SwitchImpl(MetaWearBoardPrivate mwPrivate): super(mwPrivate) {
+        this.mwPrivate.tagProducer(PRODUCER, new UintData(ModuleType.SWITCH, STATE, new DataAttributes(new byte[] {1}, (byte) 1, (byte) 0, false)));
     }
 
-    @Override
-    protected void init() {
-        stateTasks = new TimedTask<>();
-        this.mwPrivate.addResponseHandler(new Pair<>(SWITCH.id, Util.setRead(STATE)), response -> stateTasks.setResult(response[2]));
+    @override
+    void init() {
+        _stateTasks = TimedTask<>();
+        this.mwPrivate.addResponseHandler(Tuple2<int,int>( ModuleType.SWITCH.id, Util.setRead(STATE)), response -> stateTasks.setResult(response[2]));
     }
 
-    @Override
-    public ActiveDataProducer state() {
-        if (state == null) {
-            state = new ActiveDataProducer() {
-                @Override
-                public Task<Route> addRouteAsync(RouteBuilder builder) {
-                    return mwPrivate.queueRouteBuilder(builder, PRODUCER);
-                }
-
-                @Override
-                public String name() {
-                    return PRODUCER;
-                }
-            };
+    @override
+    ActiveDataProducer state() {
+        if (_state == null) {
+            _state = _ActiveDataProducer(mwPrivate);
         }
-        return state;
+        return _state;
     }
 
-    @Override
-    public Task<Byte> readCurrentStateAsync() {
+    @override
+    Future<int> readCurrentStateAsync() {
         return stateTasks.execute("Did not received button state within %dms",  Constant.RESPONSE_TIMEOUT,
                 () -> mwPrivate.sendCommand(new byte[] {SWITCH.id, Util.setRead(STATE)}));
     }

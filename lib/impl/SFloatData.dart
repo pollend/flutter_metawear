@@ -22,12 +22,12 @@
  * hello@mbientlab.com.
  */
 
+import 'package:flutter_metawear/impl/DataTypeBase.dart';
+
 /**
  * Created by etsai on 9/5/16.
  */
 class SFloatData extends DataTypeBase {
-    private static final long serialVersionUID = -3269792750880261100L;
-
     SFloatData(Constant.Module module, byte register, byte id, DataAttributes attributes) {
         super(module, register, id, attributes);
     }
