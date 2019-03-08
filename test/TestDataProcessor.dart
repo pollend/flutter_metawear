@@ -22,48 +22,38 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear;
+import 'package:flutter_metawear/impl/JseMetaWearBoard.dart';
+import 'package:flutter_test/flutter_test.dart';
 
-import com.mbientlab.metawear.builder.RouteComponent;
-import com.mbientlab.metawear.builder.filter.*;
-import com.mbientlab.metawear.builder.function.Function1;
-import com.mbientlab.metawear.builder.function.Function2;
-import com.mbientlab.metawear.builder.predicate.PulseOutput;
-import com.mbientlab.metawear.data.Acceleration;
-import com.mbientlab.metawear.data.AngularVelocity;
-import com.mbientlab.metawear.module.Accelerometer;
-import com.mbientlab.metawear.module.AccelerometerBmi160;
-import com.mbientlab.metawear.module.BarometerBmp280;
-import com.mbientlab.metawear.module.BarometerBosch;
-import com.mbientlab.metawear.module.DataProcessor;
-import com.mbientlab.metawear.module.DataProcessor.PassthroughEditor;
-import com.mbientlab.metawear.module.Gpio;
-import com.mbientlab.metawear.module.GyroBmi160;
-import com.mbientlab.metawear.module.Led;
-import com.mbientlab.metawear.module.Switch;
-import com.mbientlab.metawear.module.Temperature;
+import 'MetaWearBoardInfo.dart';
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.experimental.runners.Enclosed;
-import org.junit.runner.RunWith;
+import 'package:flutter_metawear/module/Switch.dart';
+import 'package:flutter_metawear/module/Led.dart';
+import 'package:flutter_metawear/module/BarometerBme280.dart';
+import 'package:flutter_metawear/module/BarometerBme280.dart';
+import 'package:flutter_metawear/module/AccelerometerBmi160.dart';
+import 'package:flutter_metawear/module/GyroBmi160.dart';
+import 'package:flutter_metawear/module/Gpio.dart';
+import 'package:flutter_metawear/module/Temperature.dart';
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CancellationException;
-
-import bolts.Capture;
-import bolts.Task;
-
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
 
 /**
  * Created by etsai on 9/5/16.
  */
-@RunWith(Enclosed.class)
-public class TestDataProcessor {
+main() {
+  group('DataProcessor',() {
+    BoardInfo info;
+    setUp(() {
+      info = MetaWearBoardInfo.Modules([Switch, Led, BarometerBmp280, AccelerometerBmi160, GyroBmi160, Gpio, Temperature]);
+
+    });
+    test('Rms',() {
+
+    });
+
+  });
+}
+
     static class TestBase extends UnitTestBase {
         @Before
         public void setup() throws Exception {

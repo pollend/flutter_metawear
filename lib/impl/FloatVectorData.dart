@@ -22,9 +22,6 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.impl;
-
-import static com.mbientlab.metawear.impl.Constant.Module.DATA_PROCESSOR;
 
 /**
  * Created by etsai on 9/4/16.

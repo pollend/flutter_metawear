@@ -1,26 +1,701 @@
-package com.mbientlab.metawear.impl;
 
-import com.mbientlab.metawear.IllegalRouteOperationException;
-import com.mbientlab.metawear.builder.RouteComponent;
-import com.mbientlab.metawear.builder.filter.ComparisonOutput;
-import com.mbientlab.metawear.builder.filter.DifferentialOutput;
-import com.mbientlab.metawear.builder.filter.ThresholdOutput;
-import com.mbientlab.metawear.builder.predicate.PulseOutput;
+import 'dart:typed_data';
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.security.InvalidParameterException;
-import java.util.Locale;
+import 'package:flutter_metawear/builder/filter/ThresholdOutput.dart';
+import 'package:flutter_metawear/builder/filter/Passthrough.dart' as Pass;
+import 'package:flutter_metawear/builder/filter/Comparison.dart' as Co;
+import 'package:flutter_metawear/builder/filter/ComparisonOutput.dart';
+import 'package:flutter_metawear/builder/predicate/PulseOutput.dart';
+import 'package:flutter_metawear/impl/DataAttributes.dart';
 
-import static com.mbientlab.metawear.impl.RouteComponentImpl.MULTI_CHANNEL_MATH;
-import static com.mbientlab.metawear.impl.RouteComponentImpl.MULTI_COMPARISON_MIN_FIRMWARE;
+import 'package:sprintf/sprintf.dart';
+
 
 /**
  * Created by eric on 8/27/17.
  */
 
+class Threshold extends DataProcessorConfig {
+    static const int ID = 0xd;
+
+    final int input;
+    final bool isSigned;
+    final ThresholdOutput mode;
+    final int boundary;
+    final int hysteresis;
+
+    Threshold(this.input, this.isSigned, this.mode, this.boundary,
+        this.hysteresis) : super(ID);
+
+
+    Threshold.config(Uint8List cfg):
+            input = ((cfg[1] & 0x3) + 1),
+            isSigned = (cfg[1] & 0x4) == 0x4,
+            mode = ThresholdOutput.values[(cfg[1] >> 3) & 0x7],
+            boundary = ByteData.view(cfg.buffer).getUint32(2, Endian.little),
+            hysteresis = ByteData.view(cfg.buffer).getUint16(6, Endian.little),
+            super(cfg[0])
+
+
+    @override
+    String createUri(bool state, int procId) {
+        return sprintf("threshold?id=%d", procId);
+    }
+
+    @override
+    Uint8List build() {
+        final data = Uint8List(8);
+        final buffer = ByteData.view(data.buffer);
+        int offset = 0;
+        buffer.setUint8(offset, ID);
+        buffer.setUint8(offset += 1,((input - 1) & 0x3 | (isSigned ? 0x4 : 0) | (mode.index << 3)));
+        buffer.setUint32(offset += 4, boundary, Endian.little);
+        buffer.setUint16(offset += 2, hysteresis, Endian.little);
+        return data;
+    }
+
+}
+
+class Passthrough extends DataProcessorConfig {
+    static const int ID = 0x1;
+
+    final Pass.Passthrough type;
+    final int value;
+
+    Passthrough.config(Uint8List config):
+            type = Pass.Passthrough.values[config[1] & 0x7],
+            value = ByteData.view(config.buffer).getUint16(2, Endian.little),
+            super(config[0]);
+
+    Passthrough(this.type, this.value) : super(ID);
+
+    @override
+    Uint8List build() {
+        final data = Uint8List(4);
+        final buffer = ByteData.view(data.buffer);
+        int offset = 0;
+        buffer.setUint8(offset, ID);
+        buffer.setUint8(offset += 1, (type.index & 0x7));
+        buffer.setUint16(offset += 2, value, Endian.little)
+    }
+
+    @override
+    String createUri(bool state, int procId) =>
+        sprintf("passthrough%s?id=%d", [state == null ? "-state" : "", procId]);
+
+}
+
+
+class Accumulator extends DataProcessorConfig {
+    static const int ID = 0x2;
+
+    final bool counter;
+    final int output;
+    final int input;
+
+    Accumulator(this.counter, this.output, this.input) : super(ID);
+
+    Accumulator.config(Uint8List config):
+            counter = (config[1] & 0x10) == 0x10,
+            output = ((config[1] & 0x3) + 1),
+            input = (((config[1] >> 2) & 0x3) + 1),
+            super(config[0]);
+
+
+    @override
+    Uint8List build() => Uint8List.fromList([ID, (((output - 1) & 0x3) | (((input - 1) & 0x3) << 2) | (counter ? 0x10 : 0))]);
+
+    @override
+    String createUri(bool state, int procId) {
+        return sprintf("%s%s?id=%d",
+            [counter ? "count" : "accumulate", state ? "-state" : "", procId]);
+    }
+}
+
+class Average extends DataProcessorConfig {
+    static const int ID = 0x3;
+
+    final int output;
+    final int input;
+    final int samples;
+    int nInputs;
+    bool hpf, supportsHpf;
+
+    Average(DataAttributes attributes, this.samples, this.hpf, this.supportsHpf):
+            this.output = attributes.length(),
+            this.input = attributes.length(),
+            this.nInputs = attributes.sizes.length,
+            super(ID);
+
+
+    Average.config(Uint8List config):
+            output = ((config[1] & 0x3) + 1),
+            input = (((config[1] >> 2) & 0x3) + 1),
+            samples = (config[2]),
+            nInputs = config.length == 4 ? config[3] : 0,
+            hpf = config.length == 4 ? (config[1] >> 5) == 1 : 0,
+            supportsHpf = config.length == 4,
+            super(config[0]);
+
+    @override
+    Uint8List build() {
+        final data = Uint8List(supportsHpf ? 4 : 3);
+        final buffer = ByteData.view(data.buffer);
+
+        int offset = 0;
+        buffer.setUint8(offset, ID);
+        buffer.setUint8(offset += 1,
+            ((((output - 1) & 0x3) | (((input - 1) & 0x3) << 2)) | ((supportsHpf
+                ? (hpf ? 1 : 0)
+                : 0) << 5)));
+        buffer.setUint8(offset += 1, samples);
+        if (supportsHpf)
+            buffer.setUint8(offset += 1, (nInputs - 1));
+        return data;
+    }
+
+    @override
+    String createUri(bool state, int procId) =>
+        sprintf("%s?id=%d", [hpf ? "high-pass" : "low-pass", procId
+        ]);
+
+}
+
+abstract class Comparison extends  DataProcessorConfig {
+    static const int ID = 0x6;
+
+    Comparison(int id) : super(id);
+
+    @override
+    String createUri(bool state, int procId) => sprintf("comparison?id=%d", procId);
+
+}
+
+class MultiValueComparison extends Comparison {
+    static void fillReferences(ByteData buffer, int length,
+        List<num> references) {
+        int offset = 0;
+        switch (length) {
+            case 1:
+                for (num it in references) {
+                    buffer.setUint8(offset, it);
+                    offset += 1;
+                }
+                break;
+            case 2:
+                for (num it in references) {
+                    buffer.setUint16(offset, it, Endian.little);
+                    offset += 2;
+                }
+                break;
+            case 4:
+                for (num it in references) {
+                    buffer.setUint32(offset, it, Endian.little);
+                    offset += 4;
+                }
+                break;
+        }
+    }
+
+    static List<num> extractReferences(ByteData buffer, int length) {
+        List<num> references = null;
+        int remaining = buffer.lengthInBytes;
+
+        switch (length) {
+            case 1:
+                references = List<num>(remaining);
+                for (int i = 0; i < references.length; i++) {
+                    references[i] = buffer.getUint8(i);
+                }
+                break;
+            case 2:
+                references = List<num>((remaining / 2).round());
+                for (int i = 0; i < references.length; i++) {
+                    references[i] = buffer.getUint16(i * 2, Endian.little);
+                }
+                break;
+            case 4:
+                references = List<num>((remaining / 4).round());
+                for (int i = 0; i < references.length; i++) {
+                    references[i] = buffer.getUint32(i * 4, Endian.little);
+                }
+                break;
+        }
+
+        return references;
+    }
+
+    int input;
+    final List<num> references;
+    final Co.Comparison op;
+    final ComparisonOutput mode;
+    final bool isSigned;
+
+    MultiValueComparison(this.isSigned, this.input, this.op, this.mode,
+        this.references) : super(Comparison.ID);
+
+
+    MultiValueComparison.config(Uint8List config)
+        :
+            this.isSigned = (config[1] & 0x1) == 0x1,
+            this.input = (((config[1] >> 1) & 0x3) + 1),
+            this.op = Co.Comparison.values[(config[1] >> 3) & 0x7],
+            this.mode = ComparisonOutput.values[(config[1] >> 6) & 0x3],
+            this.references = extractReferences(ByteData.view(config.buffer, 2),
+                (((config[1] >> 1) & 0x3) + 1)),
+            super(config[0]);
+
+
+    @override
+    Uint8List build() {
+        final data = Uint8List(2 + references.length * input);
+        final buffer = ByteData.view(data.buffer);
+        int offset = 0;
+        buffer.setUint8(offset, 0x6);
+        buffer.setUint8(offset += 1,
+            ((isSigned ? 1 : 0) | ((input - 1) << 1) | (op.index << 3) | (mode
+                .index << 6)));
+        fillReferences(ByteData.view(data.buffer, offset), input, references);
+
+        return data;
+    }
+}
+
+
+class SingleValueComparison extends Comparison {
+    final bool isSigned;
+    final Co.Comparison op;
+    final int reference;
+
+    SingleValueComparison(this.isSigned, this.op, this.reference)
+        : super(Comparison.ID);
+
+    SingleValueComparison.config(Uint8List config):
+            isSigned = config[1] == 0x1,
+            op = Co.Comparison.values[config[2]],
+            reference = ByteData.view(config.buffer).getUint8(4),
+            super(config[0]);
+
+
+    @override
+    Uint8List build() {
+        final data = Uint8List(8);
+        final buffer = ByteData.view(data.buffer);
+        int offset = 0;
+        buffer.setUint8(offset, Comparison.ID);
+        buffer.setUint8(offset += 1, isSigned ? 1 : 0);
+        buffer.setUint8(offset += 1, op.index);
+        buffer.setUint8(offset += 1, 0);
+        buffer.setUint32(offset += 4, reference);
+    }
+}
+
+class Combiner extends DataProcessorConfig {
+    static final int ID = 0x7;
+
+    final int output;
+    final int input;
+    final int nInputs;
+    final bool isSigned;
+    final bool rss;
+
+    Combiner(DataAttributes attributes, this.rss):
+            this.output = attributes.sizes[0],
+            this.input = attributes.sizes[0],
+            this.nInputs = attributes.sizes.length,
+            this.isSigned = attributes.signed,
+            super(ID);
+
+    Combiner.config(Uint8List config):
+            output = ((config[1] & 0x3) + 1),
+            input = (((config[1] >> 2) & 0x3) + 1),
+            nInputs = (((config[1] >> 4) & 0x3) + 1),
+            isSigned = (config[1] & 0x80) == 0x80,
+            rss = config[2] == 1,
+            super(config[0]);
+
+
+    @override
+    Uint8List build() {
+        return new Uint8List.fromList([
+            ID,
+            (((output - 1) & 0x3) | (((input - 1) & 0x3) << 2) | (((nInputs -
+                1) & 0x3) << 4) | (isSigned ? 0x80 : 0)),
+            (rss ? 1 : 0)
+        ]);
+    }
+
+    @override
+    String createUri(bool state, int procId) {
+        return sprintf("%s?id=%d", [rss ? "rss" : "rms", procId]);
+    }
+}
+
+class Time extends DataProcessorConfig {
+    static const int ID = 0x8;
+
+    final int input;
+    final int type;
+    final int period;
+
+    Time(this.input, this.type, this.period) : super(ID);
+
+    Time.config(Uint8List config)
+        :
+            period = ByteData.view(config.buffer).getUint32(2, Endian.little),
+            input = ((config[1] & 0x7) + 1),
+            type = ((config[1] >> 3) & 0x7),
+            super(config[0]);
+
+
+    @override
+    Uint8List build() {
+        final data = Uint8List(6);
+        final buffer = ByteData.view(data.buffer);
+        int offset = 0;
+        buffer.setUint8(offset, ID);
+        buffer.setUint8(offset += 1, ((input - 1) & 0x7 | (type << 3)));
+        buffer.setUint32(offset += 4, period);
+    }
+
+    @override
+    String createUri(bool state, int procId) {
+        return sprintf("time?id=%d", [procId]);
+    }
+}
+
+
+enum Operation {
+    /** Add the data */
+    ADD,
+    /** Multiply the data */
+    MULTIPLY,
+    /** Divide the data */
+    DIVIDE,
+    /** Calculate the remainder */
+    MODULUS,
+    /** Calculate exponentiation of the data */
+    EXPONENT,
+    /** Calculate square root */
+    SQRT,
+    /** Perform left shift */
+    LEFT_SHIFT,
+    /** Perform right shift */
+    RIGHT_SHIFT,
+    /** Subtract the data */
+    SUBTRACT,
+    /** Calculates the absolute value */
+    ABS_VALUE,
+    /** Transforms the input into a constant value */
+    CONSTANT
+}
+
+class Maths extends DataProcessorConfig {
+    static final int ID = 0x9;
+    
+    int output;
+    final int input;
+    int nInputs;
+    final bool isSigned;
+    bool multiChnlMath;
+    final Operation op;
+    final int rhs;
+
+    Maths(DataAttributes attributes, this.multiChnlMath, this.op, this.rhs)
+        :
+            this.output = -1,
+            this.input = attributes.sizes[0],
+            this.nInputs = attributes.sizes.length,
+            this.isSigned = attributes.signed,
+            super(ID);
+
+    Maths.config(this.multiChnlMath, Uint8List config)
+        :
+            output = ((config[1] & 0x3) + 1),
+            input = (((config[1] >> 2) & 0x3) + 1),
+            isSigned = (config[1] & 0x10) == 0x10,
+            op = Operation.values[config[2] - 1],
+            rhs = ByteData.view(config.buffer).getInt32(3, Endian.little),
+            nInputs = multiChnlMath ? (config[7] + 1) : 0,
+            super(config[0]);
+
+
+    @override
+    Uint8List build() {
+        if (output == -1) {
+            throw Exception("Output length cannot be negative");
+        }
+
+        final data = Uint8List(multiChnlMath ? 8 : 7);
+        final buffer = ByteData.view(data.buffer);
+        int offset = 0;
+        buffer.setUint8(offset, ID);
+        buffer.setUint8(offset += 1,
+            ((output - 1) & 0x3 | ((input - 1) << 2) | (isSigned ? 0x10 : 0)));
+        buffer.setUint8(offset += 1, op.index);
+        buffer.setInt32(offset += 4, rhs);
+        if (multiChnlMath)
+            buffer.setInt8(offset += 1, nInputs - 1);
+        return data;
+    }
+
+    @override
+    String createUri(bool state, int procId) {
+        return sprintf("math?id=%d", [procId]);
+    }
+}
+
+class Delay extends DataProcessorConfig {
+    static const int ID = 0xa;
+
+    final bool expanded;
+    final int input;
+    final int samples;
+
+    Delay(this.expanded, this.input, this.samples) : super(ID);
+
+    Delay.config(this.expanded, Uint8List config)
+        :
+            input = ((config[1] & (expanded ? 0xf : 0x3)) + 1),
+            samples = config[2],
+            super(config[0]);
+
+    @override
+    Uint8List build() =>
+        Uint8List.fromList(
+            [ID, ((input - 1) & (expanded ? 0xf : 0x3)), samples]);
+
+    @override
+    String createUri(bool state, int procId) => sprintf("delay?id=%d", procId);
+}
+
+class Pulse extends DataProcessorConfig {
+    static const int ID = 0xb;
+
+    final int input;
+    final int threshold;
+    final int samples;
+    final PulseOutput mode;
+
+    Pulse(this.input, this.threshold, this.samples, this.mode) :super(ID);
+
+
+    Pulse.config(Uint8List config)
+        :
+            input = (config[2] + 1),
+            threshold = ByteData.view(config.buffer).getInt32(4, Endian.little),
+            samples = ByteData.view(config.buffer).getInt16(8, Endian.little),
+            mode = PulseOutput.values[config[4]],
+            super(config[0]);
+
+
+    Uint8List build() {
+        final data = Uint8List(10);
+        final buffer = ByteData.view(data.buffer);
+        int offset = 0;
+        buffer.setInt8(offset, ID);
+        buffer.setInt8(offset += 1, 0);
+        buffer.setInt8(offset += 1, mode.index);
+        buffer.setInt8(offset += 1, threshold);
+        buffer.setInt8(offset += 1, samples);
+        return data;
+    }
+
+    @override
+    String createUri(bool state, int procId) {
+        return sprintf("pulse?id=%d", [procId]);
+    }
+}
+
+static class Differential extends DataProcessorConfig {
+static final byte ID = 0xc;
+
+final byte input;
+final boolean isSigned;
+final DifferentialOutput mode;
+final int differential;
+
+Differential(byte input, boolean isSigned, DifferentialOutput mode, int differential) {
+super(ID);
+
+this.input = input;
+this.isSigned = isSigned;
+this.mode = mode;
+this.differential = differential;
+}
+
+Differential(byte[] config) {
+super(config[0]);
+
+input = (byte) ((config[1] & 0x3) + 1);
+isSigned = (config[1] & 0x4) == 0x4;
+mode = DifferentialOutput.values()[(config[1] >> 3) & 0x7];
+differential = ByteBuffer.wrap(config, 1, 4).getInt();
+}
+
+@Override
+byte[] build() {
+return ByteBuffer.allocate(6).order(ByteOrder.LITTLE_ENDIAN)
+    .put(ID)
+    .put((byte) (((input - 1) & 0x3) | (isSigned ? 0x4 : 0) | (mode.ordinal() << 3)))
+    .putInt(differential)
+    .array();
+}
+
+@Override
+String createUri(boolean state, byte procId) {
+return String.format(Locale.US, "differential?id=%d", procId);
+}
+}
+
+
+
+static class Buffer extends DataProcessorConfig {
+static final byte ID = 0xf;
+
+final byte input;
+
+Buffer(byte input) {
+super(ID);
+
+this.input = input;
+}
+
+Buffer(byte[] config) {
+super(config[0]);
+
+input = (byte) ((config[1] & 0x1f) + 1);
+}
+
+@Override
+byte[] build() {
+return new byte[] {ID, (byte) ((input - 1) & 0x1f)};
+}
+
+@Override
+String createUri(boolean state, byte procId) {
+return String.format(Locale.US, "buffer%s?id=%d", state ? "-state" : "", procId);
+}
+}
+
+static class Packer extends DataProcessorConfig {
+static final byte ID = 0x10;
+
+final byte input;
+final byte count;
+
+Packer(byte input, byte count) {
+super(ID);
+
+this.input = input;
+this.count = count;
+}
+
+Packer(byte[] config) {
+super(config[0]);
+
+input = (byte) ((config[1] & 0x1f) + 1);
+count = (byte) ((config[2] & 0x1f) + 1);
+}
+
+@Override
+byte[] build() {
+return new byte[] {ID, (byte) ((input - 1) & 0x1f), (byte) ((count - 1)& 0x1f)};
+}
+
+@Override
+String createUri(boolean state, byte procId) {
+return String.format(Locale.US, "packer?id=%d", procId);
+}
+}
+
+static class Accounter extends DataProcessorConfig {
+static final byte ID = 0x11;
+
+final byte length;
+final RouteComponent.AccountType type;
+
+Accounter(byte length, RouteComponent.AccountType type) {
+super(ID);
+
+this.length = length;
+this.type = type;
+}
+
+Accounter(byte[] config) {
+super(config[0]);
+
+length = (byte) (((config[1] >> 4) & 0x3) + 1);
+type = RouteComponent.AccountType.values()[config[1] & 0xf];
+}
+
+@Override
+byte[] build() {
+return new byte[] {ID, (byte) (type.ordinal() | ((length - 1) << 4)), 0x3};
+}
+
+@Override
+String createUri(boolean state, byte procId) {
+return String.format(Locale.US, "account?id=%d", procId);
+}
+}
+
+static class Fuser extends DataProcessorConfig {
+static final byte ID = 0x1b;
+
+final String[] names;
+final byte[] filterIds;
+
+Fuser(String[] names) {
+super(ID);
+
+this.filterIds = new byte[names.length];
+this.names = names;
+}
+
+Fuser(byte[] config) {
+super(config[0]);
+
+names = null;
+filterIds = new byte[config[1] & 0x1f];
+System.arraycopy(config, 2, filterIds, 0, filterIds.length);
+}
+
+void syncFilterIds(DataProcessorImpl dpModule) {
+int i = 0;
+for(String it: names) {
+if (!dpModule.nameToIdMapping.containsKey(it)) {
+throw new IllegalRouteOperationException("No processor named \"" + it + "\" found");
+}
+
+byte id = dpModule.nameToIdMapping.get(it);
+DataProcessorImpl.Processor value = dpModule.activeProcessors.get(id);
+if (!(value.editor.configObj instanceof DataProcessorConfig.Buffer)) {
+throw new IllegalRouteOperationException("Can only use buffer processors as inputs to the fuser");
+}
+
+filterIds[i] = id;
+i++;
+}
+}
+
+@Override
+byte[] build() {
+return ByteBuffer.allocate(2 + filterIds.length).order(ByteOrder.LITTLE_ENDIAN)
+    .put(ID)
+    .put((byte)(filterIds.length))
+    .put(filterIds)
+    .array();
+}
+
+@Override
+String createUri(boolean state, byte procId) {
+return String.format(Locale.US, "fuser?id=%d", procId);
+}
+}
+
 abstract class DataProcessorConfig {
-    static DataProcessorConfig from(Version firmware, byte revision, byte[] config) {
+    static DataProcessorConfig from(Version firmware, int revision, Uint8List config) {
         switch(config[0]) {
             case Passthrough.ID:
                 return new Passthrough(config);
@@ -57,736 +732,11 @@ abstract class DataProcessorConfig {
         throw new InvalidParameterException("Unrecognized config id: " + config[0]);
     }
 
-    final byte id;
+    final int id;
 
-    DataProcessorConfig(byte id) {
-        this.id = id;
-    }
-    abstract byte[] build();
-    abstract String createUri(boolean state, byte procId);
+    DataProcessorConfig(this.id);
 
-    static class Passthrough extends DataProcessorConfig {
-        static final byte ID = 0x1;
+    Uint8List build();
+    String createUri(bool state, int procId);
 
-        final com.mbientlab.metawear.builder.filter.Passthrough type;
-        final short value;
-
-        Passthrough(byte[] config) {
-            super(config[0]);
-
-            type = com.mbientlab.metawear.builder.filter.Passthrough.values()[config[1] & 0x7];
-            value = ByteBuffer.wrap(config, 2, 2).order(ByteOrder.LITTLE_ENDIAN).getShort();
-        }
-
-        Passthrough(com.mbientlab.metawear.builder.filter.Passthrough mode, short value) {
-            super(ID);
-
-            this.type = mode;
-            this.value = value;
-        }
-
-        @Override
-        byte[] build() {
-            return ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN)
-                    .put(ID)
-                    .put((byte) (type.ordinal() & 0x7))
-                    .putShort(value).array();
-        }
-
-        @Override
-        String createUri(boolean state, byte procId) {
-            return String.format(Locale.US, "passthrough%s?id=%d", state ? "-state" : "", procId);
-        }
-    }
-
-    static class Accumulator extends DataProcessorConfig {
-        static final byte ID = 0x2;
-
-        final boolean counter;
-        final byte output;
-        final byte input;
-
-        Accumulator(boolean counter, byte output, byte input) {
-            super(ID);
-
-            this.counter = counter;
-            this.output = output;
-            this.input = input;
-        }
-
-        Accumulator(byte[] config) {
-            super(config[0]);
-
-            counter = (config[1] & 0x10) == 0x10;
-            output = (byte) ((config[1] & 0x3) + 1);
-            input = (byte) (((config[1] >> 2) & 0x3) + 1);
-        }
-
-        @Override
-        byte[] build() {
-            return new byte[] {ID, (byte) (((output - 1) & 0x3) | (((input - 1) & 0x3) << 2) | (counter ? 0x10 : 0))};
-        }
-
-        @Override
-        String createUri(boolean state, byte procId) {
-            return String.format(Locale.US, "%s%s?id=%d", counter ? "count" : "accumulate", state ? "-state" : "", procId);
-        }
-    }
-
-    static class Average extends DataProcessorConfig {
-        static final byte ID = 0x3;
-
-        final byte output;
-        final byte input;
-        final byte samples;
-        byte nInputs;
-        boolean hpf, supportsHpf;
-
-        Average(DataAttributes attributes, byte samples, boolean hpf, boolean supportsHpf) {
-            super(ID);
-
-            this.output = attributes.length();
-            this.input = attributes.length();
-            this.samples = samples;
-            this.nInputs = (byte) attributes.sizes.length;
-            this.hpf = hpf;
-            this.supportsHpf = supportsHpf;
-        }
-
-        Average(byte[] config) {
-            super(config[0]);
-
-            output = (byte) ((config[1] & 0x3) + 1);
-            input = (byte) (((config[1] >> 2) & 0x3) + 1);
-            samples = config[2];
-
-            if (config.length == 4) {
-                nInputs = config[3];
-                hpf = (config[1] >> 5) == 1;
-                supportsHpf = true;
-            }
-        }
-
-        @Override
-        byte[] build() {
-            ByteBuffer buffer = ByteBuffer.allocate(supportsHpf ? 4 : 3).order(ByteOrder.LITTLE_ENDIAN)
-                    .put(ID)
-                    .put((byte) ((((output - 1) & 0x3) | (((input - 1) & 0x3) << 2)) | ((supportsHpf ? (hpf ? 1 : 0) : 0) << 5)))
-                    .put(samples);
-            if (supportsHpf) {
-                buffer.put((byte) (nInputs - 1));
-            }
-
-            return buffer.array();
-        }
-
-        @Override
-        String createUri(boolean state, byte procId) {
-            return String.format(Locale.US, "%s?id=%d", hpf ? "high-pass" : "low-pass", procId);
-        }
-    }
-
-    static abstract class Comparison extends  DataProcessorConfig {
-        static final byte ID = 0x6;
-
-        Comparison(byte id) {
-            super(id);
-        }
-
-        @Override
-        String createUri(boolean state, byte procId) {
-            return String.format(Locale.US, "comparison?id=%d", procId);
-        }
-    }
-    static class MultiValueComparison extends Comparison {
-        static void fillReferences(ByteBuffer buffer, byte length, Number... references) {
-            switch(length) {
-                case 1:
-                    for(Number it: references) {
-                        buffer.put(it.byteValue());
-                    }
-                    break;
-                case 2:
-                    for(Number it: references) {
-                        buffer.putShort(it.shortValue());
-                    }
-                    break;
-                case 4:
-                    for(Number it: references) {
-                        buffer.putInt(it.intValue());
-                    }
-                    break;
-            }
-        }
-
-        static Number[] extractReferences(ByteBuffer buffer, byte length) {
-            Number[] references = null;
-            int remaining = buffer.capacity() - buffer.position();
-
-            switch(length) {
-                case 1:
-                    references = new Number[remaining];
-                    for(int i = 0; i < references.length; i++) {
-                        references[i] = buffer.get();
-                    }
-                    break;
-                case 2:
-                    references = new Number[remaining / 2];
-                    for(int i = 0; i < references.length; i++) {
-                        references[i]= buffer.getShort();
-                    }
-                    break;
-                case 4:
-                    references = new Number[remaining / 4];
-                    for(int i = 0; i < references.length; i++) {
-                        references[i]= buffer.getInt();
-                    }
-                    break;
-            }
-
-            return references;
-        }
-
-        byte input;
-        final Number[] references;
-        final com.mbientlab.metawear.builder.filter.Comparison op;
-        final ComparisonOutput mode;
-        final boolean isSigned;
-
-        MultiValueComparison(boolean isSigned, byte input, com.mbientlab.metawear.builder.filter.Comparison op, ComparisonOutput mode, Number[] references) {
-            super(ID);
-
-            this.isSigned = isSigned;
-            this.input = input;
-            this.op = op;
-            this.mode = mode;
-            this.references = references;
-        }
-
-        MultiValueComparison(byte[] config) {
-            super(config[0]);
-
-            isSigned = (config[1] & 0x1) == 0x1;
-            input = (byte) (((input >> 1) & 0x3) + 1);
-            op = com.mbientlab.metawear.builder.filter.Comparison.values()[(config[1] >> 3) & 0x7];
-            mode = ComparisonOutput.values()[(config[1] >> 6) & 0x3];
-
-            references = extractReferences(ByteBuffer.wrap(config, 2, config.length - 2).order(ByteOrder.LITTLE_ENDIAN), input);
-        }
-
-        @Override
-        byte[] build() {
-            ByteBuffer buffer= ByteBuffer.allocate(2 + references.length * input).order(ByteOrder.LITTLE_ENDIAN)
-                    .put((byte) 0x6)
-                    .put((byte) ((isSigned ? 1 : 0) | ((input - 1) << 1) | (op.ordinal() << 3) | (mode.ordinal() << 6)));
-            fillReferences(buffer, input, references);
-
-            return buffer.array();
-        }
-    }
-    static class SingleValueComparison extends Comparison {
-        final boolean isSigned;
-        final com.mbientlab.metawear.builder.filter.Comparison op;
-        final int reference;
-
-        SingleValueComparison(boolean isSigned, com.mbientlab.metawear.builder.filter.Comparison op, int reference) {
-            super(ID);
-
-            this.isSigned = isSigned;
-            this.op = op;
-            this.reference = reference;
-        }
-
-        SingleValueComparison(byte[] config) {
-            super(config[0]);
-
-            isSigned = config[1] == 0x1;
-            op = com.mbientlab.metawear.builder.filter.Comparison.values()[config[2]];
-            reference = ByteBuffer.wrap(config, 4, 4).order(ByteOrder.LITTLE_ENDIAN).getInt();
-        }
-
-        @Override
-        byte[] build() {
-            return ByteBuffer.allocate(8).order(ByteOrder.LITTLE_ENDIAN)
-                    .put(ID)
-                    .put((byte) (isSigned ? 1 : 0))
-                    .put((byte) op.ordinal())
-                    .put((byte) 0)
-                    .putInt(reference).array();
-        }
-    }
-
-    static class Combiner extends DataProcessorConfig {
-        static final byte ID = 0x7;
-
-        final byte output;
-        final byte input;
-        final byte nInputs;
-        final boolean isSigned;
-        final boolean rss;
-
-        Combiner(DataAttributes attributes, boolean rss) {
-            super(ID);
-
-            this.output = attributes.sizes[0];
-            this.input = attributes.sizes[0];
-            this.nInputs = (byte) attributes.sizes.length;
-            this.isSigned = attributes.signed;
-            this.rss = rss;
-        }
-
-        Combiner(byte[] config) {
-            super(config[0]);
-
-            output = (byte) ((config[1] & 0x3) + 1);
-            input = (byte) (((config[1] >> 2) & 0x3) + 1);
-            nInputs = (byte) (((config[1] >> 4) & 0x3) + 1);
-            isSigned = (config[1] & 0x80) == 0x80;
-            rss = config[2] == 1;
-        }
-
-        @Override
-        byte[] build() {
-            return new byte[] {
-                    ID,
-                    (byte) (((output - 1) & 0x3) | (((input - 1) & 0x3) << 2) | (((nInputs - 1) & 0x3) << 4) | (isSigned ? 0x80 : 0)),
-                    (byte) (rss ? 1 : 0)
-            };
-        }
-
-        @Override
-        String createUri(boolean state, byte procId) {
-            return String.format(Locale.US, "%s?id=%d", rss ? "rss" : "rms", procId);
-        }
-    }
-
-    static class Time extends DataProcessorConfig {
-        static final byte ID = 0x8;
-
-        final byte input;
-        final byte type;
-        final int period;
-
-        Time(byte input, byte type, int period) {
-            super(ID);
-
-            this.input = input;
-            this.type = type;
-            this.period = period;
-        }
-
-        Time(byte[] config) {
-            super(config[0]);
-
-            period = ByteBuffer.wrap(config, 2, 4).order(ByteOrder.LITTLE_ENDIAN).getInt();
-            input = (byte) ((config[1] & 0x7) + 1);
-            type = (byte) ((config[1] >> 3) & 0x7);
-        }
-
-        @Override
-        byte[] build() {
-            return ByteBuffer.allocate(6).order(ByteOrder.LITTLE_ENDIAN).put(ID)
-                    .put((byte) ((input - 1) & 0x7 | (type << 3))).putInt(period).array();
-        }
-
-        @Override
-        String createUri(boolean state, byte procId) {
-            return String.format(Locale.US, "time?id=%d", procId);
-        }
-    }
-
-    static class Maths extends DataProcessorConfig {
-        static final byte ID = 0x9;
-
-        enum Operation {
-            /** Add the data */
-            ADD,
-            /** Multiply the data */
-            MULTIPLY,
-            /** Divide the data */
-            DIVIDE,
-            /** Calculate the remainder */
-            MODULUS,
-            /** Calculate exponentiation of the data */
-            EXPONENT,
-            /** Calculate square root */
-            SQRT,
-            /** Perform left shift */
-            LEFT_SHIFT,
-            /** Perform right shift */
-            RIGHT_SHIFT,
-            /** Subtract the data */
-            SUBTRACT,
-            /** Calculates the absolute value */
-            ABS_VALUE,
-            /** Transforms the input into a constant value */
-            CONSTANT
-        }
-
-        byte output;
-        final byte input;
-        byte nInputs;
-        final boolean isSigned;
-        boolean multiChnlMath;
-        final Operation op;
-        final int rhs;
-
-        Maths(DataAttributes attributes, boolean multiChnlMath, Operation op, int rhs) {
-            super(ID);
-
-            this.output = -1;
-            this.input = attributes.sizes[0];
-            this.nInputs = (byte) attributes.sizes.length;
-            this.isSigned = attributes.signed;
-            this.multiChnlMath = multiChnlMath;
-            this.op = op;
-            this.rhs = rhs;
-        }
-
-        Maths(boolean multiChnlMath, byte[] config) {
-            super(config[0]);
-
-            output = (byte) ((config[1] & 0x3) + 1);
-            input = (byte) (((config[1] >> 2) & 0x3) + 1);
-            isSigned = (config[1] & 0x10) == 0x10;
-            op = Operation.values()[config[2] - 1];
-            rhs = ByteBuffer.wrap(config, 3, 4).order(ByteOrder.LITTLE_ENDIAN).getInt();
-
-            if (multiChnlMath) {
-                this.multiChnlMath = true;
-                nInputs = (byte) (config[7] + 1);
-            }
-        }
-
-        @Override
-        byte[] build() {
-            if (output == -1) {
-                throw new IllegalStateException("Output length cannot be negative");
-            }
-            ByteBuffer buffer= ByteBuffer.allocate(multiChnlMath ? 8 : 7)
-                    .order(ByteOrder.LITTLE_ENDIAN)
-                    .put(ID)
-                    .put((byte) ((output - 1) & 0x3 | ((input - 1) << 2) | (isSigned ? 0x10 : 0)))
-                    .put((byte) (op.ordinal() + 1))
-                    .putInt(rhs);
-            if (multiChnlMath) {
-                buffer.put((byte) (nInputs - 1));
-            }
-
-            return buffer.array();
-        }
-
-        @Override
-        String createUri(boolean state, byte procId) {
-            return String.format(Locale.US, "math?id=%d", procId);
-        }
-    }
-
-    static class Delay extends DataProcessorConfig {
-        static final byte ID = 0xa;
-
-        final boolean expanded;
-        final byte input;
-        final byte samples;
-
-        Delay(boolean expanded, byte input, byte samples) {
-            super(ID);
-
-            this.expanded = expanded;
-            this.input = input;
-            this.samples = samples;
-        }
-
-        Delay(boolean expanded, byte[] config) {
-            super(config[0]);
-
-            this.expanded = expanded;
-            input = (byte) ((config[1] & (expanded ? 0xf : 0x3)) + 1);
-            samples = config[2];
-        }
-
-        @Override
-        byte[] build() {
-            return new byte[]{ID, (byte) ((input - 1) & (expanded ? 0xf : 0x3)), samples};
-        }
-
-        @Override
-        String createUri(boolean state, byte procId) {
-            return String.format(Locale.US, "delay?id=%d", procId);
-        }
-    }
-
-    static class Pulse extends DataProcessorConfig {
-        static final byte ID = 0xb;
-
-        final byte input;
-        final int threshold;
-        final short samples;
-        final PulseOutput mode;
-
-        Pulse(byte input, int threshold, short samples, PulseOutput mode) {
-            super(ID);
-
-            this.input = input;
-            this.threshold = threshold;
-            this.samples = samples;
-            this.mode = mode;
-        }
-
-        Pulse(byte[] config) {
-            super(config[0]);
-
-            input = (byte) (config[2] + 1);
-            threshold = ByteBuffer.wrap(config, 4, 4).getInt();
-            samples = ByteBuffer.wrap(config, 8, 2).getShort();
-            mode = PulseOutput.values()[config[4]];
-        }
-
-        byte[] build() {
-            return ByteBuffer.allocate(10).order(ByteOrder.LITTLE_ENDIAN)
-                    .put(ID)
-                    .put((byte) (input- 1))
-                    .put((byte) 0)
-                    .put((byte) mode.ordinal())
-                    .putInt(threshold)
-                    .putShort(samples)
-                    .array();
-        }
-
-        @Override
-        String createUri(boolean state, byte procId) {
-            return String.format(Locale.US, "pulse?id=%d", procId);
-        }
-    }
-
-    static class Differential extends DataProcessorConfig {
-        static final byte ID = 0xc;
-
-        final byte input;
-        final boolean isSigned;
-        final DifferentialOutput mode;
-        final int differential;
-
-        Differential(byte input, boolean isSigned, DifferentialOutput mode, int differential) {
-            super(ID);
-
-            this.input = input;
-            this.isSigned = isSigned;
-            this.mode = mode;
-            this.differential = differential;
-        }
-
-        Differential(byte[] config) {
-            super(config[0]);
-
-            input = (byte) ((config[1] & 0x3) + 1);
-            isSigned = (config[1] & 0x4) == 0x4;
-            mode = DifferentialOutput.values()[(config[1] >> 3) & 0x7];
-            differential = ByteBuffer.wrap(config, 1, 4).getInt();
-        }
-
-        @Override
-        byte[] build() {
-            return ByteBuffer.allocate(6).order(ByteOrder.LITTLE_ENDIAN)
-                    .put(ID)
-                    .put((byte) (((input - 1) & 0x3) | (isSigned ? 0x4 : 0) | (mode.ordinal() << 3)))
-                    .putInt(differential)
-                    .array();
-        }
-
-        @Override
-        String createUri(boolean state, byte procId) {
-            return String.format(Locale.US, "differential?id=%d", procId);
-        }
-    }
-
-    static class Threshold extends DataProcessorConfig {
-        static final byte ID = 0xd;
-
-        final byte input;
-        final boolean isSigned;
-        final ThresholdOutput mode;
-        final int boundary;
-        final short hysteresis;
-
-        Threshold(byte input, boolean isSigned, ThresholdOutput mode, int boundary, short hysteresis) {
-            super(ID);
-
-            this.input = input;
-            this.isSigned = isSigned;
-            this.mode = mode;
-            this.boundary = boundary;
-            this.hysteresis = hysteresis;
-        }
-
-        Threshold(byte[] config) {
-            super(config[0]);
-
-            input = (byte) ((config[1] & 0x3) + 1);
-            isSigned = (config[1] & 0x4) == 0x4;
-            mode = ThresholdOutput.values()[(config[1] >> 3) & 0x7];
-            boundary = ByteBuffer.wrap(config, 2, 4).order(ByteOrder.LITTLE_ENDIAN).getInt();
-            hysteresis = ByteBuffer.wrap(config, 6, 2).order(ByteOrder.LITTLE_ENDIAN).getShort();
-        }
-
-        @Override
-        byte[] build() {
-            return ByteBuffer.allocate(8).order(ByteOrder.LITTLE_ENDIAN)
-                    .put(ID)
-                    .put((byte) ((input - 1) & 0x3 | (isSigned ? 0x4 : 0) | (mode.ordinal() << 3)))
-                    .putInt(boundary)
-                    .putShort(hysteresis)
-                    .array();
-        }
-
-        @Override
-        String createUri(boolean state, byte procId) {
-            return String.format(Locale.US, "threshold?id=%d", procId);
-        }
-
-    }
-
-    static class Buffer extends DataProcessorConfig {
-        static final byte ID = 0xf;
-
-        final byte input;
-
-        Buffer(byte input) {
-            super(ID);
-
-            this.input = input;
-        }
-
-        Buffer(byte[] config) {
-            super(config[0]);
-
-            input = (byte) ((config[1] & 0x1f) + 1);
-        }
-
-        @Override
-        byte[] build() {
-            return new byte[] {ID, (byte) ((input - 1) & 0x1f)};
-        }
-
-        @Override
-        String createUri(boolean state, byte procId) {
-            return String.format(Locale.US, "buffer%s?id=%d", state ? "-state" : "", procId);
-        }
-    }
-
-    static class Packer extends DataProcessorConfig {
-        static final byte ID = 0x10;
-
-        final byte input;
-        final byte count;
-
-        Packer(byte input, byte count) {
-            super(ID);
-
-            this.input = input;
-            this.count = count;
-        }
-
-        Packer(byte[] config) {
-            super(config[0]);
-
-            input = (byte) ((config[1] & 0x1f) + 1);
-            count = (byte) ((config[2] & 0x1f) + 1);
-        }
-
-        @Override
-        byte[] build() {
-            return new byte[] {ID, (byte) ((input - 1) & 0x1f), (byte) ((count - 1)& 0x1f)};
-        }
-
-        @Override
-        String createUri(boolean state, byte procId) {
-            return String.format(Locale.US, "packer?id=%d", procId);
-        }
-    }
-
-    static class Accounter extends DataProcessorConfig {
-        static final byte ID = 0x11;
-
-        final byte length;
-        final RouteComponent.AccountType type;
-
-        Accounter(byte length, RouteComponent.AccountType type) {
-            super(ID);
-
-            this.length = length;
-            this.type = type;
-        }
-
-        Accounter(byte[] config) {
-            super(config[0]);
-
-            length = (byte) (((config[1] >> 4) & 0x3) + 1);
-            type = RouteComponent.AccountType.values()[config[1] & 0xf];
-        }
-
-        @Override
-        byte[] build() {
-            return new byte[] {ID, (byte) (type.ordinal() | ((length - 1) << 4)), 0x3};
-        }
-
-        @Override
-        String createUri(boolean state, byte procId) {
-            return String.format(Locale.US, "account?id=%d", procId);
-        }
-    }
-
-    static class Fuser extends DataProcessorConfig {
-        static final byte ID = 0x1b;
-
-        final String[] names;
-        final byte[] filterIds;
-
-        Fuser(String[] names) {
-            super(ID);
-
-            this.filterIds = new byte[names.length];
-            this.names = names;
-        }
-
-        Fuser(byte[] config) {
-            super(config[0]);
-
-            names = null;
-            filterIds = new byte[config[1] & 0x1f];
-            System.arraycopy(config, 2, filterIds, 0, filterIds.length);
-        }
-
-        void syncFilterIds(DataProcessorImpl dpModule) {
-            int i = 0;
-            for(String it: names) {
-                if (!dpModule.nameToIdMapping.containsKey(it)) {
-                    throw new IllegalRouteOperationException("No processor named \"" + it + "\" found");
-                }
-
-                byte id = dpModule.nameToIdMapping.get(it);
-                DataProcessorImpl.Processor value = dpModule.activeProcessors.get(id);
-                if (!(value.editor.configObj instanceof DataProcessorConfig.Buffer)) {
-                    throw new IllegalRouteOperationException("Can only use buffer processors as inputs to the fuser");
-                }
-
-                filterIds[i] = id;
-                i++;
-            }
-        }
-
-        @Override
-        byte[] build() {
-            return ByteBuffer.allocate(2 + filterIds.length).order(ByteOrder.LITTLE_ENDIAN)
-                    .put(ID)
-                    .put((byte)(filterIds.length))
-                    .put(filterIds)
-                    .array();
-        }
-
-        @Override
-        String createUri(boolean state, byte procId) {
-            return String.format(Locale.US, "fuser?id=%d", procId);
-        }
-    }
 }

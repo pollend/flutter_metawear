@@ -22,21 +22,6 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.impl;
-
-import com.mbientlab.metawear.DataToken;
-import com.mbientlab.metawear.impl.platform.TimedTask;
-import com.mbientlab.metawear.module.IBeacon;
-
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.util.UUID;
-
-import bolts.Capture;
-import bolts.Task;
-
-import static com.mbientlab.metawear.impl.Constant.Module.IBEACON;
-
 /**
  * Created by etsai on 9/18/16.
  */

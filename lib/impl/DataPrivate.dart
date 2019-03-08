@@ -40,72 +40,43 @@ abstract class ClassToObject {
  */
 abstract class DataPrivate implements Data {
 
-    final DateTime _timestamp;
-    final Uint8List _dataBytes;
-    final ClassToObject _mapper;
+  final DateTime _timestamp;
+  final Uint8List _dataBytes;
+  final ClassToObject _mapper;
 
-    DataPrivate(this._timestamp, this._dataBytes, this._mapper);
+  DataPrivate(this._timestamp, this._dataBytes, this._mapper);
 
-    @override
-    DateTime timestamp() {
+  @override
+  DateTime timestamp() {
+    return _timestamp;
+  }
 
-        return _timestamp;
-    }
+  @override
+  String formattedTimestamp() {
+    return timestamp().toIso8601String();
+  }
 
-    @override
-    String formattedTimestamp() {
-        return timestamp().toIso8601String();
-//        return sprintf("%tY-%<tm-%<tdT%<tH:%<tM:%<tS.%<tL", [timestamp().toIso8601String()]);
-    }
-
-    @override
+  @override
   double scale() => 1.0;
 
-    @override
+  @override
   Uint8List bytes() => _dataBytes;
 
-    @override
-    T value<T>(Type clazz){
-        throw CastError();
+  @override
+  T value<T>(Type clazz) {
+    throw CastError();
+  }
+
+  T extra<T>(Type clazz) {
+    Object value;
+    if (_mapper == null || (value = _mapper.apply(clazz)) == null) {
+      throw CastError();
     }
+    return value as T;
+  }
 
-    T extra<T>(Type clazz){
-        Object value;
-        if (_mapper == null || (value = _mapper.apply(clazz)) == null) {
-            throw CastError();
-        }
-        return value as T;
-    }
-
-//    @override
-//    float scale() {
-//        return 1.0;
-//    }
-//
-//    @override
-//   Uint8List bytes() {
-//        return _dataBytes;
-//    }
-//
-//    @override
-//    public <T> T value(Class<T> clazz) {
-//        throw new ClassCastException(String.format(Locale.US, "Invalid input class: \'%s\'", clazz.toString()));
-//    }
-//
-//    @override
-//    public <T> T extra(Class<T> clazz) {
-//        Object value;
-//        if (mapper == null || (value = mapper.apply(clazz)) == null) {
-//            throw new ClassCastException(String.format(Locale.US, "Invalid input class: \'%s\'", clazz.toString()));
-//        }
-//        return clazz.cast(value);
-//    }
-//
-//    @override
-//    public String toString() {
-//        return String.format(Locale.US, "{timestamp: %s, data: %s}", formattedTimestamp(), Util.arrayToHexString(bytes()));
-//    }
-
-@override
-  String toString() => sprintf("{timestamp: %s, data: %s}",[formattedTimestamp(),Util.arrayToHexString(bytes())]);
+  @override
+  String toString() =>
+      sprintf("{timestamp: %s, data: %s}",
+          [formattedTimestamp(), Util.arrayToHexString(bytes())]);
 }

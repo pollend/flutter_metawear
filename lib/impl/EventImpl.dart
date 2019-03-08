@@ -22,20 +22,6 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.impl;
-
-import com.mbientlab.metawear.CodeBlock;
-import com.mbientlab.metawear.MetaWearBoard.Module;
-import com.mbientlab.metawear.impl.platform.TimedTask;
-
-import java.util.LinkedList;
-import java.util.Queue;
-
-import bolts.Capture;
-import bolts.Task;
-
-import static com.mbientlab.metawear.impl.Constant.Module.EVENT;
-
 /**
  * Created by etsai on 10/26/16.
  */

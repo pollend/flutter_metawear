@@ -22,89 +22,73 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear;
 
-import com.mbientlab.metawear.impl.platform.BtleGatt;
-import com.mbientlab.metawear.impl.platform.BtleGattCharacteristic;
-import com.mbientlab.metawear.impl.platform.DeviceInformationService;
-import com.mbientlab.metawear.impl.platform.IO;
+import 'dart:async';
+import 'dart:core';
+import 'dart:typed_data';
+import 'dart:io';
+import 'dart:convert';
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import 'package:flutter_metawear/impl/platform/BtleGatt.dart';
+import 'package:flutter_metawear/impl/platform/IO.dart';
+import 'package:flutter_metawear/impl/platform/BtleGattCharacteristic.dart';
+import 'package:flutter_metawear/impl/platform/DeviceInformationService.dart';
 
-import bolts.Task;
-import bolts.TaskCompletionSource;
+abstract class MwBridge {
+ void disconnected();
+ void sendMockResponse(Uint8List response);
+}
 
 /**
  * Created by etsai on 8/31/16.
  */
 class JunitPlatform implements IO, BtleGatt {
-    private static final File RES_PATH = new File(new File("src", "test"), "res");
-    private static final ScheduledExecutorService SCHEDULED_TASK_THREADPOOL = Executors.newSingleThreadScheduledExecutor();
+    final File RES_PATH = new File(new File("src", "test"), "res");
+    final ScheduledExecutorService SCHEDULED_TASK_THREADPOOL = Executors.newSingleThreadScheduledExecutor();
 
-    interface MwBridge {
-        void disconnected();
-        void sendMockResponse(byte[] response);
-    }
+    int nConnects = 0, nDisconnects = 0;
+    MetaWearBoardInfo boardInfo= MetaWearBoardInfo();
+    String firmware= "1.2.3", boardStateSuffix;
+    bool delayModuleInfoResponse= false;
+    bool deserializeModuleInfo= false;
+    final bool serializeModuleInfo = false;
+    bool enableMetaBootState = false;
+    bool delayReadDevInfo = false;
+    final Map<int, Uint8List> customModuleInfo= Map();
+    final Map<int, Uint8List> customResponses = Map();
 
-    public int nConnects = 0, nDisconnects = 0;
-    public MetaWearBoardInfo boardInfo= new MetaWearBoardInfo();
-    public String firmware= "1.2.3", boardStateSuffix;
-    public boolean delayModuleInfoResponse= false;
-    public boolean deserializeModuleInfo= false;
-    public final boolean serializeModuleInfo = false;
-    public boolean enableMetaBootState = false;
-    public boolean delayReadDevInfo = false;
-    private final Map<Byte, byte[]> customModuleInfo= new HashMap<>();
-    private final Map<Integer, byte[]> customResponses = new HashMap<>();
-
-    public byte maxProcessors= 28, maxLoggers= 8, maxTimers= 8, maxEvents= 28, maxModule = -1;
-    public byte timerId= 0, eventId= 0, loggerId= 0, dataProcessorId= 0, macroId = 0;
-    private final MwBridge bridge;
-    final ArrayList<byte[]> commandHistory= new ArrayList<>(), connectCmds= new ArrayList<>();
-    private final ArrayList<BtleGattCharacteristic> gattCharReadHistory = new ArrayList<>();
+    int maxProcessors= 28, maxLoggers= 8, maxTimers= 8, maxEvents= 28, maxModule = -1;
+    int timerId= 0, eventId= 0, loggerId= 0, dataProcessorId= 0, macroId = 0;
+    final MwBridge bridge;
+    final List<Uint8List> commandHistory = [], connectCmds = [];
+    final List<BtleGattCharacteristic> gattCharReadHistory = [];
     NotificationListener notificationListener;
     DisconnectHandler dcHandler;
 
-    public JunitPlatform(MwBridge bridge) {
+    JunitPlatform(MwBridge bridge) {
         this.bridge= bridge;
     }
 
-    public void addCustomModuleInfo(byte[] info) {
+    void addCustomModuleInfo(byte[] info) {
         customModuleInfo.put(info[0], info);
     }
-    public void removeCustomModuleInfo(byte id) {
+    void removeCustomModuleInfo(byte id) {
         customModuleInfo.remove(id);
     }
-    public void addCustomResponse(byte[] command, byte[] response) {
+    void addCustomResponse(byte[] command, byte[] response) {
         customResponses.put(Arrays.hashCode(command), response);
     }
 
-    private void scheduleMockResponse(final byte[] response) {
+    void scheduleMockResponse(final byte[] response) {
         SCHEDULED_TASK_THREADPOOL.schedule(() -> bridge.sendMockResponse(response), 20, TimeUnit.MILLISECONDS);
     }
 
-    public void scheduleTask(Runnable r, long timeout) {
+    void scheduleTask(Runnable r, long timeout) {
         SCHEDULED_TASK_THREADPOOL.schedule(r, timeout, TimeUnit.MILLISECONDS);
     }
 
-    @Override
-    public void localSave(String key, byte[] data) throws IOException {
+    @override
+    void localSave(String key, byte[] data) throws IOException {
         String prefix = key.substring(key.lastIndexOf(".") + 1).toLowerCase();
         if (!prefix.equals("board_info") || serializeModuleInfo) {
             FileOutputStream fos = new FileOutputStream(String.format(Locale.US, "build/%s_%s", prefix, boardStateSuffix));
@@ -113,8 +97,8 @@ class JunitPlatform implements IO, BtleGatt {
         }
     }
 
-    @Override
-    public InputStream localRetrieve(String key) throws IOException {
+    @override
+    Stream<int> localRetrieve(String key) throws IOException {
         String prefix = key.substring(key.lastIndexOf(".") + 1).toLowerCase();
         if (prefix.equals("board_info") && deserializeModuleInfo) {
             return new FileInputStream(new File(RES_PATH, "board_module_info"));
@@ -124,8 +108,8 @@ class JunitPlatform implements IO, BtleGatt {
                 null;
     }
 
-    @Override
-    public Task<Void> writeCharacteristicAsync(BtleGattCharacteristic gattCharr, WriteType writeType, byte[] value) {
+    @override
+    Future<void> writeCharacteristicAsync(BtleGattCharacteristic gattCharr, WriteType writeType, byte[] value) {
         if (!customResponses.isEmpty()) {
             for (int i = 2; i < Math.min(3, value.length) + 1; i++) {
                 byte[] prefix = new byte[i];
@@ -188,26 +172,26 @@ class JunitPlatform implements IO, BtleGatt {
         return Task.forResult(null);
     }
 
-    @Override
-    public Task<byte[]> readCharacteristicAsync(BtleGattCharacteristic gattChar) {
-        gattCharReadHistory.add(gattChar);
-        if (gattChar.equals(DeviceInformationService.FIRMWARE_REVISION)) {
-            return Task.delay(20L).continueWithTask(task -> Task.forResult(firmware.getBytes()));
-        } else if (gattChar.equals(DeviceInformationService.HARDWARE_REVISION)) {
-            return Task.delay(20L).continueWithTask(task -> Task.forResult(boardInfo.hardwareRevision));
-        } else if (gattChar.equals(DeviceInformationService.MODEL_NUMBER)) {
-            return Task.delay(20L).continueWithTask(task -> Task.forResult(boardInfo.modelNumber));
-        } else if (gattChar.equals(DeviceInformationService.MANUFACTURER_NAME)) {
-            return Task.delay(20L).continueWithTask(task -> delayReadDevInfo ? Task.forError(new TimeoutException("Reading gatt characteristic timed out")) : Task.forResult(boardInfo.manufacturer));
-        } else if (gattChar.equals(DeviceInformationService.SERIAL_NUMBER)) {
-            return Task.delay(20L).continueWithTask(task -> delayReadDevInfo ? Task.forError(new TimeoutException("Reading gatt characteristic timed out")) : Task.forResult(boardInfo.serialNumber));
-        }
+//    @override
+//    Future<Uint8List> readCharacteristicAsync(BtleGattCharacteristic gattChar) {
+//        gattCharReadHistory.add(gattChar);
+//        if (gattChar.equals(DeviceInformationService.FIRMWARE_REVISION)) {
+//            return Task.delay(20L).continueWithTask(task -> Task.forResult(firmware.getBytes()));
+//        } else if (gattChar.equals(DeviceInformationService.HARDWARE_REVISION)) {
+//            return Task.delay(20L).continueWithTask(task -> Task.forResult(boardInfo.hardwareRevision));
+//        } else if (gattChar.equals(DeviceInformationService.MODEL_NUMBER)) {
+//            return Task.delay(20L).continueWithTask(task -> Task.forResult(boardInfo.modelNumber));
+//        } else if (gattChar.equals(DeviceInformationService.MANUFACTURER_NAME)) {
+//            return Task.delay(20L).continueWithTask(task -> delayReadDevInfo ? Task.forError(new TimeoutException("Reading gatt characteristic timed out")) : Task.forResult(boardInfo.manufacturer));
+//        } else if (gattChar.equals(DeviceInformationService.SERIAL_NUMBER)) {
+//            return Task.delay(20L).continueWithTask(task -> delayReadDevInfo ? Task.forError(new TimeoutException("Reading gatt characteristic timed out")) : Task.forResult(boardInfo.serialNumber));
+//        }
+//
+//        return Task.forResult(null);
+//    }
 
-        return Task.forResult(null);
-    }
-
-    @Override
-    public Task<Void> enableNotificationsAsync(BtleGattCharacteristic characteristic, NotificationListener listener) {
+    @override
+    Future<void> enableNotificationsAsync(BtleGattCharacteristic characteristic, NotificationListener listener) {
         if (enableMetaBootState && !characteristic.serviceUuid.equals(MetaWearBoard.METABOOT_SERVICE)) {
             return Task.forError(new IllegalStateException("Service " + characteristic.serviceUuid.toString() + " does not exist"));
         }
@@ -215,61 +199,83 @@ class JunitPlatform implements IO, BtleGatt {
         return Task.forResult(null);
     }
 
-    @Override
-    public void onDisconnect(DisconnectHandler handler) {
+    @override
+    void onDisconnect(DisconnectHandler handler) {
         dcHandler = handler;
     }
 
-    @Override
-    public boolean serviceExists(UUID serviceUuid) {
+    @override
+    bool serviceExists(UUID serviceUuid) {
         return enableMetaBootState && serviceUuid.equals(MetaWearBoard.METABOOT_SERVICE) ||
                 serviceUuid.equals(MetaWearBoard.METAWEAR_GATT_SERVICE);
     }
 
-    @Override
-    public Task<byte[][]> readCharacteristicAsync(BtleGattCharacteristic[] characteristics) {
-        final ArrayList<Task<byte[]>> tasks = new ArrayList<>();
-        for(BtleGattCharacteristic it: characteristics) {
-            tasks.add(readCharacteristicAsync(it));
+    Future<Uint8List> test() => Future.delayed(Duration(milliseconds: 20),() => Uint8List.fromList(Utf8Encoder().convert(firmware)));
+
+
+    Future<Uint8List> _readCharacteristicAsync(BtleGattCharacteristic gattChar) {
+        gattCharReadHistory.add(gattChar);
+        if (gattChar == DeviceInformationService.FIRMWARE_REVISION) {
+            return Future.delayed(Duration(milliseconds: 20), () =>
+                Uint8List.fromList(Utf8Encoder().convert(firmware)));
+        } else if (gattChar == DeviceInformationService.HARDWARE_REVISION) {
+            return Future.delayed(Duration(milliseconds: 20), () =>
+                Uint8List.fromList(
+                    Utf8Encoder().convert(boardInfo.hardwareRevision)));
+        } else if (gattChar == DeviceInformationService.MODEL_NUMBER) {
+            return Future.delayed(Duration(milliseconds: 20), () =>
+                Uint8List.fromList(
+                    Utf8Encoder().convert(boardInfo.modelNumber)));
+        } else if (gattChar == DeviceInformationService.MANUFACTURER_NAME) {
+            return Future.delayed(Duration(milliseconds: 20), () =>
+            delayReadDevInfo == null
+                ? throw new Exception("Reading gatt characterstic timed out")
+                : boardInfo.manufacturer);
+        } else if (gattChar == DeviceInformationService.SERIAL_NUMBER) {
+            return Future.delayed(Duration(milliseconds: 20), () =>
+            delayReadDevInfo
+                ? throw new Exception("Reading gatt characterstic timed out")
+                : boardInfo.serialNumber);
         }
-
-        return Task.whenAll(tasks).onSuccessTask(task -> {
-            byte[][] valuesArray = new byte[tasks.size()][];
-            for (int i = 0; i < valuesArray.length; i++) {
-                valuesArray[i] = tasks.get(i).getResult();
-            }
-
-            return Task.forResult(valuesArray);
-        });
+        return Future(() => null);
     }
 
-    @Override
-    public Task<Void> localDisconnectAsync() {
+    @override
+    Future<List<Uint8List>> readCharacteristicAsync(List<BtleGattCharacteristic> characteristics) {
+        final List<Future<Uint8List>> tasks = List();
+        for(BtleGattCharacteristic it in characteristics) {
+            tasks.add(_readCharacteristicAsync(it));
+        }
+        return Future.wait(tasks);
+    }
+
+    @override
+    Future<void> localDisconnectAsync() {
         nDisconnects++;
         bridge.disconnected();
-        return Task.forResult(null);
+        return Future(() => null);
     }
 
-    @Override
-    public Task<Void> remoteDisconnectAsync() {
+    @override
+    Future<void> remoteDisconnectAsync() {
         return localDisconnectAsync();
     }
 
-    @Override
-    public Task<Void> connectAsync() {
+    @override
+    Future<void> connectAsync() {
         nConnects++;
         return Task.forResult(null);
     }
 
-    @Override
-    public Task<Integer> readRssiAsync() {
+    @override
+    Future<int> readRssiAsync() {
         TaskCompletionSource<Integer> source= new TaskCompletionSource<>();
         source.trySetError(new UnsupportedOperationException("Reading rssi not supported in JUnit tests"));
         return source.getTask();
     }
 
-    @Override
-    public Task<File> downloadFileAsync(String srcUrl, String dest) {
+    @override
+    Future<File> downloadFileAsync(String srcUrl, String dest) {
         if (srcUrl.endsWith("firmware.zip") || srcUrl.endsWith("bl.zip") || srcUrl.endsWith("sd_bl.zip")) {
             return Task.forResult(new File(dest));
         } else if (srcUrl.endsWith("info2.json")) {
@@ -278,19 +284,19 @@ class JunitPlatform implements IO, BtleGatt {
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
-    @Override
-    public File findDownloadedFile(String filename) {
+    @override
+    File findDownloadedFile(String filename) {
         // create a dummy File object
         return new File(RES_PATH, filename);
     }
 
-    @Override
-    public void logWarn(String tag, String message) {
+    @override
+    void logWarn(String tag, String message) {
         System.out.println(String.format(Locale.US, "%s: %s", tag, message));
     }
 
-    @Override
-    public void logWarn(String tag, String message, Throwable tr) {
+    @override
+    void logWarn(String tag, String message, Throwable tr) {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
         tr.printStackTrace(pw);
@@ -298,7 +304,7 @@ class JunitPlatform implements IO, BtleGatt {
         System.out.println(String.format(Locale.US, "%s: %s%n%s", tag, message, sw.toString()));
     }
 
-    byte[][] getConnectCommands() {
+    List<Uint8List> getConnectCommands() {
         byte[][] cmdArray= new byte[connectCmds.size()][];
         for(int i= 0; i < connectCmds.size(); i++) {
             cmdArray[i]= connectCmds.get(i);
@@ -307,11 +313,11 @@ class JunitPlatform implements IO, BtleGatt {
         return cmdArray;
     }
 
-    byte[][] getCommands() {
+    List<Uint8List> getCommands() {
         return getCommands(0, commandHistory.size());
     }
 
-    byte[][] getCommands(int start, int end) {
+    List<Uint8List> getCommands(int start, int end) {
         byte[][] cmdArray= new byte[end - start][];
         for(int i= start; i < end; i++) {
             cmdArray[i - start]= commandHistory.get(i);
@@ -320,15 +326,15 @@ class JunitPlatform implements IO, BtleGatt {
         return cmdArray;
     }
 
-    byte[][] getCommands(int start) {
+    List<Uint8List> getCommands(int start) {
         return getCommands(start, commandHistory.size());
     }
 
-    public byte[] getLastCommand() {
+    Uint8List getLastCommand() {
         return commandHistory.isEmpty() ? null : commandHistory.get(commandHistory.size() - 1);
     }
 
-    byte[][] getLastCommands(int count) {
+    List<Uint8List> getLastCommands(int count) {
         byte[][] cmdArray= new byte[count][];
         for(int i= 0; i < count; i++) {
             int index= commandHistory.size() - (count - i);
@@ -338,7 +344,7 @@ class JunitPlatform implements IO, BtleGatt {
         return cmdArray;
     }
 
-    BtleGattCharacteristic[] getGattCharReadHistory() {
+    List<BtleGattCharacteristic> getGattCharReadHistory() {
         BtleGattCharacteristic[] array = new BtleGattCharacteristic[gattCharReadHistory.size()];
         gattCharReadHistory.toArray(array);
         return array;

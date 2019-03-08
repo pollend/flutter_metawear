@@ -21,27 +21,56 @@
  * Should you have any questions regarding your right to use this Software, contact MbientLab via email:
  * hello@mbientlab.com.
  */
+import 'DataTypeBase.dart';
 
-package com.mbientlab.metawear.impl;
+class _BatteryStateData extends DataTypeBase {
+    BatteryStateData() {
+        super(SETTINGS, Util.setSilentRead(BATTERY_STATE), new DataAttributes(new byte[] {1, 2}, (byte) 1, (byte) 0, false));
+    }
 
-import com.mbientlab.metawear.ActiveDataProducer;
-import com.mbientlab.metawear.CodeBlock;
-import com.mbientlab.metawear.Data;
-import com.mbientlab.metawear.Observer;
-import com.mbientlab.metawear.Route;
-import com.mbientlab.metawear.builder.RouteBuilder;
-import com.mbientlab.metawear.impl.platform.TimedTask;
-import com.mbientlab.metawear.module.Settings;
+    BatteryStateData(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
+        super(input, module, register, id, attributes);
+    }
 
-import java.io.UnsupportedEncodingException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.util.Calendar;
+    @Override
+    public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
+        return new BatteryStateData(input, module, register, id, attributes);
+    }
 
-import bolts.Capture;
-import bolts.Task;
+    @Override
+    public Number convertToFirmwareUnits(MetaWearBoardPrivate mwPrivate, Number value) {
+        return value;
+    }
 
-import static com.mbientlab.metawear.impl.Constant.Module.SETTINGS;
+    @Override
+    public Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, final byte[] data, final Calendar timestamp, DataPrivate.ClassToObject mapper) {
+    final float voltage= ByteBuffer.wrap(data, 1, 2).order(ByteOrder.LITTLE_ENDIAN).getShort() / 1000f;
+    final BatteryState state= new BatteryState(data[0], voltage);
+
+    return new DataPrivate(timestamp, data, mapper) {
+    @Override
+    public Class<?>[] types() {
+    return new Class<?>[]{BatteryState.class};
+    }
+
+    @Override
+    public <T> T value(Class<T> clazz) {
+    if (clazz == BatteryState.class) {
+    return clazz.cast(state);
+    }
+    return super.value(clazz);
+    }
+    };
+    }
+
+    @Override
+    public DataTypeBase[] createSplits() {
+        return new DataTypeBase[] {
+            new UintData(SETTINGS, eventConfig[1], eventConfig[2], new DataAttributes(new byte[] {1}, (byte) 1, (byte) 0, false)),
+        new MilliUnitsUFloatData(SETTINGS, eventConfig[1], eventConfig[2], new DataAttributes(new byte[] {2}, (byte) 1, (byte) 1, false))
+    };
+    }
+}
 
 /**
  * Created by etsai on 9/20/16.
@@ -66,16 +95,15 @@ class SettingsImpl extends ModuleImplBase implements Settings {
         }
     }
 
-    private static final long serialVersionUID = -8845055245623576362L;
-    private final static String BATTERY_PRODUCER= "com.mbientlab.metawear.impl.SettingsImpl.BATTERY_PRODUCER",
+    static const String BATTERY_PRODUCER= "com.mbientlab.metawear.impl.SettingsImpl.BATTERY_PRODUCER",
             BATTERY_CHARGE_PRODUCER= "com.mbientlab.metawear.impl.SettingsImpl.BATTERY_CHARGE_PRODUCER",
             BATTERY_VOLTAGE_PRODUCER= "com.mbientlab.metawear.impl.SettingsImpl.BATTERY_VOLTAGE_PRODUCER",
             POWER_STATUS_PRODUCER= "com.mbientlab.metawear.impl.SettingsImpl.POWER_STATUS_PRODUCER",
             CHARGE_STATUS_PRODUCER= "com.mbientlab.metawear.impl.SettingsImpl.CHARGE_STATUS_PRODUCER";
 
-    private static final byte CONN_PARAMS_REVISION= 1, DISCONNECTED_EVENT_REVISION= 2, BATTERY_REVISION= 3, CHARGE_STATUS_REVISION = 5, WHITELIST_REVISION = 6;
-    private static final float AD_INTERVAL_STEP= 0.625f, CONN_INTERVAL_STEP= 1.25f, SUPERVISOR_TIMEOUT_STEP= 10f;
-    private static final byte DEVICE_NAME = 1, AD_PARAM = 2, TX_POWER = 3,
+    static const int CONN_PARAMS_REVISION= 1, DISCONNECTED_EVENT_REVISION= 2, BATTERY_REVISION= 3, CHARGE_STATUS_REVISION = 5, WHITELIST_REVISION = 6;
+    static const double AD_INTERVAL_STEP= 0.625f, CONN_INTERVAL_STEP= 1.25f, SUPERVISOR_TIMEOUT_STEP= 10f;
+    static const int DEVICE_NAME = 1, AD_PARAM = 2, TX_POWER = 3,
         START_ADVERTISING = 5,
         SCAN_RESPONSE = 7, PARTIAL_SCAN_RESPONSE = 8,
         CONNECTION_PARAMS = 9,

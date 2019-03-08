@@ -25,21 +25,18 @@
 
 import 'dart:typed_data';
 
+import 'package:flutter_metawear/Data.dart';
 import 'package:flutter_metawear/DataToken.dart';
 import 'package:flutter_metawear/impl/DataAttributes.dart';
+import 'package:flutter_metawear/impl/DataPrivate.dart';
+import 'package:flutter_metawear/impl/DataProcessorConfig.dart';
+import 'package:flutter_metawear/impl/DataProcessorImpl.dart';
+import 'package:flutter_metawear/impl/DataTypeBase.dart';
 import 'package:flutter_metawear/impl/DataTypeBase.dart';
 import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
 import 'package:flutter_metawear/impl/ModuleType.dart';
-
-class test extends DataTypeBase{
-  test(DataTypeBase input, ModuleType module, int register, DataAttributes attributes) : super(input, module, register, attributes);
-
-
-  createList(){
-
-  }
-}
-
+import 'package:flutter_metawear/impl/Util.dart';
+import 'package:tuple/tuple.dart';
 
 /**
  * Created by etsai on 9/4/16.
@@ -128,257 +125,227 @@ abstract class DataTypeBase implements DataToken {
             split = null,
             attributes = DataAttributes(Uint8List.fromList([length]),1,offset,false);
 
-    DataTypeBase(DataTypeBase input, ModuleType module, int register, DataAttributes attributes, Function split,[int id]):
-            eventConfig = id != null ? Uint8List.fromList([module.id,register,id]): Uint8List.fromList([NO_DATA_ID]),
+    DataTypeBase(ModuleType module, int register, DataAttributes attributes, Function split,[int id, DataTypeBase input]):
+            this.eventConfig = Uint8List.fromList([module.id,register,id == null ? NO_DATA_ID: id]),
             this.attributes = attributes,
             this.input = input,
             this.split = split();
 
 
-  @override
-  DataToken slice(int offset, int length) {
-    // TODO: implement slice
-    return null;
-  }
 
-//    DataTypeBase(this.eventConfig,int offset, int length): attributes = DataAttributes(Uint8List.fromList([length]),1,offset,false), split = null, input=null;
+    Tuple3<int, int, int> eventConfigAsTuple() {
+        return Tuple3<int,int,int>(eventConfig[0], eventConfig[1], eventConfig[2]);
+    }
 
-//    factory DataTypeBase.Module(ModuleType type, int register, DataAttributes attributes, [int id]){
+    void read(MetaWearBoardPrivate mwPrivate,[Uint8List parameters]) {
+      if(parameters == null) {
+          if (eventConfig[2] == NO_DATA_ID) {
+              mwPrivate.sendCommand(Uint8List.fromList([eventConfig[0], eventConfig[1]]));
+          } else {
+              mwPrivate.sendCommand(eventConfig);
+          }
+      }
+      else{
+          Uint8List command = Uint8List(eventConfig.length + parameters.length);
+          command.setAll(0, eventConfig);
+          command.setAll(eventConfig.length, parameters);
+          mwPrivate.sendCommand(command);
+      }
+    }
 
-//    }
 
+    void markSilent() {
+        if ((eventConfig[1] & 0x80) == 0x80) {
+            eventConfig[1] |= 0x40;
+        }
+    }
 
-//
-//    DataTypeBase(Constant.Module module, byte register, byte id, DataAttributes attributes) {
-//        this(null, module, register, id, attributes);
-//    }
-//
-//    DataTypeBase(Constant.Module module, byte register, DataAttributes attributes) {
-//        this(null, module, register, attributes);
-//    }
-//
-//    DataTypeBase(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
-//        this.eventConfig = new byte[] {module.id, register, id};
-//        this.attributes= attributes;
-//        this.input= input;
-//        this.split = createSplits();
-//    }
-//
-//    DataTypeBase(DataTypeBase input, Constant.Module module, byte register, DataAttributes attributes) {
-//        this(input, module, register, NO_DATA_ID, attributes);
-//    }
-//
-//    Tuple3<Byte, Byte, Byte> eventConfigAsTuple() {
-//        return new Tuple3<>(eventConfig[0], eventConfig[1], eventConfig[2]);
-//    }
-//
-//    public void read(MetaWearBoardPrivate mwPrivate) {
-//        if (eventConfig[2] == NO_DATA_ID) {
-//            mwPrivate.sendCommand(new byte[] {eventConfig[0], eventConfig[1]});
-//        } else {
-//            mwPrivate.sendCommand(eventConfig);
-//        }
-//    }
-//
-//    public void read(MetaWearBoardPrivate mwPrivate, byte[] parameters) {
-//    byte[] command= new byte[eventConfig.length + parameters.length];
-//    System.arraycopy(eventConfig, 0, command, 0, eventConfig.length);
-//    System.arraycopy(parameters, 0, command, eventConfig.length, parameters.length);
-//
-//    mwPrivate.sendCommand(command);
-//    }
-//
-//    void markSilent() {
-//        if ((eventConfig[1] & 0x80) == 0x80) {
-//            eventConfig[1] |= 0x40;
-//        }
-//    }
-//
-//    void markLive() {
-//        if ((eventConfig[1] & 0x80) == 0x80) {
-//            eventConfig[1] &= ~0x40;
-//        }
-//    }
-//
-//    protected float scale(MetaWearBoardPrivate mwPrivate) {
-//        return (input == null) ? 1.f : input.scale(mwPrivate);
-//    }
-//    public abstract DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes);
-//    public DataTypeBase dataProcessorCopy(DataTypeBase input, DataAttributes attributes) {
-//        return copy(input, DATA_PROCESSOR, DataProcessorImpl.NOTIFY, NO_DATA_ID, attributes);
-//    }
-//    public DataTypeBase dataProcessorStateCopy(DataTypeBase input, DataAttributes attributes) {
-//        return copy(input, DATA_PROCESSOR, Util.setSilentRead(DataProcessorImpl.STATE), NO_DATA_ID, attributes);
-//    }
-//
-//    public Number convertToFirmwareUnits(MetaWearBoardPrivate mwPrivate, Number value) {
-//        return value;
-//    }
-//    public abstract Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, byte[] data, Calendar timestamp, DataPrivate.ClassToObject mapper);
-//    Pair<? extends DataTypeBase, ? extends DataTypeBase> dataProcessorTransform(DataProcessorConfig config, DataProcessorImpl dpModule) {
-//        switch(config.id) {
-//            case DataProcessorConfig.Buffer.ID:
-//                return new Pair<>(
-//                    new UintData(this, DATA_PROCESSOR, DataProcessorImpl.NOTIFY, new DataAttributes(new byte[] {}, (byte) 0, (byte) 0, false)),
-//                    dataProcessorStateCopy(this, this.attributes)
-//                );
-//            case DataProcessorConfig.Accumulator.ID: {
-//                DataProcessorConfig.Accumulator casted = (DataProcessorConfig.Accumulator) config;
-//                DataAttributes attributes= new DataAttributes(new byte[] {casted.output}, (byte) 1, (byte) 0, !casted.counter && this.attributes.signed);
-//
-//                return new Pair<>(
-//                    casted.counter ? new UintData(this, DATA_PROCESSOR, DataProcessorImpl.NOTIFY, attributes) : dataProcessorCopy(this, attributes),
-//                    casted.counter ? new UintData(null, DATA_PROCESSOR, Util.setSilentRead(DataProcessorImpl.STATE), DataTypeBase.NO_DATA_ID, attributes) :
-//                    dataProcessorStateCopy(this, attributes)
-//                );
-//            }
-//            case DataProcessorConfig.Average.ID:
-//            case DataProcessorConfig.Delay.ID:
-//            case DataProcessorConfig.Time.ID:
-//                return new Pair<>(dataProcessorCopy(this, this.attributes.dataProcessorCopy()), null);
-//            case DataProcessorConfig.Passthrough.ID:
-//                return new Pair<>(
-//                    dataProcessorCopy(this, this.attributes.dataProcessorCopy()),
-//                    new UintData(DATA_PROCESSOR, Util.setSilentRead(DataProcessorImpl.STATE), DataTypeBase.NO_DATA_ID, new DataAttributes(new byte[] {2}, (byte) 1, (byte) 0, false))
-//                );
-//            case DataProcessorConfig.Maths.ID: {
-//                DataProcessorConfig.Maths casted = (DataProcessorConfig.Maths) config;
-//                DataTypeBase processor = null;
-//                switch(casted.op) {
-//                    case ADD:
-//                        processor = dataProcessorCopy(this, attributes.dataProcessorCopySize((byte) 4));
-//                        break;
-//                    case MULTIPLY:
-//                        processor = dataProcessorCopy(this, attributes.dataProcessorCopySize(Math.abs(casted.rhs) < 1 ? attributes.sizes[0] : 4));
-//                        break;
-//                    case DIVIDE:
-//                        processor = dataProcessorCopy(this, attributes.dataProcessorCopySize(Math.abs(casted.rhs) < 1 ? 4 : attributes.sizes[0]));
-//                        break;
-//                    case SUBTRACT:
-//                        processor = dataProcessorCopy(this, attributes.dataProcessorCopySigned(true));
-//                        break;
-//                    case ABS_VALUE:
-//                        processor = dataProcessorCopy(this, attributes.dataProcessorCopySigned(false));
-//                        break;
-//                    case MODULUS: {
-//                        processor = dataProcessorCopy(this, attributes.dataProcessorCopy());
-//                        break;
-//                    }
-//                    case EXPONENT: {
-//                        processor = new ByteArrayData(this, DATA_PROCESSOR, DataProcessorImpl.NOTIFY,
-//                            attributes.dataProcessorCopySize((byte) 4));
-//                        break;
-//                    }
-//                    case LEFT_SHIFT: {
-//                        processor = new ByteArrayData(this, DATA_PROCESSOR, DataProcessorImpl.NOTIFY,
-//                            attributes.dataProcessorCopySize((byte) Math.min(attributes.sizes[0] + (casted.rhs / 8), 4)));
-//        break;
-//        }
-//        case RIGHT_SHIFT: {
-//        processor = new ByteArrayData(this, DATA_PROCESSOR, DataProcessorImpl.NOTIFY,
-//        attributes.dataProcessorCopySize((byte) Math.max(attributes.sizes[0] - (casted.rhs / 8), 1)));
-//        break;
-//        }
-//        case SQRT: {
-//        processor = new ByteArrayData(this, DATA_PROCESSOR, DataProcessorImpl.NOTIFY, attributes.dataProcessorCopySigned(false));
-//        break;
-//        }
-//        case CONSTANT:
-//        DataAttributes attributes = new DataAttributes(new byte[] {4}, (byte) 1, (byte) 0, casted.rhs >= 0);
-//        processor = attributes.signed ? new IntData(this, DATA_PROCESSOR, DataProcessorImpl.NOTIFY, attributes) :
-//        new UintData(this, DATA_PROCESSOR, DataProcessorImpl.NOTIFY, attributes);
-//        break;
-//        }
-//        if (processor != null) {
-//        return new Pair<>(processor, null);
-//        }
-//        break;
-//        }
-//        case DataProcessorConfig.Pulse.ID: {
-//        DataProcessorConfig.Pulse casted = (DataProcessorConfig.Pulse) config;
-//        DataTypeBase processor;
-//        switch(casted.mode) {
-//        case WIDTH:
-//        processor = new UintData(this, DATA_PROCESSOR, DataProcessorImpl.NOTIFY, new DataAttributes(new byte[] {2}, (byte) 1, (byte) 0, false));
-//        break;
-//        case AREA:
-//        processor = dataProcessorCopy(this, attributes.dataProcessorCopySize((byte) 4));
-//        break;
-//        case PEAK:
-//        processor = dataProcessorCopy(this, attributes.dataProcessorCopy());
-//        break;
-//        case ON_DETECT:
-//        processor = new UintData(this, DATA_PROCESSOR, DataProcessorImpl.NOTIFY, new DataAttributes(new byte[] {1}, (byte) 1, (byte) 0, false));
-//        break;
-//        default:
-//        processor = null;
-//        }
-//        if (processor != null) {
-//        return new Pair<>(processor, null);
-//        }
-//        break;
-//        }
-//        case DataProcessorConfig.Comparison.ID: {
-//        DataTypeBase processor = null;
-//        if (config instanceof DataProcessorConfig.SingleValueComparison) {
-//        processor = dataProcessorCopy(this, this.attributes.dataProcessorCopy());
-//        } else if (config instanceof DataProcessorConfig.MultiValueComparison) {
-//        DataProcessorConfig.MultiValueComparison casted = (DataProcessorConfig.MultiValueComparison) config;
-//        if (casted.mode == ComparisonOutput.PASS_FAIL || casted.mode == ComparisonOutput.ZONE) {
-//        processor = new UintData(this, DATA_PROCESSOR, DataProcessorImpl.NOTIFY, new DataAttributes(new byte[] {1}, (byte) 1, (byte) 0, false));
-//        } else {
-//        processor = dataProcessorCopy(this, attributes.dataProcessorCopy());
-//        }
-//        }
-//        if (processor != null) {
-//        return new Pair<>(processor, null);
-//        }
-//        break;
-//        }
-//        case DataProcessorConfig.Threshold.ID: {
-//        DataProcessorConfig.Threshold casted = (DataProcessorConfig.Threshold) config;
-//        switch (casted.mode) {
-//        case ABSOLUTE:
-//        return new Pair<>(dataProcessorCopy(this, attributes.dataProcessorCopy()), null);
-//        case BINARY:
-//        return new Pair<>(new IntData(this, DATA_PROCESSOR, DataProcessorImpl.NOTIFY,
-//        new DataAttributes(new byte[] {1}, (byte) 1, (byte) 0, true)), null);
-//        }
-//        break;
-//        }
-//        case DataProcessorConfig.Differential.ID: {
-//        DataProcessorConfig.Differential casted = (DataProcessorConfig.Differential) config;
-//        switch(casted.mode) {
-//        case ABSOLUTE:
-//        return new Pair<>(dataProcessorCopy(this, attributes.dataProcessorCopy()), null);
-//        case DIFFERENCE:
-//        throw new IllegalStateException("Differential processor in 'difference' mode must be handled by subclasses");
-//        case BINARY:
-//        return new Pair<>(new IntData(this, DATA_PROCESSOR, DataProcessorImpl.NOTIFY, new DataAttributes(new byte[] {1}, (byte) 1, (byte) 0, true)), null);
-//        }
-//        break;
-//        }
-//        case DataProcessorConfig.Packer.ID: {
-//        DataProcessorConfig.Packer casted = (DataProcessorConfig.Packer) config;
-//        return new Pair<>(dataProcessorCopy(this, attributes.dataProcessorCopyCopies(casted.count)), null);
-//        }
-//        case DataProcessorConfig.Accounter.ID: {
-//        DataProcessorConfig.Accounter casted = (DataProcessorConfig.Accounter) config;
-//        return new Pair<>(dataProcessorCopy(this, new DataAttributes(new byte[] {casted.length, attributes.length()}, (byte) 1, (byte) 0, attributes.signed)), null);
-//        }
-//        case DataProcessorConfig.Fuser.ID: {
-//        byte fusedLength = attributes.length();
-//        DataProcessorConfig.Fuser casted = (DataProcessorConfig.Fuser) config;
-//
-//        for(byte id: casted.filterIds) {
-//        fusedLength+= dpModule.activeProcessors.get(id).state.attributes.length();
-//        }
-//
-//        return new Pair<>(new ArrayData(this, DATA_PROCESSOR, DataProcessorImpl.NOTIFY, new DataAttributes(new byte[] {fusedLength}, (byte) 1, (byte) 0, false)), null);
-//        }
-//        }
-//        throw new IllegalStateException("Unable to determine the DataTypeBase object for config: " + Util.arrayToHexString(config.build()));
-//    }
+    void markLive() {
+        if ((eventConfig[1] & 0x80) == 0x80) {
+            eventConfig[1] &= ~0x40;
+        }
+    }
+
+    double scale(MetaWearBoardPrivate mwPrivate) {
+        return (input == null) ? 1.0 : input.scale(mwPrivate);
+    }
+    DataTypeBase copy(DataTypeBase input, ModuleType module, int register, int id, DataAttributes attributes);
+    DataTypeBase dataProcessorCopy(DataTypeBase input, DataAttributes attributes) {
+        return copy(input, ModuleType.DATA_PROCESSOR, DataProcessorImpl.NOTIFY, NO_DATA_ID, attributes);
+    }
+    DataTypeBase dataProcessorStateCopy(DataTypeBase input, DataAttributes attributes) {
+        return copy(input, ModuleType.DATA_PROCESSOR, Util.setSilentRead(DataProcessorImpl.STATE), NO_DATA_ID, attributes);
+    }
+
+    num convertToFirmwareUnits(MetaWearBoardPrivate mwPrivate, num value) {
+        return value;
+    }
+    Data createMessage(bool logData, MetaWearBoardPrivate mwPrivate, Uint8List data, Data timestamp, ClassToObject mapper);
+
+    Tuple2 dataProcessorTransform(DataProcessorConfig config, DataProcessorImpl dpModule) {
+        switch(config.id) {
+            case DataProcessorConfig.Buffer.ID:
+                return Tuple2(
+                    new UintData(this, DATA_PROCESSOR, DataProcessorImpl.NOTIFY, new DataAttributes(Uint8List(0), 0, 0, false)),
+                    dataProcessorStateCopy(this, this.attributes)
+                );
+            case DataProcessorConfig.Accumulator.ID: {
+                DataProcessorConfig.Accumulator casted = (DataProcessorConfig.Accumulator) config;
+                DataAttributes attributes= new DataAttributes(new byte[] {casted.output}, (byte) 1, (byte) 0, !casted.counter && this.attributes.signed);
+
+                return new Pair<>(
+                    casted.counter ? new UintData(this, DATA_PROCESSOR, DataProcessorImpl.NOTIFY, attributes) : dataProcessorCopy(this, attributes),
+                    casted.counter ? new UintData(null, DATA_PROCESSOR, Util.setSilentRead(DataProcessorImpl.STATE), DataTypeBase.NO_DATA_ID, attributes) :
+                    dataProcessorStateCopy(this, attributes)
+                );
+            }
+            case DataProcessorConfig.Average.ID:
+            case DataProcessorConfig.Delay.ID:
+            case DataProcessorConfig.Time.ID:
+                return new Pair<>(dataProcessorCopy(this, this.attributes.dataProcessorCopy()), null);
+            case DataProcessorConfig.Passthrough.ID:
+                return new Pair<>(
+                    dataProcessorCopy(this, this.attributes.dataProcessorCopy()),
+                    new UintData(DATA_PROCESSOR, Util.setSilentRead(DataProcessorImpl.STATE), DataTypeBase.NO_DATA_ID, new DataAttributes(new byte[] {2}, (byte) 1, (byte) 0, false))
+                );
+            case DataProcessorConfig.Maths.ID: {
+                DataProcessorConfig.Maths casted = (DataProcessorConfig.Maths) config;
+                DataTypeBase processor = null;
+                switch(casted.op) {
+                    case ADD:
+                        processor = dataProcessorCopy(this, attributes.dataProcessorCopySize((byte) 4));
+                        break;
+                    case MULTIPLY:
+                        processor = dataProcessorCopy(this, attributes.dataProcessorCopySize(Math.abs(casted.rhs) < 1 ? attributes.sizes[0] : 4));
+                        break;
+                    case DIVIDE:
+                        processor = dataProcessorCopy(this, attributes.dataProcessorCopySize(Math.abs(casted.rhs) < 1 ? 4 : attributes.sizes[0]));
+                        break;
+                    case SUBTRACT:
+                        processor = dataProcessorCopy(this, attributes.dataProcessorCopySigned(true));
+                        break;
+                    case ABS_VALUE:
+                        processor = dataProcessorCopy(this, attributes.dataProcessorCopySigned(false));
+                        break;
+                    case MODULUS: {
+                        processor = dataProcessorCopy(this, attributes.dataProcessorCopy());
+                        break;
+                    }
+                    case EXPONENT: {
+                        processor = new ByteArrayData(this, DATA_PROCESSOR, DataProcessorImpl.NOTIFY,
+                            attributes.dataProcessorCopySize((byte) 4));
+                        break;
+                    }
+                    case LEFT_SHIFT: {
+                        processor = new ByteArrayData(this, DATA_PROCESSOR, DataProcessorImpl.NOTIFY,
+                            attributes.dataProcessorCopySize((byte) Math.min(attributes.sizes[0] + (casted.rhs / 8), 4)));
+        break;
+        }
+        case RIGHT_SHIFT: {
+        processor = new ByteArrayData(this, DATA_PROCESSOR, DataProcessorImpl.NOTIFY,
+        attributes.dataProcessorCopySize((byte) Math.max(attributes.sizes[0] - (casted.rhs / 8), 1)));
+        break;
+        }
+        case SQRT: {
+        processor = new ByteArrayData(this, DATA_PROCESSOR, DataProcessorImpl.NOTIFY, attributes.dataProcessorCopySigned(false));
+        break;
+        }
+        case CONSTANT:
+        DataAttributes attributes = new DataAttributes(new byte[] {4}, (byte) 1, (byte) 0, casted.rhs >= 0);
+        processor = attributes.signed ? new IntData(this, DATA_PROCESSOR, DataProcessorImpl.NOTIFY, attributes) :
+        new UintData(this, DATA_PROCESSOR, DataProcessorImpl.NOTIFY, attributes);
+        break;
+        }
+        if (processor != null) {
+        return new Pair<>(processor, null);
+        }
+        break;
+        }
+        case DataProcessorConfig.Pulse.ID: {
+        DataProcessorConfig.Pulse casted = (DataProcessorConfig.Pulse) config;
+        DataTypeBase processor;
+        switch(casted.mode) {
+        case WIDTH:
+        processor = new UintData(this, DATA_PROCESSOR, DataProcessorImpl.NOTIFY, new DataAttributes(new byte[] {2}, (byte) 1, (byte) 0, false));
+        break;
+        case AREA:
+        processor = dataProcessorCopy(this, attributes.dataProcessorCopySize((byte) 4));
+        break;
+        case PEAK:
+        processor = dataProcessorCopy(this, attributes.dataProcessorCopy());
+        break;
+        case ON_DETECT:
+        processor = new UintData(this, DATA_PROCESSOR, DataProcessorImpl.NOTIFY, new DataAttributes(new byte[] {1}, (byte) 1, (byte) 0, false));
+        break;
+        default:
+        processor = null;
+        }
+        if (processor != null) {
+        return new Pair<>(processor, null);
+        }
+        break;
+        }
+        case DataProcessorConfig.Comparison.ID: {
+        DataTypeBase processor = null;
+        if (config instanceof DataProcessorConfig.SingleValueComparison) {
+        processor = dataProcessorCopy(this, this.attributes.dataProcessorCopy());
+        } else if (config instanceof DataProcessorConfig.MultiValueComparison) {
+        DataProcessorConfig.MultiValueComparison casted = (DataProcessorConfig.MultiValueComparison) config;
+        if (casted.mode == ComparisonOutput.PASS_FAIL || casted.mode == ComparisonOutput.ZONE) {
+        processor = new UintData(this, DATA_PROCESSOR, DataProcessorImpl.NOTIFY, new DataAttributes(new byte[] {1}, (byte) 1, (byte) 0, false));
+        } else {
+        processor = dataProcessorCopy(this, attributes.dataProcessorCopy());
+        }
+        }
+        if (processor != null) {
+        return new Pair<>(processor, null);
+        }
+        break;
+        }
+        case DataProcessorConfig.Threshold.ID: {
+        DataProcessorConfig.Threshold casted = (DataProcessorConfig.Threshold) config;
+        switch (casted.mode) {
+        case ABSOLUTE:
+        return new Pair<>(dataProcessorCopy(this, attributes.dataProcessorCopy()), null);
+        case BINARY:
+        return new Pair<>(new IntData(this, DATA_PROCESSOR, DataProcessorImpl.NOTIFY,
+        new DataAttributes(new byte[] {1}, (byte) 1, (byte) 0, true)), null);
+        }
+        break;
+        }
+        case DataProcessorConfig.Differential.ID: {
+        DataProcessorConfig.Differential casted = (DataProcessorConfig.Differential) config;
+        switch(casted.mode) {
+        case ABSOLUTE:
+        return new Pair<>(dataProcessorCopy(this, attributes.dataProcessorCopy()), null);
+        case DIFFERENCE:
+        throw new IllegalStateException("Differential processor in 'difference' mode must be handled by subclasses");
+        case BINARY:
+        return new Pair<>(new IntData(this, DATA_PROCESSOR, DataProcessorImpl.NOTIFY, new DataAttributes(new byte[] {1}, (byte) 1, (byte) 0, true)), null);
+        }
+        break;
+        }
+        case DataProcessorConfig.Packer.ID: {
+        DataProcessorConfig.Packer casted = (DataProcessorConfig.Packer) config;
+        return new Pair<>(dataProcessorCopy(this, attributes.dataProcessorCopyCopies(casted.count)), null);
+        }
+        case DataProcessorConfig.Accounter.ID: {
+        DataProcessorConfig.Accounter casted = (DataProcessorConfig.Accounter) config;
+        return new Pair<>(dataProcessorCopy(this, new DataAttributes(new byte[] {casted.length, attributes.length()}, (byte) 1, (byte) 0, attributes.signed)), null);
+        }
+        case DataProcessorConfig.Fuser.ID: {
+        byte fusedLength = attributes.length();
+        DataProcessorConfig.Fuser casted = (DataProcessorConfig.Fuser) config;
+
+        for(byte id: casted.filterIds) {
+        fusedLength+= dpModule.activeProcessors.get(id).state.attributes.length();
+        }
+
+        return new Pair<>(new ArrayData(this, DATA_PROCESSOR, DataProcessorImpl.NOTIFY, new DataAttributes(new byte[] {fusedLength}, (byte) 1, (byte) 0, false)), null);
+        }
+        }
+        throw new IllegalStateException("Unable to determine the DataTypeBase object for config: " + Util.arrayToHexString(config.build()));
+    }
 //
 //    protected DataTypeBase[] createSplits() {
 //        return null;

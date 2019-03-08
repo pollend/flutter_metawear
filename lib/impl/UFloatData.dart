@@ -45,8 +45,8 @@ class UFloatData extends DataTypeBase {
         super(input, module, register, attributes);
     }
 
-    @Override
-    public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
+    @override
+    DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
         if (input == null) {
             if (this.input == null) {
                 throw new NullPointerException("SFloatData cannot have null input variable");
@@ -57,13 +57,13 @@ class UFloatData extends DataTypeBase {
         return new UFloatData(input, module, register, id, attributes);
     }
 
-    @Override
-    public Number convertToFirmwareUnits(MetaWearBoardPrivate mwPrivate, Number value) {
+    @override
+    num convertToFirmwareUnits(MetaWearBoardPrivate mwPrivate, num value) {
         return value.floatValue() * scale(mwPrivate);
     }
 
-    @Override
-    public Data createMessage(boolean logData, final MetaWearBoardPrivate mwPrivate, final byte[] data, final Calendar timestamp, DataPrivate.ClassToObject mapper) {
+    @override
+    Data createMessage(bool logData, final MetaWearBoardPrivate mwPrivate, final byte[] data, final Calendar timestamp, DataPrivate.ClassToObject mapper) {
         final ByteBuffer buffer = Util.bytesToUIntBuffer(logData, data, attributes);
         final float scaled= buffer.getLong(0) / scale(mwPrivate);
 
@@ -88,8 +88,8 @@ class UFloatData extends DataTypeBase {
         };
     }
 
-    @Override
-    Pair<? extends DataTypeBase, ? extends DataTypeBase> dataProcessorTransform(DataProcessorConfig config, DataProcessorImpl dpModule) {
+    @override
+    Tuple2<? extends DataTypeBase, ? extends DataTypeBase> dataProcessorTransform(DataProcessorConfig config, DataProcessorImpl dpModule) {
         switch(config.id) {
             case DataProcessorConfig.Maths.ID: {
                 DataProcessorConfig.Maths casted = (DataProcessorConfig.Maths) config;

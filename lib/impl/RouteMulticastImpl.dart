@@ -22,11 +22,6 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.impl;
-
-import com.mbientlab.metawear.builder.RouteComponent;
-import com.mbientlab.metawear.builder.RouteMulticast;
-
 /**
  * Created by etsai on 9/22/16.
  */

@@ -25,6 +25,7 @@
 
 import 'package:flutter_metawear/impl/DataPrivate.dart';
 import 'package:flutter_metawear/impl/DataTypeBase.dart';
+import 'package:flutter_metawear/impl/ModuleType.dart';
 
 
 class _DataPrivate extends DataPrivate{
@@ -36,6 +37,8 @@ class _DataPrivate extends DataPrivate{
  * Created by etsai on 9/4/16.
  */
 class UintData extends DataTypeBase {
+
+    UintData.Module(ModuleType module,int register) : super(null, null, 0, null, null)
 
 //    UintData(Constant.Module module, byte register, byte id, DataAttributes attributes) {
 //        super(module, register, id, attributes);

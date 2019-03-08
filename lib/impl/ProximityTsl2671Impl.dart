@@ -22,8 +22,12 @@
  * hello@mbientlab.com.
  */
 
+import 'package:flutter_metawear/ForcedDataProducer.dart';
 import 'package:flutter_metawear/impl/DataTypeBase.dart';
+import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
 import 'package:flutter_metawear/impl/ModuleImplBase.dart';
+import 'package:flutter_metawear/impl/UintData.dart';
+import 'package:flutter_metawear/impl/Util.dart';
 import 'package:flutter_metawear/module/ProximityTsl2671.dart';
 
 /**
@@ -39,15 +43,12 @@ class ProximityTsl2671Impl extends ModuleImplBase implements ProximityTsl2671 {
         }
     }
 
-    private final static String PRODUCER= "com.mbientlab.metawear.impl.ProximityTsl2671Impl.PRODUCER";
-    private static final byte ADC= 1, MODE= 2;
-    private static final long serialVersionUID = -3980380296316444383L;
+    static const String PRODUCER= "com.mbientlab.metawear.impl.ProximityTsl2671Impl.PRODUCER";
+    static const int ADC= 1, MODE= 2;
 
-    private transient ForcedDataProducer proximityProducer;
+    ForcedDataProducer proximityProducer;
 
-    ProximityTsl2671Impl(MetaWearBoardPrivate mwPrivate) {
-        super(mwPrivate);
-
+    ProximityTsl2671Impl(MetaWearBoardPrivate mwPrivate) : super(mwPrivate){
         mwPrivate.tagProducer(PRODUCER, new UintData(PROXIMITY, Util.setSilentRead(ADC), new DataAttributes(new byte[] {2}, (byte) 1, (byte) 0, false)));
     }
 

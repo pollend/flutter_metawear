@@ -22,15 +22,69 @@
  * hello@mbientlab.com.
  */
 
+import 'dart:typed_data';
+
 import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
 import 'package:flutter_metawear/impl/ModuleImplBase.dart';
+import 'package:flutter_metawear/impl/ModuleType.dart';
 import 'package:flutter_metawear/module/NeoPixel.dart';
+
+
+class _Strand extends Strand {
+    final Map<int, int> _activeStrands;
+    final MetaWearBoardPrivate _mwPrivate;
+    final int strand;
+    final int length;
+
+  _Strand(this._activeStrands,this._mwPrivate, this.length,this.strand);
+
+    @override
+    void free() {
+        _activeStrands.remove(strand);
+        _mwPrivate.sendCommand(Uint8List.fromList([ModuleType.NEO_PIXEL.id, NeoPixelImpl.FREE, strand]));
+    }
+
+    @override
+    void hold() {
+        _mwPrivate.sendCommand(Uint8List.fromList([ModuleType.NEO_PIXEL.id, NeoPixelImpl.HOLD, strand, 1]));
+    }
+
+    @override
+    void release() {
+        _mwPrivate.sendCommand(Uint8List.fromList([ModuleType.NEO_PIXEL.id, NeoPixelImpl.HOLD, strand,  0]));
+    }
+
+    @override
+    void clear(int start, int end) {
+        _mwPrivate.sendCommand(Uint8List.fromList([ModuleType.NEO_PIXEL.id, NeoPixelImpl.CLEAR, strand, start, end]));
+    }
+
+    @override
+    void setRgb(int index, int red, int green, int blue) {
+        _mwPrivate.sendCommand(Uint8List.fromList([ModuleType.NEO_PIXEL.id, NeoPixelImpl.SET_COLOR, strand, index, red, green, blue]));
+    }
+
+    void rotate(RotationDirection direction, int period,[int repetitions]){
+      _mwPrivate.sendCommand(Uint8List.fromList([ModuleType.NEO_PIXEL.id, NeoPixelImpl.ROTATE, strand, direction.index, repetitions == null ? -1 : repetitions, (period & 0xff), (period >> 8 & 0xff)]));
+    }
+
+    @override
+    void stopRotation() {
+        _mwPrivate.sendCommand(Uint8List.fromList([ModuleType.NEO_PIXEL.id, NeoPixelImpl.ROTATE, strand, 0x0, 0x0, 0x0, 0x0]));
+    }
+
+    @override
+    int nLeds() {
+        return length;
+    }
+
+}
 
 /**
  * Created by etsai on 9/18/16.
  */
 class NeoPixelImpl extends ModuleImplBase implements NeoPixel {
-    static final int INITIALIZE= 1,
+    static const int INITIALIZE= 1,
             HOLD= 2,
             CLEAR= 3, SET_COLOR= 4,
             ROTATE= 5,
@@ -39,69 +93,20 @@ class NeoPixelImpl extends ModuleImplBase implements NeoPixel {
 
     NeoPixelImpl(MetaWearBoardPrivate mwPrivate): super(mwPrivate);
 
-    @Override
-    public Strand initializeStrand(byte strand, ColorOrdering ordering, StrandSpeed speed, byte gpioPin, byte length) {
-        activeStrands.put(strand, length);
-        mwPrivate.sendCommand(new byte[] {NEO_PIXEL.id, INITIALIZE, strand, (byte)(speed.ordinal() << 2 | ordering.ordinal()), gpioPin, length});
-        return createStrandObj(strand, length);
+    @override
+    Strand initializeStrand(int strand, ColorOrdering ordering, StrandSpeed speed, int gpioPin, int length) {
+        activeStrands[strand] =  length;
+        mwPrivate.sendCommand(Uint8List.fromList([ModuleType.NEO_PIXEL.id, INITIALIZE, strand, (speed.index << 2 | ordering.index), gpioPin, length]));
+        return _createStrandObj(strand, length);
     }
 
-    @Override
-    public Strand lookupStrand(byte strand) {
+    @override
+    Strand lookupStrand(int strand) {
         if (activeStrands.containsKey(strand)) {
-            return createStrandObj(strand, activeStrands.get(strand));
+            return _createStrandObj(strand, activeStrands[strand]);
         }
         return null;
     }
 
-    private Strand createStrandObj(final byte strand, final byte length) {
-        return new Strand() {
-            @Override
-            public void free() {
-                activeStrands.remove(strand);
-                mwPrivate.sendCommand(new byte[] {NEO_PIXEL.id, FREE, strand});
-            }
-
-            @Override
-            public void hold() {
-                mwPrivate.sendCommand(new byte[] {NEO_PIXEL.id, HOLD, strand, (byte) 1});
-            }
-
-            @Override
-            public void release() {
-                mwPrivate.sendCommand(new byte[] {NEO_PIXEL.id, HOLD, strand, (byte) 0});
-            }
-
-            @Override
-            public void clear(byte start, byte end) {
-                mwPrivate.sendCommand(new byte[] {NEO_PIXEL.id, CLEAR, strand, start, end});
-            }
-
-            @Override
-            public void setRgb(byte index, byte red, byte green, byte blue) {
-                mwPrivate.sendCommand(new byte[] {NEO_PIXEL.id, SET_COLOR, strand, index, red, green, blue});
-            }
-
-            @Override
-            public void rotate(RotationDirection direction, byte repetitions, short period) {
-                mwPrivate.sendCommand(new byte[] {NEO_PIXEL.id, ROTATE, strand, (byte)direction.ordinal(), repetitions,
-                        (byte)(period & 0xff), (byte)(period >> 8 & 0xff)});
-            }
-
-            @Override
-            public void rotate(RotationDirection direction, short period) {
-                rotate(direction, (byte) -1, period);
-            }
-
-            @Override
-            public void stopRotation() {
-                mwPrivate.sendCommand(new byte[] {NEO_PIXEL.id, ROTATE, strand, 0x0, 0x0, 0x0, 0x0});
-            }
-
-            @Override
-            public int nLeds() {
-                return length;
-            }
-        };
-    }
+    Strand _createStrandObj(final int strand, final int length) => _Strand(activeStrands, mwPrivate, length, strand);
 }

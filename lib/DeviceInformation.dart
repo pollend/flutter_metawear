@@ -25,6 +25,7 @@
 import 'dart:core';
 
 import 'package:sprintf/sprintf.dart';
+import 'package:quiver/core.dart';
 
 /**
  * Wrapper class holding Characteristics under the
@@ -69,25 +70,22 @@ class DeviceInformation {
             ]);
 
     @override
-    bool operator ==(other) {
-        if (this == other) return true;
-        if (other == null || !(this is DeviceInformation)) return false;
-        DeviceInformation that = other as DeviceInformation;
-        return manufacturer == that.manufacturer &&
-            modelNumber == that.modelNumber &&
-            serialNumber == that.serialNumber &&
-            firmwareRevision == that.firmwareRevision &&
-            hardwareRevision == that.hardwareRevision;
-    }
+    bool operator ==(other) =>
+        other is DeviceInformation &&
+            manufacturer == other.manufacturer &&
+            modelNumber == other.modelNumber &&
+            serialNumber == other.serialNumber &&
+            firmwareRevision == other.firmwareRevision &&
+            hardwareRevision == other.hardwareRevision;
+
 
     @override
-    int get hashCode {
-        int result = manufacturer.hashCode;
-        result = 31 * result + modelNumber.hashCode;
-        result = 31 * result + serialNumber.hashCode;
-        result = 31 * result + firmwareRevision.hashCode;
-        result = 31 * result + hardwareRevision.hashCode;
-        return result;
-    }
-
+    int get hashCode =>
+        hashObjects([
+            manufacturer,
+            modelNumber,
+            serialNumber,
+            firmwareRevision,
+            hardwareRevision
+        ]);
 }

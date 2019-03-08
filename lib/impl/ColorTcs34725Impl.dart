@@ -22,22 +22,6 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.impl;
-
-import com.mbientlab.metawear.Data;
-import com.mbientlab.metawear.Route;
-import com.mbientlab.metawear.builder.RouteBuilder;
-import com.mbientlab.metawear.module.ColorTcs34725;
-
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.util.Calendar;
-import java.util.Locale;
-
-import bolts.Task;
-
-import static com.mbientlab.metawear.impl.Constant.Module.COLOR_DETECTOR;
-import static com.mbientlab.metawear.impl.Constant.Module.DATA_PROCESSOR;
 
 /**
  * Created by etsai on 9/19/16.
@@ -52,7 +36,7 @@ class ColorTcs34725Impl extends ModuleImplBase implements ColorTcs34725 {
         }
     }
 
-    private final static String ADC_PRODUCER= "com.mbientlab.metawear.impl.ColorTcs34725Impl.ADC_PRODUCER",
+    static const String ADC_PRODUCER= "com.mbientlab.metawear.impl.ColorTcs34725Impl.ADC_PRODUCER",
             ADC_CLEAR_PRODUCER= "com.mbientlab.metawear.impl.ColorTcs34725Impl.ADC_CLEAR_PRODUCER",
             ADC_RED_PRODUCER= "com.mbientlab.metawear.impl.ColorTcs34725Impl.ADC_RED_PRODUCER",
             ADC_GREEN_PRODUCER= "com.mbientlab.metawear.impl.ColorTcs34725Impl.ADC_GREEN_PRODUCER",

@@ -22,6 +22,10 @@
  * hello@mbientlab.com.
  */
 
+import 'dart:core';
+import 'dart:typed_data';
+
+import 'dart:io';
 /**
  * IO operations used by the API, must be implemented by the target platform to use the API.
  * @author Eric Tsai
@@ -33,14 +37,14 @@ abstract class IO {
      * @param data    Data to save
      * @throws IOException If I/O error occurs
      */
-    void localSave(String key, byte[] data) throws IOException;
+    void localSave(String key, Uint8List data);
     /**
      * Retrieves data saved locally to the device
      * @param key    Key value identifying the data
      * @return Stream to read the data
      * @throws IOException If I/O error occurs
      */
-    InputStream localRetrieve(String key) throws IOException;
+    Stream<int> localRetrieve(String key);
 
     /**
      * Downloads a file from a URL and stores it locally on the device.  When downloaded, the file
@@ -49,7 +53,7 @@ abstract class IO {
      * @param dest      Where to store the downloaded file
      * @return Task holding the downloaded file, if successful
      */
-    Task<File> downloadFileAsync(String srcUrl, String dest);
+    Future<File> downloadFileAsync(String srcUrl, String dest);
     /**
      * Finds a downloaded file matching the name.  Before using the returned object, check if the
      * file exists by calling {@link File#exists()}
@@ -70,5 +74,5 @@ abstract class IO {
      * @param message    Message to log
      * @param tr         Additional information to provide to the logger
      */
-    void logWarn(String tag, String message, Throwable tr);
+//    void logWarn(String tag, String message, Throwable tr);
 }
