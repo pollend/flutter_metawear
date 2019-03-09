@@ -48,16 +48,14 @@ abstract class AccelerometerBoschImpl extends ModuleImplBase implements Accelero
         }
     }
 
-    private static final long serialVersionUID = -5265441447807910938L;
-
-    private static final byte PACKED_ACC_REVISION = 0x1, FLAT_REVISION = 0x2;
-    private final float LOW_THRESHOLD_STEP= 0.00781f, LOW_HYSTERESIS_STEP= 0.125f;
-    private static final float[] BOSCH_HIGH_THRESHOLD_STEPS= {0.00781f, 0.01563f, 0.03125f, 0.0625f},
+    static const int PACKED_ACC_REVISION = 0x1, FLAT_REVISION = 0x2;
+    static const double LOW_THRESHOLD_STEP= 0.00781f, LOW_HYSTERESIS_STEP= 0.125f;
+    static const List<double> BOSCH_HIGH_THRESHOLD_STEPS= {0.00781f, 0.01563f, 0.03125f, 0.0625f},
             BOSCH_HIGH_HYSTERESIS_STEPS= {0.125f, 0.250f, 0.5f, 1f},
             BOSCH_ANY_MOTION_THS_STEPS= {0.00391f, 0.00781f, 0.01563f, 0.03125f};
-    protected static final float[] BOSCH_NO_MOTION_THS_STEPS= BOSCH_ANY_MOTION_THS_STEPS;
-    private static final float[] BOSCH_TAP_THS_STEPS= {0.0625f, 0.125f, 0.250f, 0.5f};
-    protected static final byte POWER_MODE = 1,
+    static const List<double> BOSCH_NO_MOTION_THS_STEPS= BOSCH_ANY_MOTION_THS_STEPS;
+    static const List<double> BOSCH_TAP_THS_STEPS= {0.0625f, 0.125f, 0.250f, 0.5f};
+    static const int POWER_MODE = 1,
             DATA_INTERRUPT_ENABLE = 2, DATA_CONFIG = 3, DATA_INTERRUPT = 4, DATA_INTERRUPT_CONFIG = 5,
             ORIENT_INTERRUPT_ENABLE = 0xf, ORIENT_CONFIG = 0x10, ORIENT_INTERRUPT = 0x11,
             LOW_HIGH_G_INTERRUPT_ENABLE = 0x6, LOW_HIGH_G_CONFIG = 0x7, LOW_HIGH_G_INTERRUPT = 0x8,
@@ -65,7 +63,7 @@ abstract class AccelerometerBoschImpl extends ModuleImplBase implements Accelero
             TAP_INTERRUPT_ENABLE = 0xc, TAP_CONFIG = 0xd, TAP_INTERRUPT = 0xe,
             FLAT_INTERRUPT_ENABLE = 0x12, FLAT_CONFIG = 0x13, FLAT_INTERRUPT = 0x14,
             PACKED_ACC_DATA= 0x1c;
-    protected final static String ACCEL_PRODUCER= "com.mbientlab.metawear.impl.AccelerometerBoschImpl.ACCEL_PRODUCER",
+    static const String ACCEL_PRODUCER= "com.mbientlab.metawear.impl.AccelerometerBoschImpl.ACCEL_PRODUCER",
             ACCEL_X_AXIS_PRODUCER= "com.mbientlab.metawear.impl.AccelerometerBoschImpl.ACCEL_X_AXIS_PRODUCER",
             ACCEL_Y_AXIS_PRODUCER= "com.mbientlab.metawear.impl.AccelerometerBoschImpl.ACCEL_Y_AXIS_PRODUCER",
             ACCEL_Z_AXIS_PRODUCER= "com.mbientlab.metawear.impl.AccelerometerBoschImpl.ACCEL_Z_AXIS_PRODUCER",
@@ -75,7 +73,7 @@ abstract class AccelerometerBoschImpl extends ModuleImplBase implements Accelero
             FLAT_PRODUCER= "com.mbientlab.metawear.impl.AccelerometerBoschImpl.FLAT_PRODUCER",
             MOTION_PRODUCER= "com.mbientlab.metawear.impl.AccelerometerBoschImpl.MOTION_PRODUCER",
             TAP_PRODUCER= "com.mbientlab.metawear.impl.AccelerometerBoschImpl.TAP_PRODUCER";
-    private static final float ORIENT_HYS_G_PER_STEP= 0.0625f, THETA_STEP= (float) (44.8/63.f);
+    static const double ORIENT_HYS_G_PER_STEP= 0.0625, THETA_STEP= (44.8/63.0);
 
     private static class BoschAccCartesianFloatData extends FloatVectorData {
         private static final long serialVersionUID = -758164941443260674L;
@@ -232,7 +230,6 @@ abstract class AccelerometerBoschImpl extends ModuleImplBase implements Accelero
         }
     }
     private static class BoschLowHighData extends DataTypeBase {
-        private static final long serialVersionUID = 2893724840326544116L;
 
         BoschLowHighData() {
             super(ACCELEROMETER, LOW_HIGH_G_INTERRUPT, new DataAttributes(new byte[] {1}, (byte) 1, (byte) 0, false));

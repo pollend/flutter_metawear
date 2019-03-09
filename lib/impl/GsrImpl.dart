@@ -24,14 +24,45 @@
 
 
 
+import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
+import 'package:flutter_metawear/impl/ModuleImplBase.dart';
+import 'package:flutter_metawear/module/Gsr.dart';
+import 'package:flutter_metawear/ForcedDataProducer.dart';
+
+class Channel implements ForcedDataProducer{
+    final int id;
+    MetaWearBoardPrivate mwPrivate;
+
+    Channel(this.id,this.mwPrivate) {
+        mwPrivate.tagProducer(name(), new UintData(GSR, Util.setSilentRead(CONDUCTANCE), id, new DataAttributes(new byte[] {4}, (byte) 1, (byte) 0, false)));
+    }
+
+    void restoreTransientVariables(MetaWearBoardPrivate mwPrivate) {
+        this.mwPrivate = mwPrivate;
+    }
+
+    @override
+    void read() {
+        mwPrivate.lookupProducer(name()).read(mwPrivate);
+    }
+
+    @override
+    Future<Route> addRouteAsync(RouteBuilder builder) {
+        return mwPrivate.queueRouteBuilder(builder, name());
+    }
+
+    @override
+    String name() {
+        return String.format(Locale.US, CONDUCTANCE_PRODUCER_FORMAT, id);
+    }
+}
+
 /**
  * Created by etsai on 9/21/16.
  */
 class GsrImpl extends ModuleImplBase implements Gsr {
-    private static final long serialVersionUID = 7636307854618085010L;
-
-    private static final String CONDUCTANCE_PRODUCER_FORMAT= "com.mbientlab.metawear.impl.GsrImpl.CONDUCTANCE_PRODUCER_%d";
-    private static final byte CONDUCTANCE = 0x1, CALIBRATE = 0x2, CONFIG= 0x3;
+    static const String CONDUCTANCE_PRODUCER_FORMAT= "com.mbientlab.metawear.impl.GsrImpl.CONDUCTANCE_PRODUCER_%d";
+    static const  int CONDUCTANCE = 0x1, CALIBRATE = 0x2, CONFIG= 0x3;
 
     private static class Channel implements ForcedDataProducer, Serializable {
         private static final long serialVersionUID = 5552089355271489517L;

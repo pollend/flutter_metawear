@@ -22,30 +22,50 @@
  * hello@mbientlab.com.
  */
 
+import 'dart:typed_data';
+
+import 'package:flutter_metawear/DataToken.dart';
 import 'package:flutter_metawear/impl/DataTypeBase.dart';
+import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
+import 'ModuleType.dart';
+import 'DataAttributes.dart';
+import 'DataTypeBase.dart';
+import 'package:tuple/tuple.dart';
+import 'DataPrivate.dart';
+class _DataPrivate extends DataPrivate{
+    final MetaWearBoardPrivate mwPrivate;
+    final SFloatData sFloatData;
+    final double scaled;
+
+    _DataPrivate(DateTime timestamp, Uint8List dataBytes, ClassToObject mapper, this.mwPrivate,this.sFloatData,this.scaled) : super(timestamp, dataBytes, mapper);
+
+
+    @override
+    double scale() => sFloatData.scale(mwPrivate);
+
+    @override
+    List<Type> types() => [double];
+
+    @override
+    dynamic value(Type clazz) {
+        if (clazz == double) {
+            return scaled;
+        }
+        return super.value(clazz);
+    }
+}
+
 
 /**
  * Created by etsai on 9/5/16.
  */
 class SFloatData extends DataTypeBase {
-    SFloatData(Constant.Module module, byte register, byte id, DataAttributes attributes) {
-        super(module, register, id, attributes);
-    }
 
-    SFloatData(Constant.Module module, byte register, DataAttributes attributes) {
-        super(module, register, attributes);
-    }
+    SFloatData(ModuleType module, int register, DataAttributes attributes, Function split,{int id, DataTypeBase input}): super(module,register,attributes,split,id:id,input:input);
 
-    SFloatData(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
-        super(input, module, register, id, attributes);
-    }
 
-    SFloatData(DataTypeBase input, Constant.Module module, byte register, DataAttributes attributes) {
-        super(input, module, register, attributes);
-    }
-
-    @Override
-    public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
+    @override
+    DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
         if (input == null) {
             if (this.input == null) {
                 throw new NullPointerException("SFloatData cannot have null input variable");
@@ -56,28 +76,28 @@ class SFloatData extends DataTypeBase {
         return new SFloatData(input, module, register, id, attributes);
     }
 
-    @Override
-    public Number convertToFirmwareUnits(MetaWearBoardPrivate mwPrivate, Number value) {
+    @override
+    num convertToFirmwareUnits(MetaWearBoardPrivate mwPrivate, Number value) {
         return value.floatValue() * scale(mwPrivate);
     }
 
-    @Override
-    public Data createMessage(boolean logData, final MetaWearBoardPrivate mwPrivate, final byte[] data, final Calendar timestamp, DataPrivate.ClassToObject mapper) {
+    @override
+    Data createMessage(boolean logData, final MetaWearBoardPrivate mwPrivate, final byte[] data, final Calendar timestamp, DataPrivate.ClassToObject mapper) {
         final ByteBuffer buffer = Util.bytesToSIntBuffer(logData, data, attributes);
         final float scaled= buffer.getInt(0) / scale(mwPrivate);
 
         return new DataPrivate(timestamp, data, mapper) {
-            @Override
+            @override
             public float scale() {
                 return SFloatData.this.scale(mwPrivate);
             }
 
-            @Override
+            @override
             public Class<?>[] types() {
                 return new Class<?>[] {Float.class};
             }
 
-            @Override
+            @override
             public <T> T value(Class<T> clazz) {
                 if (clazz.equals(Float.class)) {
                     return clazz.cast(scaled);
@@ -87,8 +107,8 @@ class SFloatData extends DataTypeBase {
         };
     }
 
-    @Override
-    Pair<? extends DataTypeBase, ? extends DataTypeBase> dataProcessorTransform(DataProcessorConfig config, DataProcessorImpl dpModule) {
+    @override
+    Tuple2<DataTypeBase,DataTypeBase> dataProcessorTransform(DataProcessorConfig config, DataProcessorImpl dpModule) {
         switch(config.id) {
             case DataProcessorConfig.Maths.ID: {
                 DataProcessorConfig.Maths casted = (DataProcessorConfig.Maths) config;
@@ -103,4 +123,5 @@ class SFloatData extends DataTypeBase {
         }
         return super.dataProcessorTransform(config, dpModule);
     }
+
 }

@@ -102,7 +102,7 @@ class SettingsImpl extends ModuleImplBase implements Settings {
             CHARGE_STATUS_PRODUCER= "com.mbientlab.metawear.impl.SettingsImpl.CHARGE_STATUS_PRODUCER";
 
     static const int CONN_PARAMS_REVISION= 1, DISCONNECTED_EVENT_REVISION= 2, BATTERY_REVISION= 3, CHARGE_STATUS_REVISION = 5, WHITELIST_REVISION = 6;
-    static const double AD_INTERVAL_STEP= 0.625f, CONN_INTERVAL_STEP= 1.25f, SUPERVISOR_TIMEOUT_STEP= 10f;
+    static const double AD_INTERVAL_STEP= 0.625, CONN_INTERVAL_STEP= 1.25, SUPERVISOR_TIMEOUT_STEP= 10;
     static const int DEVICE_NAME = 1, AD_PARAM = 2, TX_POWER = 3,
         START_ADVERTISING = 5,
         SCAN_RESPONSE = 7, PARTIAL_SCAN_RESPONSE = 8,
@@ -113,7 +113,6 @@ class SettingsImpl extends ModuleImplBase implements Settings {
         CHARGE_STATUS = 0x12;
 
     private static class BatteryStateData extends DataTypeBase {
-        private static final long serialVersionUID = -1080271339658673808L;
 
         BatteryStateData() {
             super(SETTINGS, Util.setSilentRead(BATTERY_STATE), new DataAttributes(new byte[] {1, 2}, (byte) 1, (byte) 0, false));

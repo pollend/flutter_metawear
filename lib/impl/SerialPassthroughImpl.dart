@@ -22,23 +22,6 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.impl;
-
-import com.mbientlab.metawear.Route;
-import com.mbientlab.metawear.builder.RouteBuilder;
-import com.mbientlab.metawear.impl.platform.TimedTask;
-import com.mbientlab.metawear.module.SerialPassthrough;
-
-import java.io.Serializable;
-import java.util.Locale;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import bolts.Task;
-
-import static com.mbientlab.metawear.impl.Constant.Module.DATA_PROCESSOR;
-import static com.mbientlab.metawear.impl.Constant.Module.SERIAL_PASSTHROUGH;
-
 /**
  * Created by etsai on 10/3/16.
  */
@@ -54,14 +37,12 @@ class SerialPassthroughImpl extends ModuleImplBase implements SerialPassthrough 
         }
     }
 
-    private final static byte SPI_REVISION= 1;
-    private static final byte I2C_RW = 0x1, SPI_RW = 0x2, DIRECT_I2C_READ_ID = (byte) 0xff, DIRECT_SPI_READ_ID = 0xf;
-    private static final String I2C_PRODUCER_FORMAT= "com.mbientlab.metawear.impl.SerialPassthroughImpl.I2C_PRODUCER_%d",
+    static const int SPI_REVISION= 1;
+    static const int I2C_RW = 0x1, SPI_RW = 0x2, DIRECT_I2C_READ_ID = 0xff, DIRECT_SPI_READ_ID = 0xf;
+    static const String I2C_PRODUCER_FORMAT= "com.mbientlab.metawear.impl.SerialPassthroughImpl.I2C_PRODUCER_%d",
             SPI_PRODUCER_FORMAT= "com.mbientlab.metawear.impl.SerialPassthroughImpl.SPI_PRODUCER_%d";
-    private static final long serialVersionUID = 3950502593880962546L;
 
     private static class SerialPassthroughData extends ByteArrayData {
-        private static final long serialVersionUID = 2683337991563998545L;
 
         SerialPassthroughData(byte register, byte id, byte length) {
             super(SERIAL_PASSTHROUGH, register, id, new DataAttributes(new byte[] {length}, (byte) 1, (byte) 0, false));

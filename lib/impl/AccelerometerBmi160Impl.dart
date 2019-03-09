@@ -22,6 +22,7 @@
  * hello@mbientlab.com.
  */
 
+import 'dart:typed_data';
 
 /**
  * Created by etsai on 9/1/16.
@@ -37,23 +38,21 @@ class AccelerometerBmi160Impl extends AccelerometerBoschImpl implements Accelero
         return AccelerometerBoschImpl.createUri(dataType);
     }
 
-    final static byte IMPLEMENTATION= 0x1;
-    private static final byte STEP_DETECTOR_INTERRUPT_ENABLE = 0x17,
+    static const int IMPLEMENTATION= 0x1;
+    static const int STEP_DETECTOR_INTERRUPT_ENABLE = 0x17,
             STEP_DETECTOR_CONFIG= 0x18,
             STEP_DETECTOR_INTERRUPT= 0x19,
             STEP_COUNTER_DATA= 0x1a,
             STEP_COUNTER_RESET= 0x1b;
-    private static final long serialVersionUID = 6590506443181115665L;
-    private static final String STEP_DETECTOR_PRODUCER= "com.mbientlab.metawear.impl.AccelerometerBmi160Impl.STEP_DETECTOR_PRODUCER",
+    static const String STEP_DETECTOR_PRODUCER= "com.mbientlab.metawear.impl.AccelerometerBmi160Impl.STEP_DETECTOR_PRODUCER",
             STEP_COUNTER_PRODUCER= "com.mbientlab.metawear.impl.AccelerometerBmi160Impl.STEP_COUNTER_PRODUCER";
-    private static final byte[] DEFAULT_MOTION_CONFIG = new byte[] {0x00, 0x14, 0x14, 0x14};
+    static Uint8List DEFAULT_MOTION_CONFIG = Uint8List.fromList([0x00, 0x14, 0x14, 0x14]);
+    static Uint8List accDataConfig = Uint8List.fromList([0x28, 0x03]);
 
-    private final byte[] accDataConfig= new byte[] {0x28, 0x03};
-
-    private transient AsyncDataProducer lowhigh, noMotion, slowMotion, anyMotion, significantMotion;
-    private transient StepDetectorDataProducer stepDetector;
-    private transient StepCounterDataProducer stepCounter;
-    private transient TimedTask<byte[]> pullConfigTask;
+    AsyncDataProducer lowhigh, noMotion, slowMotion, anyMotion, significantMotion;
+    StepDetectorDataProducer stepDetector;
+    StepCounterDataProducer stepCounter;
+    TimedTask<byte[]> pullConfigTask;
 
     AccelerometerBmi160Impl(MetaWearBoardPrivate mwPrivate) {
         super(mwPrivate);
@@ -64,24 +63,24 @@ class AccelerometerBmi160Impl extends AccelerometerBoschImpl implements Accelero
                 new DataAttributes(new byte[] {2}, (byte) 1, (byte) 0, false)));
     }
 
-    @Override
-    protected void init() {
+    @override
+    void init() {
         pullConfigTask = new TimedTask<>();
         mwPrivate.addResponseHandler(new Pair<>(ACCELEROMETER.id, Util.setRead(DATA_CONFIG)), response -> pullConfigTask.setResult(response));
     }
 
-    @Override
-    protected float getAccDataScale() {
+    @override
+    float getAccDataScale() {
         return AccRange.bitMaskToRange((byte) (accDataConfig[1] & 0x0f)).scale;
     }
 
-    @Override
-    protected int getSelectedAccRange() {
+    @override
+    int getSelectedAccRange() {
         return AccRange.bitMaskToRange((byte) (accDataConfig[1] & 0x0f)).ordinal();
     }
 
-    @Override
-    protected int getMaxOrientHys() {
+    @override
+    int getMaxOrientHys() {
         return 0xf;
     }
 
@@ -140,17 +139,17 @@ class AccelerometerBmi160Impl extends AccelerometerBoschImpl implements Accelero
         };
     }
 
-    @Override
-    public float getOdr() {
+    @override
+    double getOdr() {
         return OutputDataRate.values()[(accDataConfig[0] & ~0xf0) - 1].frequency;
     }
 
-    @Override
-    public float getRange() {
+    @override
+    double getRange() {
         return AccRange.bitMaskToRange((byte) (accDataConfig[1] & ~0xf0)).range;
     }
 
-    @Override
+    @override
     public Task<Void> pullConfigAsync() {
         return pullConfigTask.execute("Did not receive BMI160 acc config within %dms", Constant.RESPONSE_TIMEOUT,
                 () -> mwPrivate.sendCommand(new byte[] {ACCELEROMETER.id, Util.setRead(DATA_CONFIG)})
@@ -229,8 +228,8 @@ class AccelerometerBmi160Impl extends AccelerometerBoschImpl implements Accelero
         return stepDetector;
     }
 
-    @Override
-    public StepCounterDataProducer stepCounter() {
+    @override
+    StepCounterDataProducer stepCounter() {
         if (stepCounter == null) {
             stepCounter = new StepCounterDataProducer() {
                 @Override

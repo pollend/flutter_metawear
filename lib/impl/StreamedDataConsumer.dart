@@ -22,45 +22,36 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.impl;
+import 'package:flutter_metawear/Subscriber.dart';
+import 'package:flutter_metawear/impl/DataTypeBase.dart';
+import 'package:flutter_metawear/impl/DeviceDataConsumer.dart';
+import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
+import 'package:flutter_metawear/impl/JseMetaWearBoard.dart';
+import 'package:flutter_metawear/impl/ModuleType.dart';
 
-import com.mbientlab.metawear.Subscriber;
-import com.mbientlab.metawear.builder.RouteComponent;
-import com.mbientlab.metawear.impl.JseMetaWearBoard.RegisterResponseHandler;
-import com.mbientlab.metawear.module.DataProcessor;
-import com.mbientlab.metawear.module.Logging;
-
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.util.Calendar;
-
-import static com.mbientlab.metawear.impl.Constant.Module.DATA_PROCESSOR;
+import 'dart:typed_data';
 
 /**
  * Created by etsai on 10/27/16.
  */
 
 class StreamedDataConsumer extends DeviceDataConsumer {
-    private static final long serialVersionUID = 7339116325296045121L;
+    RegisterResponseHandler dataResponseHandler= null;
 
-    private transient RegisterResponseHandler dataResponseHandler= null;
+    StreamedDataConsumer(DataTypeBase source, Subscriber subscriber) : super(source,subscriber);
 
-    StreamedDataConsumer(DataTypeBase source, Subscriber subscriber) {
-        super(source, subscriber);
-    }
-
-    public void enableStream(final MetaWearBoardPrivate mwPrivate) {
+    void enableStream(final MetaWearBoardPrivate mwPrivate) {
         addDataHandler(mwPrivate);
 
         if ((source.eventConfig[1] & 0x80) == 0x0) {
             if (source.eventConfig[2] == DataTypeBase.NO_DATA_ID) {
                 if (mwPrivate.numDataHandlers(source.eventConfigAsTuple()) == 1) {
-                    mwPrivate.sendCommand(new byte[]{source.eventConfig[0], source.eventConfig[1], 0x1});
+                    mwPrivate.sendCommand(Uint8List.fromList([source.eventConfig[0], source.eventConfig[1], 0x1]);
                 }
             } else {
-                mwPrivate.sendCommand(new byte[] {source.eventConfig[0], source.eventConfig[1], 0x1});
+                mwPrivate.sendCommand(Uint8List.fromList([source.eventConfig[0], source.eventConfig[1], 0x1]));
                 if (mwPrivate.numDataHandlers(source.eventConfigAsTuple()) == 1) {
-                    if (source.eventConfig[0] == DATA_PROCESSOR.id && source.eventConfig[1] == DataProcessorImpl.NOTIFY) {
+                    if (source.eventConfig[0] ==  ModuleType.DATA_PROCESSOR.id && source.eventConfig[1] == DataProcessorImpl.NOTIFY) {
                         mwPrivate.sendCommand(new byte[]{source.eventConfig[0], DataProcessorImpl.NOTIFY_ENABLE, source.eventConfig[2], 0x1});
                     }
                 }
@@ -70,7 +61,7 @@ class StreamedDataConsumer extends DeviceDataConsumer {
         }
     }
 
-    public void disableStream(MetaWearBoardPrivate mwPrivate) {
+    void disableStream(MetaWearBoardPrivate mwPrivate) {
         if ((source.eventConfig[1] & 0x80) == 0x0) {
             if (source.eventConfig[2] == DataTypeBase.NO_DATA_ID) {
                 if (mwPrivate.numDataHandlers(source.eventConfigAsTuple()) == 1) {

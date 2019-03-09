@@ -22,33 +22,6 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.impl;
-
-import com.mbientlab.metawear.AsyncDataProducer;
-import com.mbientlab.metawear.Data;
-import com.mbientlab.metawear.Route;
-import com.mbientlab.metawear.builder.RouteBuilder;
-import com.mbientlab.metawear.data.Acceleration;
-import com.mbientlab.metawear.data.EulerAngles;
-import com.mbientlab.metawear.data.Quaternion;
-import com.mbientlab.metawear.impl.platform.TimedTask;
-import com.mbientlab.metawear.module.Accelerometer;
-import com.mbientlab.metawear.module.AccelerometerBmi160;
-import com.mbientlab.metawear.module.AccelerometerBosch;
-import com.mbientlab.metawear.module.GyroBmi160;
-import com.mbientlab.metawear.module.MagnetometerBmm150;
-import com.mbientlab.metawear.module.SensorFusionBosch;
-
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.util.Arrays;
-import java.util.Calendar;
-
-import bolts.CancellationToken;
-import bolts.Capture;
-import bolts.Task;
-
-import static com.mbientlab.metawear.impl.Constant.Module.SENSOR_FUSION;
 
 /**
  * Created by etsai on 11/12/16.

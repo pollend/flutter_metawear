@@ -37,16 +37,15 @@ class MagnetometerBmm150Impl extends ModuleImplBase implements MagnetometerBmm15
         }
     }
 
-    private final static String BFIELD_PRODUCER= "com.mbientlab.metawear.impl.MagnetometerBmm150Impl.BFIELD_PRODUCER",
+    static const String BFIELD_PRODUCER= "com.mbientlab.metawear.impl.MagnetometerBmm150Impl.BFIELD_PRODUCER",
             BFIELD_X_AXIS_PRODUCER= "com.mbientlab.metawear.impl.MagnetometerBmm150Impl.BFIELD_X_AXIS_PRODUCER",
             BFIELD_Y_AXIS_PRODUCER= "com.mbientlab.metawear.impl.MagnetometerBmm150Impl.BFIELD_Y_AXIS_PRODUCER",
             BFIELD_Z_AXIS_PRODUCER= "com.mbientlab.metawear.impl.MagnetometerBmm150Impl.BFIELD_Z_AXIS_PRODUCER",
             BFIELD_PACKED_PRODUCER= "com.mbientlab.metawear.impl.MagnetometerBmm150Impl.BFIELD_PACKED_PRODUCER";
-    private static final byte PACKED_BFIELD_REVISION= 1, SUSPEND_REVISION = 2;
-    private static final byte POWER_MODE = 1,
+    static const int PACKED_BFIELD_REVISION= 1, SUSPEND_REVISION = 2;
+    static const int POWER_MODE = 1,
         DATA_INTERRUPT_ENABLE = 2, DATA_RATE = 3, DATA_REPETITIONS = 4, MAG_DATA = 5,
         PACKED_MAG_DATA = 0x09;
-    private static final long serialVersionUID = -8266211541629259291L;
 
     private static class Bmm150CartesianFloatData extends FloatVectorData {
         private static final long serialVersionUID = -1411571904651005619L;

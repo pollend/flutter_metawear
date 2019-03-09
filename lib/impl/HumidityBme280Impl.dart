@@ -22,16 +22,31 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.impl;
+import 'package:flutter_metawear/ForcedDataProducer.dart';
+import 'package:flutter_metawear/impl/ModuleImplBase.dart';
+import 'package:flutter_metawear/impl/UFloatData.dart';
+import 'package:flutter_metawear/module/HumidityBme280.dart';
 
-import com.mbientlab.metawear.ForcedDataProducer;
-import com.mbientlab.metawear.Route;
-import com.mbientlab.metawear.builder.RouteBuilder;
-import com.mbientlab.metawear.module.HumidityBme280;
 
-import bolts.Task;
+class HumidityBme280SFloatData extends UFloatData {
+    HumidityBme280SFloatData() {
+        super(HUMIDITY, Util.setSilentRead(VALUE), new DataAttributes(new byte[] {4}, (byte) 1, (byte) 0, false));
+    }
 
-import static com.mbientlab.metawear.impl.Constant.Module.HUMIDITY;
+    HumidityBme280SFloatData(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
+        super(input, module, register, id, attributes);
+    }
+
+    @Override
+    public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
+        return new HumidityBme280SFloatData(input, module, register, id, attributes);
+    }
+
+    @Override
+    protected float scale(MetaWearBoardPrivate mwPrivate) {
+        return 1024.f;
+    }
+}
 
 /**
  * Created by etsai on 9/19/16.
@@ -46,33 +61,11 @@ class HumidityBme280Impl extends ModuleImplBase implements HumidityBme280 {
         }
     }
 
-    private final static String PRODUCER= "com.mbientlab.metawear.impl.HumidityBme280Impl.PRODUCER";
-    private final static byte VALUE = 1, MODE = 2;
-    private static final long serialVersionUID = 1478927889851422678L;
+    static const String PRODUCER= "com.mbientlab.metawear.impl.HumidityBme280Impl.PRODUCER";
+    static const int VALUE = 1, MODE = 2;
 
-    private static class HumidityBme280SFloatData extends UFloatData {
-        private static final long serialVersionUID = -2742030048950836121L;
 
-        HumidityBme280SFloatData() {
-            super(HUMIDITY, Util.setSilentRead(VALUE), new DataAttributes(new byte[] {4}, (byte) 1, (byte) 0, false));
-        }
-
-        HumidityBme280SFloatData(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
-            super(input, module, register, id, attributes);
-        }
-
-        @Override
-        public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
-            return new HumidityBme280SFloatData(input, module, register, id, attributes);
-        }
-
-        @Override
-        protected float scale(MetaWearBoardPrivate mwPrivate) {
-            return 1024.f;
-        }
-    }
-
-    private transient ForcedDataProducer humidityProducer;
+    ForcedDataProducer humidityProducer;
 
     HumidityBme280Impl(MetaWearBoardPrivate mwPrivate) {
         super(mwPrivate);

@@ -26,7 +26,7 @@
  * Created by etsai on 9/22/16.
  */
 class RouteMulticastImpl implements RouteMulticast {
-    private final RouteComponentImpl caller;
+    final RouteComponentImpl caller;
 
     RouteMulticastImpl(RouteComponentImpl caller) {
         this.caller= caller;

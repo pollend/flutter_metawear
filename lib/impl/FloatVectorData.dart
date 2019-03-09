@@ -27,7 +27,6 @@
  * Created by etsai on 9/4/16.
  */
 abstract class FloatVectorData extends DataTypeBase {
-    private static final long serialVersionUID = -1464860783728940565L;
 
     FloatVectorData(Constant.Module module, byte register, DataAttributes attributes) {
         super(module, register, attributes);

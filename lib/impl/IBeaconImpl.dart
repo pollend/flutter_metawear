@@ -26,9 +26,8 @@
  * Created by etsai on 9/18/16.
  */
 class IBeaconImpl extends ModuleImplBase implements IBeacon {
-    private static final byte ENABLE = 0x1, AD_UUID = 0x2, MAJOR = 0x3, MINOR = 0x4,
+    static const ENABLE = 0x1, AD_UUID = 0x2, MAJOR = 0x3, MINOR = 0x4,
         RX = 0x5, TX = 0x6, PERIOD = 0x7;
-    private static final long serialVersionUID = 5027360264544753193L;
 
     private transient TimedTask<byte[]> readConfigTask;
 
@@ -36,7 +35,7 @@ class IBeaconImpl extends ModuleImplBase implements IBeacon {
         super(mwPrivate);
     }
 
-    @Override
+    @override
     protected void init() {
         readConfigTask = new TimedTask<>();
 
@@ -45,7 +44,7 @@ class IBeaconImpl extends ModuleImplBase implements IBeacon {
         }
     }
 
-    @Override
+    @override
     public ConfigEditor configure() {
         return new ConfigEditor() {
             private UUID newUuid= null;
@@ -150,17 +149,17 @@ class IBeaconImpl extends ModuleImplBase implements IBeacon {
         };
     }
 
-    @Override
+    @override
     public void enable() {
         mwPrivate.sendCommand(new byte[] {IBEACON.id, ENABLE, (byte) 1});
     }
 
-    @Override
+    @override
     public void disable() {
         mwPrivate.sendCommand(new byte[] {IBEACON.id, ENABLE, (byte) 0});
     }
 
-    @Override
+    @override
     public Task<Configuration> readConfigAsync() {
         final Capture<UUID> ad = new Capture<>();
         final Capture<Short> major = new Capture<>(), minor = new Capture<>();

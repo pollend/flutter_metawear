@@ -41,8 +41,7 @@ class ColorTcs34725Impl extends ModuleImplBase implements ColorTcs34725 {
             ADC_RED_PRODUCER= "com.mbientlab.metawear.impl.ColorTcs34725Impl.ADC_RED_PRODUCER",
             ADC_GREEN_PRODUCER= "com.mbientlab.metawear.impl.ColorTcs34725Impl.ADC_GREEN_PRODUCER",
             ADC_BLUE_PRODUCER= "com.mbientlab.metawear.impl.ColorTcs34725Impl.ADC_BLUE_PRODUCER";
-    private static final byte ADC = 1, MODE = 2;
-    private static final long serialVersionUID = -6867360365437005527L;
+    static const int ADC = 1, MODE = 2;
 
     private static UintData createAdcUintDataProducer(byte offset) {
         return new UintData(COLOR_DETECTOR, Util.setSilentRead(ADC), new DataAttributes(new byte[] {2}, (byte) 1, offset, true));

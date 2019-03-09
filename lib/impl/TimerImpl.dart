@@ -26,9 +26,8 @@
  * Created by etsai on 9/17/16.
  */
 class TimerImpl extends ModuleImplBase implements Timer {
-    private static final long serialVersionUID = -4333941915456769144L;
 
-    private static final byte TIMER_ENTRY = 2,
+    static const int TIMER_ENTRY = 2,
         START = 3, STOP = 4, REMOVE = 5,
         NOTIFY = 6, NOTIFY_ENABLE = 7;
 

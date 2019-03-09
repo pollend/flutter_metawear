@@ -31,8 +31,6 @@ import 'package:flutter_metawear/impl/DataAttributes.dart';
 import 'package:flutter_metawear/impl/DataPrivate.dart';
 import 'package:flutter_metawear/impl/DataProcessorConfig.dart';
 import 'package:flutter_metawear/impl/DataProcessorImpl.dart';
-import 'package:flutter_metawear/impl/DataTypeBase.dart';
-import 'package:flutter_metawear/impl/DataTypeBase.dart';
 import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
 import 'package:flutter_metawear/impl/ModuleType.dart';
 import 'package:flutter_metawear/impl/Util.dart';
@@ -125,7 +123,7 @@ abstract class DataTypeBase implements DataToken {
             split = null,
             attributes = DataAttributes(Uint8List.fromList([length]),1,offset,false);
 
-    DataTypeBase(ModuleType module, int register, DataAttributes attributes, Function split,[int id, DataTypeBase input]):
+    DataTypeBase(ModuleType module, int register, DataAttributes attributes, Function split,{int id, DataTypeBase input}):
             this.eventConfig = Uint8List.fromList([module.id,register,id == null ? NO_DATA_ID: id]),
             this.attributes = attributes,
             this.input = input,
@@ -182,11 +180,11 @@ abstract class DataTypeBase implements DataToken {
     }
     Data createMessage(bool logData, MetaWearBoardPrivate mwPrivate, Uint8List data, Data timestamp, ClassToObject mapper);
 
-    Tuple2 dataProcessorTransform(DataProcessorConfig config, DataProcessorImpl dpModule) {
+    Tuple2<DataTypeBase, DataTypeBase> dataProcessorTransform(DataProcessorConfig config, DataProcessorImpl dpModule) {
         switch(config.id) {
             case DataProcessorConfig.Buffer.ID:
                 return Tuple2(
-                    new UintData(this, DATA_PROCESSOR, DataProcessorImpl.NOTIFY, new DataAttributes(Uint8List(0), 0, 0, false)),
+                    UintData(this, DATA_PROCESSOR, DataProcessorImpl.NOTIFY, new DataAttributes(Uint8List(0), 0, 0, false)),
                     dataProcessorStateCopy(this, this.attributes)
                 );
             case DataProcessorConfig.Accumulator.ID: {

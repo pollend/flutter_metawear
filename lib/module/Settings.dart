@@ -29,9 +29,10 @@ import 'package:flutter_metawear/CodeBlock.dart';
 import 'package:flutter_metawear/ConfigEditorBase.dart';
 import 'package:flutter_metawear/ForcedDataProducer.dart';
 import 'package:flutter_metawear/MetaWearBoard.dart';
-import 'package:collection/collection.dart';
 import 'package:flutter_metawear/Observer.dart';
 import 'package:flutter_metawear/impl/Util.dart';
+
+import 'package:collection/collection.dart';
 import 'package:sprintf/sprintf.dart';
 
 /**

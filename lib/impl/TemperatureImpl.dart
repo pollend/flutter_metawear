@@ -22,19 +22,32 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.impl;
+import 'package:flutter_metawear/impl/ModuleImplBase.dart';
+import 'package:flutter_metawear/impl/SFloatData.dart';
+import 'package:flutter_metawear/module/Temperature.dart';
+import 'package:flutter_metawear/impl/ModuleType.dart';
+import 'package:flutter_metawear/impl/Util.dart';
+import 'package:flutter_metawear/impl/DataAttributes.dart';
 
-import com.mbientlab.metawear.Route;
-import com.mbientlab.metawear.builder.RouteBuilder;
-import com.mbientlab.metawear.module.Temperature;
+class TempSFloatData extends SFloatData {
+  TempSFloatData(int id): super(ModuleType.TEMPERATURE, Util.setSilentRead(TemperatureImpl.VALUE), id, DataAttributes(new byte[] {2}, (byte) 1, (byte) 0, true));
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Locale;
 
-import bolts.Task;
+  TempSFloatData(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
+    super(input, module, register, id, attributes);
+  }
 
-import static com.mbientlab.metawear.impl.Constant.Module.TEMPERATURE;
+  @override
+  DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
+    return new TempSFloatData(input, module, register, id, attributes);
+  }
+
+  @override
+  double scale(MetaWearBoardPrivate mwPrivate) {
+    return 8.f;
+  }
+}
+
 
 /**
  * Created by etsai on 9/18/16.
@@ -49,31 +62,9 @@ class TemperatureImpl extends ModuleImplBase implements Temperature {
         }
     }
 
-    private static final long serialVersionUID = -80503384765010385L;
-    private static final String PRODUCER_FORMAT= "com.mbientlab.metawear.impl.TemperatureImpl.PRODUCER_%d";
-    private final static byte VALUE = 1, MODE= 2;
+    static const String PRODUCER_FORMAT= "com.mbientlab.metawear.impl.TemperatureImpl.PRODUCER_%d";
+    static const int VALUE = 1, MODE= 2;
 
-    private static class TempSFloatData extends SFloatData {
-        private static final long serialVersionUID = 7645511455396654766L;
-
-        TempSFloatData(byte id) {
-            super(TEMPERATURE, Util.setSilentRead(VALUE), id, new DataAttributes(new byte[] {2}, (byte) 1, (byte) 0, true));
-        }
-
-        TempSFloatData(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
-            super(input, module, register, id, attributes);
-        }
-
-        @Override
-        public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
-            return new TempSFloatData(input, module, register, id, attributes);
-        }
-
-        @Override
-        protected float scale(MetaWearBoardPrivate mwPrivate) {
-            return 8.f;
-        }
-    }
 
     private static class SensorImpl implements Sensor, Serializable {
         private static final long serialVersionUID = 6237752475101914419L;

@@ -22,24 +22,20 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.impl;
-
-import com.mbientlab.metawear.IllegalRouteOperationException;
-import com.mbientlab.metawear.builder.RouteComponent;
-import com.mbientlab.metawear.builder.RouteSplit;
-
+import 'package:flutter_metawear/builder/RouteComponent.dart';
+import 'package:flutter_metawear/builder/RouteSplit.dart';
+import 'package:flutter_metawear/impl/RouteComponentImpl.dart';
 /**
  * Created by etsai on 9/22/16.
  */
 class RouteSplitImpl implements RouteSplit {
-    private final RouteComponentImpl caller;
+    final RouteComponentImpl caller;
 
-    RouteSplitImpl(RouteComponentImpl caller) {
-        this.caller= caller;
-    }
+    RouteSplitImpl(this.caller);
 
-    @Override
-    public RouteComponent index(int i) {
+
+    @override
+    RouteComponent index(int i) {
         try {
             return new RouteComponentImpl(caller.persistantData.splits.peek().second[i], caller);
         } catch (ArrayIndexOutOfBoundsException e) {

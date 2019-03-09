@@ -22,24 +22,14 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.impl;
-
-import com.mbientlab.metawear.module.Haptic;
-
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-
-import static com.mbientlab.metawear.impl.Constant.Module.HAPTIC;
-
 /**
  * Created by etsai on 9/18/16.
  */
 class HapticImpl extends ModuleImplBase implements Haptic {
-    private static final byte PULSE= 0x1;
-    private static final byte BUZZER_DUTY_CYCLE= 127;
+    static const int PULSE= 0x1;
+    static const int BUZZER_DUTY_CYCLE= 127;
 
-    private final static float DEFAULT_DUTY_CYCLE= 100.f;
-    private static final long serialVersionUID = 6603637370348000809L;
+    static const DEFAULT_DUTY_CYCLE= 100.0;
 
     HapticImpl(MetaWearBoardPrivate mwPrivate) {
         super(mwPrivate);

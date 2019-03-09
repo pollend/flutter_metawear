@@ -22,25 +22,12 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.impl;
-
-import com.mbientlab.metawear.impl.platform.TimedTask;
-import com.mbientlab.metawear.module.Macro;
-
-import java.util.LinkedList;
-import java.util.Queue;
-
-import bolts.Task;
-
-import static com.mbientlab.metawear.impl.Constant.Module.MACRO;
-
 /**
  * Created by etsai on 11/30/16.
  */
 class MacroImpl extends ModuleImplBase implements Macro {
-    private static final long serialVersionUID = -6776208625746571638L;
-    private static final long WRITE_MACRO_DELAY = 2000L;
-    private static final byte ENABLE = 0x1,
+    static const int WRITE_MACRO_DELAY = 2000L;
+    static const int ENABLE = 0x1,
             BEGIN = 0x2, ADD_COMMAND = 0x3, END = 0x4,
             EXECUTE = 0x5, NOTIFY_ENABLE = 0x6, NOTIFY = 0x7,
             ERASE_ALL = 0x8,

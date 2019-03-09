@@ -63,16 +63,16 @@ abstract class DataPrivate implements Data {
   Uint8List bytes() => _dataBytes;
 
   @override
-  T value<T>(Type clazz) {
+  dynamic value(Type clazz) {
     throw CastError();
   }
 
-  T extra<T>(Type clazz) {
+  dynamic extra(Type clazz) {
     Object value;
     if (_mapper == null || (value = _mapper.apply(clazz)) == null) {
       throw CastError();
     }
-    return value as T;
+    return value;
   }
 
   @override

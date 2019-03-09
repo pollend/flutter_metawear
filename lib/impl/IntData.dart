@@ -28,7 +28,6 @@
  * Created by etsai on 9/5/16.
  */
 class IntData extends DataTypeBase {
-    private static final long serialVersionUID = 8405131177286992908L;
 
     private IntData(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
         super(input, module, register, id, attributes);

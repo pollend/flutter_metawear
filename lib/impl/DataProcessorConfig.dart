@@ -1,12 +1,17 @@
 
 import 'dart:typed_data';
 
+import 'package:flutter_metawear/IllegalRouteOperationException.dart';
+import 'package:flutter_metawear/builder/RouteComponent.dart';
 import 'package:flutter_metawear/builder/filter/ThresholdOutput.dart';
 import 'package:flutter_metawear/builder/filter/Passthrough.dart' as Pass;
 import 'package:flutter_metawear/builder/filter/Comparison.dart' as Co;
 import 'package:flutter_metawear/builder/filter/ComparisonOutput.dart';
 import 'package:flutter_metawear/builder/predicate/PulseOutput.dart';
 import 'package:flutter_metawear/impl/DataAttributes.dart';
+import 'package:flutter_metawear/builder/filter/DifferentialOutput.dart';
+import 'package:flutter_metawear/impl/DataProcessorImpl.dart';
+import 'package:flutter_metawear/impl/Version.dart';
 
 import 'package:sprintf/sprintf.dart';
 
@@ -34,7 +39,7 @@ class Threshold extends DataProcessorConfig {
             mode = ThresholdOutput.values[(cfg[1] >> 3) & 0x7],
             boundary = ByteData.view(cfg.buffer).getUint32(2, Endian.little),
             hysteresis = ByteData.view(cfg.buffer).getUint16(6, Endian.little),
-            super(cfg[0])
+            super(cfg[0]);
 
 
     @override
@@ -49,8 +54,8 @@ class Threshold extends DataProcessorConfig {
         int offset = 0;
         buffer.setUint8(offset, ID);
         buffer.setUint8(offset += 1,((input - 1) & 0x3 | (isSigned ? 0x4 : 0) | (mode.index << 3)));
-        buffer.setUint32(offset += 4, boundary, Endian.little);
-        buffer.setUint16(offset += 2, hysteresis, Endian.little);
+        buffer.setInt32(offset += 4, boundary, Endian.little);
+        buffer.setInt16(offset += 2, hysteresis, Endian.little);
         return data;
     }
 
@@ -76,7 +81,7 @@ class Passthrough extends DataProcessorConfig {
         int offset = 0;
         buffer.setUint8(offset, ID);
         buffer.setUint8(offset += 1, (type.index & 0x7));
-        buffer.setUint16(offset += 2, value, Endian.little)
+        buffer.setInt16(offset += 2, value, Endian.little);
     }
 
     @override
@@ -184,13 +189,13 @@ class MultiValueComparison extends Comparison {
                 break;
             case 2:
                 for (num it in references) {
-                    buffer.setUint16(offset, it, Endian.little);
+                    buffer.setInt16(offset, it, Endian.little);
                     offset += 2;
                 }
                 break;
             case 4:
                 for (num it in references) {
-                    buffer.setUint32(offset, it, Endian.little);
+                    buffer.setInt32(offset, it, Endian.little);
                     offset += 4;
                 }
                 break;
@@ -286,12 +291,12 @@ class SingleValueComparison extends Comparison {
         buffer.setUint8(offset += 1, isSigned ? 1 : 0);
         buffer.setUint8(offset += 1, op.index);
         buffer.setUint8(offset += 1, 0);
-        buffer.setUint32(offset += 4, reference);
+        buffer.setInt32(offset += 4, reference);
     }
 }
 
 class Combiner extends DataProcessorConfig {
-    static final int ID = 0x7;
+    static const int ID = 0x7;
 
     final int output;
     final int input;
@@ -355,7 +360,7 @@ class Time extends DataProcessorConfig {
         int offset = 0;
         buffer.setUint8(offset, ID);
         buffer.setUint8(offset += 1, ((input - 1) & 0x7 | (type << 3)));
-        buffer.setUint32(offset += 4, period);
+        buffer.setInt32(offset += 4, period);
     }
 
     @override
@@ -391,7 +396,7 @@ enum Operation {
 }
 
 class Maths extends DataProcessorConfig {
-    static final int ID = 0x9;
+    static const int ID = 0x9;
     
     int output;
     final int input;
@@ -507,227 +512,213 @@ class Pulse extends DataProcessorConfig {
     }
 }
 
-static class Differential extends DataProcessorConfig {
-static final byte ID = 0xc;
+class Differential extends DataProcessorConfig {
+    static const int ID = 0xc;
 
-final byte input;
-final boolean isSigned;
-final DifferentialOutput mode;
-final int differential;
+    final int input;
+    final bool isSigned;
+    final DifferentialOutput mode;
+    final int differential;
 
-Differential(byte input, boolean isSigned, DifferentialOutput mode, int differential) {
-super(ID);
+    Differential(this.input, this.isSigned, this.mode, this.differential)
+        :super(ID);
 
-this.input = input;
-this.isSigned = isSigned;
-this.mode = mode;
-this.differential = differential;
+
+    Differential.config(Uint8List config)
+        :
+            input = ((config[1] & 0x3) + 1),
+            isSigned = (config[1] & 0x4) == 0x4,
+            mode = DifferentialOutput.values[(config[1] >> 3) & 0x7],
+            differential = ByteData.view(config.buffer).getInt32(1),
+            super(config[0]);
+
+
+    @override
+    Uint8List build() {
+        final data = Uint8List(10);
+        final buffer = ByteData.view(data.buffer);
+        int offset = 0;
+        buffer.setInt8(offset, ID);
+        buffer.setInt8(offset += 1,
+            (((input - 1) & 0x3) | (isSigned ? 0x4 : 0) | (mode.index << 3)));
+        buffer.setInt32(offset += 4, differential, Endian.little);
+        return data;
+    }
+
+    @override
+    String createUri(bool state, int procId) {
+        return sprintf("differential?id=%d", [procId]);
+    }
 }
 
-Differential(byte[] config) {
-super(config[0]);
 
-input = (byte) ((config[1] & 0x3) + 1);
-isSigned = (config[1] & 0x4) == 0x4;
-mode = DifferentialOutput.values()[(config[1] >> 3) & 0x7];
-differential = ByteBuffer.wrap(config, 1, 4).getInt();
+
+class Buffer extends DataProcessorConfig {
+    static const int ID = 0xf;
+
+    final int input;
+
+    Buffer(this.input) :super(ID);
+
+
+    Buffer.config(Uint8List config):
+            input = ((config[1] & 0x1f) + 1),
+            super(config[0]);
+
+    @override
+    Uint8List build() => Uint8List.fromList([ID, ((input - 1) & 0x1f)]);
+
+    @override
+    String createUri(bool state, int procId) =>
+        sprintf("buffer%s?id=%d", [state ? "-state" : "", procId]);
 }
 
-@Override
-byte[] build() {
-return ByteBuffer.allocate(6).order(ByteOrder.LITTLE_ENDIAN)
-    .put(ID)
-    .put((byte) (((input - 1) & 0x3) | (isSigned ? 0x4 : 0) | (mode.ordinal() << 3)))
-    .putInt(differential)
-    .array();
+class Packer extends DataProcessorConfig {
+    static const int ID = 0x10;
+
+    final int input;
+    final int count;
+
+    Packer(this.input, this.count) : super(ID);
+
+
+    Packer.config(Uint8List config):
+            input = ((config[1] & 0x1f) + 1),
+            count = ((config[2] & 0x1f) + 1),
+            super(config[0]);
+
+
+    @override
+    Uint8List build() =>
+        Uint8List.fromList([ID, ((input - 1) & 0x1f), ((count - 1) & 0x1f)]);
+
+    @override
+    String createUri(bool state, int procId) =>
+        sprintf("packer?id=%d", [procId]);
 }
 
-@Override
-String createUri(boolean state, byte procId) {
-return String.format(Locale.US, "differential?id=%d", procId);
-}
-}
+
+class Accounter extends DataProcessorConfig {
+    static const int ID = 0x11;
+
+    final int length;
+    final AccountType type;
+
+    Accounter(this.length, this.type) : super(ID);
 
 
+    Accounter.confg(Uint8List config)
+        :
+            this.length = (((config[1] >> 4) & 0x3) + 1),
+            this.type = AccountType.values[config[1] & 0xf],
+            super(config[0]);
 
-static class Buffer extends DataProcessorConfig {
-static final byte ID = 0xf;
 
-final byte input;
+    @override
+    Uint8List build() =>
+        Uint8List.fromList([ID, (type.index | ((length - 1) << 4)), 0x3]);
 
-Buffer(byte input) {
-super(ID);
 
-this.input = input;
-}
-
-Buffer(byte[] config) {
-super(config[0]);
-
-input = (byte) ((config[1] & 0x1f) + 1);
-}
-
-@Override
-byte[] build() {
-return new byte[] {ID, (byte) ((input - 1) & 0x1f)};
+    @override
+    String createUri(bool state, int procId) =>
+        sprintf("account?id=%d", [procId]);
 }
 
-@Override
-String createUri(boolean state, byte procId) {
-return String.format(Locale.US, "buffer%s?id=%d", state ? "-state" : "", procId);
-}
-}
+class Fuser extends DataProcessorConfig {
+    static const int ID = 0x1b;
 
-static class Packer extends DataProcessorConfig {
-static final byte ID = 0x10;
+    final List<String> names;
+    final Uint8List filterIds;
 
-final byte input;
-final byte count;
+    Fuser(this.names)
+        :
+            this.filterIds = Uint8List(names.length),
+            super(ID);
 
-Packer(byte input, byte count) {
-super(ID);
 
-this.input = input;
-this.count = count;
-}
+    Fuser.config(Uint8List config)
+        :
+            this.names = null,
+            this.filterIds = Uint8List(config[1] & 0x1f),
+            super(config[0]){
+        this.filterIds.setAll(0, config.skip(2));
+    }
 
-Packer(byte[] config) {
-super(config[0]);
 
-input = (byte) ((config[1] & 0x1f) + 1);
-count = (byte) ((config[2] & 0x1f) + 1);
-}
+    void syncFilterIds(DataProcessorImpl dpModule) {
+        int i = 0;
+        for (String it in names) {
+            if (!dpModule.nameToIdMapping.containsKey(it)) {
+                throw new IllegalRouteOperationException(
+                    "No processor named \"" + it + "\" found");
+            }
 
-@Override
-byte[] build() {
-return new byte[] {ID, (byte) ((input - 1) & 0x1f), (byte) ((count - 1)& 0x1f)};
-}
+            int id = dpModule.nameToIdMapping.get(it);
+            DataProcessorImpl.Processor value = dpModule.activeProcessors.get(
+                id);
+            if (!(value.editor
+                .configObj instanceof DataProcessorConfig.Buffer)) {
+                throw new IllegalRouteOperationException(
+                    "Can only use buffer processors as inputs to the fuser");
+            }
 
-@Override
-String createUri(boolean state, byte procId) {
-return String.format(Locale.US, "packer?id=%d", procId);
-}
-}
+            filterIds[i] = id;
+            i++;
+        }
+    }
 
-static class Accounter extends DataProcessorConfig {
-static final byte ID = 0x11;
+    @override
+    Uint8List build() {
+        final data = Uint8List(2 + filterIds.length);
+        final buffer = ByteData.view(data.buffer);
+        int offset = 0;
+        buffer.setInt8(offset, ID);
+        buffer.setInt8(offset += 1, filterIds.length);
+        for (int filterId in filterIds)
+            buffer.setInt8(offset += 1, filterId);
+        return data;
+    }
 
-final byte length;
-final RouteComponent.AccountType type;
+    @override
+    String createUri(bool state, int procId) =>
+        sprintf("fuser?id=%d", [procId]);
 
-Accounter(byte length, RouteComponent.AccountType type) {
-super(ID);
-
-this.length = length;
-this.type = type;
-}
-
-Accounter(byte[] config) {
-super(config[0]);
-
-length = (byte) (((config[1] >> 4) & 0x3) + 1);
-type = RouteComponent.AccountType.values()[config[1] & 0xf];
-}
-
-@Override
-byte[] build() {
-return new byte[] {ID, (byte) (type.ordinal() | ((length - 1) << 4)), 0x3};
-}
-
-@Override
-String createUri(boolean state, byte procId) {
-return String.format(Locale.US, "account?id=%d", procId);
-}
-}
-
-static class Fuser extends DataProcessorConfig {
-static final byte ID = 0x1b;
-
-final String[] names;
-final byte[] filterIds;
-
-Fuser(String[] names) {
-super(ID);
-
-this.filterIds = new byte[names.length];
-this.names = names;
-}
-
-Fuser(byte[] config) {
-super(config[0]);
-
-names = null;
-filterIds = new byte[config[1] & 0x1f];
-System.arraycopy(config, 2, filterIds, 0, filterIds.length);
-}
-
-void syncFilterIds(DataProcessorImpl dpModule) {
-int i = 0;
-for(String it: names) {
-if (!dpModule.nameToIdMapping.containsKey(it)) {
-throw new IllegalRouteOperationException("No processor named \"" + it + "\" found");
-}
-
-byte id = dpModule.nameToIdMapping.get(it);
-DataProcessorImpl.Processor value = dpModule.activeProcessors.get(id);
-if (!(value.editor.configObj instanceof DataProcessorConfig.Buffer)) {
-throw new IllegalRouteOperationException("Can only use buffer processors as inputs to the fuser");
-}
-
-filterIds[i] = id;
-i++;
-}
-}
-
-@Override
-byte[] build() {
-return ByteBuffer.allocate(2 + filterIds.length).order(ByteOrder.LITTLE_ENDIAN)
-    .put(ID)
-    .put((byte)(filterIds.length))
-    .put(filterIds)
-    .array();
-}
-
-@Override
-String createUri(boolean state, byte procId) {
-return String.format(Locale.US, "fuser?id=%d", procId);
-}
 }
 
 abstract class DataProcessorConfig {
     static DataProcessorConfig from(Version firmware, int revision, Uint8List config) {
         switch(config[0]) {
             case Passthrough.ID:
-                return new Passthrough(config);
+                return Passthrough.config(config);
             case Accumulator.ID:
-                return new Accumulator(config);
+                return Accumulator.config(config);
             case Average.ID:
-                return new Average(config);
+                return Average.config((config);
             case Comparison.ID:
                 return firmware.compareTo(MULTI_COMPARISON_MIN_FIRMWARE) >= 0 ?
                         new MultiValueComparison(config) : new SingleValueComparison(config);
             case Combiner.ID:
-                return new Combiner(config);
+                return Combiner.config(config);
             case Time.ID:
-                return new Time(config);
+                return Time.config((config);
             case Maths.ID:
                 return new Maths(firmware.compareTo(MULTI_CHANNEL_MATH) >= 0, config);
             case Delay.ID:
                 return new Delay(revision >= DataProcessorImpl.EXPANDED_DELAY, config);
             case Pulse.ID:
-                return new Pulse(config);
+                return Pulse.config((config);
             case Differential.ID:
-                return new Differential(config);
+                return Differential.config((config);
             case Threshold.ID:
-                return new Threshold(config);
+                return Threshold.config((config);
             case Buffer.ID:
-                return new Buffer(config);
+                return Buffer.config((config);
             case Packer.ID:
-                return new Packer(config);
+                return Packer.config((config);
             case Accounter.ID:
-                return new Accounter(config);
+                return Accounter.config((config);
             case Fuser.ID:
-                return new Fuser(config);
+                return Fuser.config((config);
         }
         throw new InvalidParameterException("Unrecognized config id: " + config[0]);
     }

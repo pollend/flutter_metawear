@@ -24,9 +24,10 @@
 
 
 import 'dart:core';
-
 import 'dart:typed_data';
+import 'package:collection/collection.dart';
 
+import 'package:quiver/core.dart';
 /**
  * Created by etsai on 9/4/16.
  */
@@ -80,16 +81,9 @@ class DataAttributes {
         if (other == null || other is DataAttributes) return false;
         DataAttributes that = other as DataAttributes;
         return copies == that.copies && offset == that.offset &&
-            signed == that.signed && Arrays.equals(sizes, that.sizes);
+            signed == that.signed && ListEquality().equals(sizes, that.sizes);
     }
 
     @override
-    int get hashCode {
-        int result = sizes.hashCode;
-        result = 31 * result + copies;
-        result = 31 * result + offset;
-        result = 31 * result + (signed ? 1 : 0);
-        return result;
-    }
-
+    int get hashCode => hash4(hashObjects(sizes), copies, offset, signed);
 }

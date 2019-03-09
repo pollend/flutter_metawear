@@ -26,26 +26,25 @@
  * Created by etsai on 10/26/16.
  */
 class EventImpl extends ModuleImplBase implements Module {
-    private static final byte ENTRY = 2, CMD_PARAMETERS = 3, REMOVE = 4, REMOVE_ALL = 5;
-    private static final long serialVersionUID = 4582940681177602659L;
+    static const int ENTRY = 2, CMD_PARAMETERS = 3, REMOVE = 4, REMOVE_ALL = 5;
 
     transient Tuple3<Byte, Byte, Byte> feedbackParams= null;
-    transient DataTypeBase activeDataType = null;
+    DataTypeBase activeDataType = null;
 
-    private transient Queue<byte[]> recordedCommands;
-    private transient TimedTask<byte[]> createEventTask;
+    ListQueue<byte[]> recordedCommands;
+    TimedTask<byte[]> createEventTask;
 
     EventImpl(MetaWearBoardPrivate mwPrivate) {
         super(mwPrivate);
     }
 
-    protected void init() {
+    void init() {
         createEventTask = new TimedTask<>();
         mwPrivate.addResponseHandler(new Pair<>(EVENT.id, ENTRY), response -> createEventTask.setResult(response));
     }
 
-    @Override
-    public void tearDown() {
+    @override
+    void tearDown() {
         mwPrivate.sendCommand(new byte[] {EVENT.id, EventImpl.REMOVE_ALL});
     }
 
@@ -53,7 +52,7 @@ class EventImpl extends ModuleImplBase implements Module {
         mwPrivate.sendCommand(new byte[]{EVENT.id, EventImpl.REMOVE, id});
     }
 
-    Task<LinkedList<Byte>> queueEvents(final Queue<Pair<? extends DataTypeBase, ? extends CodeBlock>> eventCodeBlocks) {
+    Future<List<int>> queueEvents(final Queue<Pair<? extends DataTypeBase, ? extends CodeBlock>> eventCodeBlocks) {
         final LinkedList<Byte> ids = new LinkedList<>();
         final Capture<Boolean> terminate = new Capture<>(false);
 

@@ -22,26 +22,19 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.impl;
 
-import com.mbientlab.metawear.ForcedDataProducer;
-import com.mbientlab.metawear.Route;
-import com.mbientlab.metawear.builder.RouteBuilder;
-import com.mbientlab.metawear.impl.platform.TimedTask;
-import com.mbientlab.metawear.module.DataProcessor;
 
-import java.io.Serializable;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Queue;
+class Processor{
 
-import bolts.Capture;
-import bolts.Task;
+final DataTypeBase state;
+final EditorImplBase editor;
 
-import static com.mbientlab.metawear.impl.Constant.Module.DATA_PROCESSOR;
+Processor(DataTypeBase state, Editor editor) {
+this.editor= (EditorImplBase) editor;
+this.state= state;
+}
+}
+
 
 /**
  * Created by etsai on 9/5/16.
@@ -61,9 +54,8 @@ class DataProcessorImpl extends ModuleImplBase implements DataProcessor {
         }
     }
 
-    private static final long serialVersionUID = -7439066046235167486L;
-    static final byte TIME_PASSTHROUGH_REVISION = 1, ENHANCED_STREAMING_REVISION = 2, HPF_REVISION = 2, EXPANDED_DELAY = 2, FUSE_REVISION = 3;
-    static final byte TYPE_ACCOUNTER = 0x11, TYPE_PACKER = 0x10;
+    static const int TIME_PASSTHROUGH_REVISION = 1, ENHANCED_STREAMING_REVISION = 2, HPF_REVISION = 2, EXPANDED_DELAY = 2, FUSE_REVISION = 3;
+    static const int TYPE_ACCOUNTER = 0x11, TYPE_PACKER = 0x10;
 
     static abstract class EditorImplBase implements Editor, Serializable {
         private static final long serialVersionUID = 4723697652659135045L;
@@ -94,25 +86,13 @@ class DataProcessorImpl extends ModuleImplBase implements DataProcessor {
         }
     }
 
-    static class Processor implements Serializable {
-        private static final long serialVersionUID = -156262560425526526L;
-
-        public final DataTypeBase state;
-        public final EditorImplBase editor;
-
-        Processor(DataTypeBase state, Editor editor) {
-            this.editor= (EditorImplBase) editor;
-            this.state= state;
-        }
-    }
-
     static class ProcessorEntry {
         byte id, offset, length;
         byte[] source;
         byte[] config;
     }
 
-    static final byte ADD= 2,
+    static const int ADD= 2,
         NOTIFY = 3,
         STATE = 4,
         PARAMETER = 5,
@@ -138,7 +118,7 @@ class DataProcessorImpl extends ModuleImplBase implements DataProcessor {
         }
     }
 
-    protected void init() {
+    protected void init() {PROCESS
         pullProcessorConfigTask = new TimedTask<>();
         createProcessorTask = new TimedTask<>();
 

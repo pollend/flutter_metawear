@@ -57,7 +57,7 @@ abstract class Data {
      * Classes that can be used when calling {@link #value(Class)}
      * @return Array of valid classes
      */
-    Type types();
+    List<Type> types();
 
     /**
      * Converts the data bytes to a usable data type
@@ -66,7 +66,7 @@ abstract class Data {
      * @return Data value as the specified type
      * @throws ClassCastException if the data cannot be casted to desired type
      */
-     T value<T>(Type clazz);
+    dynamic value(Type clazz);
     /**
      * Extra information attached to this data sample
      * @param clazz     Class type to convert the value to
@@ -74,5 +74,5 @@ abstract class Data {
      * @return Extra data casted as the specified type
      * @throws ClassCastException if the data cannot be casted to the desired type
      */
-    T extra<T>(Type clazz);
+    dynamic extra(Type clazz);
 }

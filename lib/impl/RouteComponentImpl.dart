@@ -22,92 +22,67 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.impl;
+import 'package:flutter_metawear/builder/RouteComponent.dart';
+import 'package:flutter_metawear/impl/Version.dart';
 
-import com.mbientlab.metawear.IllegalRouteOperationException;
-import com.mbientlab.metawear.Subscriber;
-import com.mbientlab.metawear.builder.RouteComponent;
-import com.mbientlab.metawear.builder.RouteMulticast;
-import com.mbientlab.metawear.builder.RouteSplit;
-import com.mbientlab.metawear.builder.filter.*;
-import com.mbientlab.metawear.builder.function.*;
-import com.mbientlab.metawear.builder.predicate.PulseOutput;
-import com.mbientlab.metawear.impl.DataProcessorImpl.*;
-import com.mbientlab.metawear.impl.ColorTcs34725Impl.ColorAdcData;
-import com.mbientlab.metawear.module.DataProcessor;
+enum BranchElement {
+    MULTICAST,
+    SPLIT
+}
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.util.ArrayList;
-import java.util.EmptyStackException;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Stack;
 
-import static com.mbientlab.metawear.impl.Constant.MAX_BTLE_LENGTH;
-import static com.mbientlab.metawear.impl.Constant.Module.DATA_PROCESSOR;
-import static com.mbientlab.metawear.impl.Constant.Module.SENSOR_FUSION;
+class Cache {
+    final List<Tuple3<DataTypeBase, Subscriber, Boolean>> subscribedProducers;
+    final List<Pair<String, Tuple3<DataTypeBase, Integer, byte[]>>> feedback;
+    final List<Tuple2<? extends DataTypeBase, ? extends Action>> reactions;
+    final List<Processor> dataProcessors;
+    final MetaWearBoardPrivate mwPrivate;
+    final ListQueue<RouteComponentImpl> stashedSignals= new Stack<>();
+    final ListQueue<BranchElement> elements;
+    final ListQueue<Pair<RouteComponentImpl, DataTypeBase[]>> splits;
+    final Map<String, Processor> taggedProcessors = new LinkedHashMap<>();
+
+    Cache(MetaWearBoardPrivate mwPrivate) {
+    this.subscribedProducers= new ArrayList<>();
+    this.feedback = new ArrayList<>();
+    this.reactions= new LinkedList<>();
+    this.dataProcessors = new LinkedList<>();
+    this.mwPrivate = mwPrivate;
+    this.elements= new Stack<>();
+    this.splits= new Stack<>();
+    }
+}
 
 /**
  * Created by etsai on 9/4/16.
  */
 class RouteComponentImpl implements RouteComponent {
-    static final Version MULTI_CHANNEL_MATH= new Version("1.1.0"), MULTI_COMPARISON_MIN_FIRMWARE= new Version("1.2.3");
+    static final MULTI_CHANNEL_MATH= Version.fromString("1.1.0"), MULTI_COMPARISON_MIN_FIRMWARE= Version.fromString("1.2.3");
 
-    private enum BranchElement {
-        MULTICAST,
-        SPLIT
-    }
-
-    static class Cache {
-        final ArrayList<Tuple3<DataTypeBase, Subscriber, Boolean>> subscribedProducers;
-        final ArrayList<Pair<String, Tuple3<DataTypeBase, Integer, byte[]>>> feedback;
-        final LinkedList<Pair<? extends DataTypeBase, ? extends Action>> reactions;
-        final LinkedList<Processor> dataProcessors;
-        public final MetaWearBoardPrivate mwPrivate;
-        final Stack<RouteComponentImpl> stashedSignals= new Stack<>();
-        final Stack<BranchElement> elements;
-        final Stack<Pair<RouteComponentImpl, DataTypeBase[]>> splits;
-        final Map<String, Processor> taggedProcessors = new LinkedHashMap<>();
-
-        Cache(MetaWearBoardPrivate mwPrivate) {
-            this.subscribedProducers= new ArrayList<>();
-            this.feedback = new ArrayList<>();
-            this.reactions= new LinkedList<>();
-            this.dataProcessors = new LinkedList<>();
-            this.mwPrivate = mwPrivate;
-            this.elements= new Stack<>();
-            this.splits= new Stack<>();
-        }
-    }
-
-    private final DataTypeBase source;
+    final DataTypeBase source;
     Cache persistantData= null;
 
-    RouteComponentImpl(DataTypeBase source) {
-        this.source= source;
-    }
+    RouteComponentImpl(this.source,[RouteComponentImpl original]):
+            original == null ? null : persistantData = original.persistantData;
 
-    RouteComponentImpl(DataTypeBase source, RouteComponentImpl original) {
-        this.source= source;
-        this.persistantData= original.persistantData;
-    }
+//    RouteComponentImpl(DataTypeBase source, RouteComponentImpl original) {
+//        this.source= source;
+//        this.persistantData= original.persistantData;
+//    }
 
-    public void setup(Cache original) {
+    void setup(Cache original) {
         this.persistantData= original;
     }
 
-    @Override
-    public RouteMulticast multicast() {
+    @override
+    RouteMulticast multicast() {
         persistantData.elements.push(BranchElement.MULTICAST);
         persistantData.stashedSignals.push(this);
         return new RouteMulticastImpl(this);
     }
 
-    @Override
-    public RouteComponent to() {
+    @override
+    RouteComponent to() {
         try {
             return persistantData.stashedSignals.peek();
         } catch (EmptyStackException e) {
@@ -115,8 +90,8 @@ class RouteComponentImpl implements RouteComponent {
         }
     }
 
-    @Override
-    public RouteSplit split() {
+    @override
+    RouteSplit split() {
         if (source.split == null) {
             throw new IllegalRouteOperationException(String.format(Locale.US, "Cannot split source data signal '%s'", source.getClass().getName()));
         }
@@ -126,8 +101,8 @@ class RouteComponentImpl implements RouteComponent {
         return new RouteSplitImpl(this);
     }
 
-    @Override
-    public RouteComponent index(int i) {
+    @override
+    RouteComponent index(int i) {
         try {
             return new RouteComponentImpl(persistantData.splits.peek().second[i], this);
         } catch (ArrayIndexOutOfBoundsException e) {
@@ -135,7 +110,7 @@ class RouteComponentImpl implements RouteComponent {
         }
     }
 
-    @Override
+    @override
     public RouteComponent end() {
         try {
             switch (persistantData.elements.pop()) {
@@ -153,7 +128,7 @@ class RouteComponentImpl implements RouteComponent {
         }
     }
 
-    @Override
+    @override
     public RouteComponent name(String name) {
         if (persistantData.taggedProcessors.containsKey(name)) {
             throw new IllegalRouteOperationException(String.format("Duplicate processor key \'%s\' found", name));
@@ -163,7 +138,7 @@ class RouteComponentImpl implements RouteComponent {
         return this;
     }
 
-    @Override
+    @override
     public RouteComponent stream(Subscriber subscriber) {
         if (source.attributes.length() > 0) {
             source.markLive();
@@ -173,7 +148,7 @@ class RouteComponentImpl implements RouteComponent {
         throw new IllegalRouteOperationException("Cannot subscribe to null data");
     }
 
-    @Override
+    @override
     public RouteComponent log(Subscriber subscriber) {
         if (source.attributes.length() > 0) {
             persistantData.subscribedProducers.add(new Tuple3<>(source, subscriber, true));
@@ -182,13 +157,13 @@ class RouteComponentImpl implements RouteComponent {
         throw new IllegalRouteOperationException("Cannot log null data");
     }
 
-    @Override
+    @override
     public RouteComponent react(Action action) {
         persistantData.reactions.add(new Pair<>(source, action));
         return this;
     }
 
-    @Override
+    @override
     public RouteComponent buffer() {
         if (source.attributes.length() <= 0) {
             throw new IllegalRouteOperationException("Cannot apply \'buffer\' filter to null data");
@@ -270,12 +245,12 @@ class RouteComponentImpl implements RouteComponent {
         return postCreate(next.second, editor);
     }
 
-    @Override
+    @override
     public RouteComponent count() {
         return createReducer(true);
     }
 
-    @Override
+    @override
     public RouteComponent accumulate() {
         return createReducer(false);
     }

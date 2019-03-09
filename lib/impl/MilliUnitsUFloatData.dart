@@ -22,15 +22,13 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear.impl;
 
-import com.mbientlab.metawear.impl.Constant.Module;
+import 'package:flutter_metawear/impl/UFloatData.dart';
 
 /**
  * Created by etsai on 2/28/17.
  */
 class MilliUnitsUFloatData extends UFloatData {
-    private static final long serialVersionUID = -5121465630232191643L;
 
     MilliUnitsUFloatData(Module module, byte register, byte id, DataAttributes attributes) {
         super(module, register, id, attributes);
@@ -53,4 +51,5 @@ class MilliUnitsUFloatData extends UFloatData {
     public DataTypeBase copy(DataTypeBase input, Module module, byte register, byte id, DataAttributes attributes) {
         return new MilliUnitsUFloatData(input, module, register, id, attributes);
     }
+
 }

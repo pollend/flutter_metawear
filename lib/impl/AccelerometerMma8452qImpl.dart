@@ -47,11 +47,10 @@ class AccelerometerMma8452qImpl extends ModuleImplBase implements AccelerometerM
         }
     }
 
-    private static final long serialVersionUID = 8144499912703592184L;
-    final static byte IMPLEMENTATION= 0x0;
-    private final float MMA8452Q_G_PER_STEP= 0.063f;
-    private static final byte PACKED_ACC_REVISION= 1;
-    private static final byte GLOBAL_ENABLE = 1,
+    static const int IMPLEMENTATION= 0x0;
+    static const double MMA8452Q_G_PER_STEP= 0.063;
+    static const int PACKED_ACC_REVISION= 1;
+    static const int GLOBAL_ENABLE = 1,
             DATA_ENABLE = 2, DATA_CONFIG = 3, DATA_VALUE = 4,
             MOVEMENT_ENABLE = 5, MOVEMENT_CONFIG = 6, MOVEMENT_VALUE = 7,
             ORIENTATION_ENABLE = 8, ORIENTATION_CONFIG = 9, ORIENTATION_VALUE = 0xa,
@@ -59,44 +58,54 @@ class AccelerometerMma8452qImpl extends ModuleImplBase implements AccelerometerM
             SHAKE_ENABLE = 0xe, SHAKE_CONFIG = 0xf, SHAKE_STATUS = 0x10,
             PACKED_ACC_DATA= 0x12;
 
-    private static final float[][] motionCountSteps= new float[][] {
-            {1.25f, 2.5f, 5, 10, 20, 20, 20, 20},
-            {1.25f, 2.5f, 5, 10, 20, 80, 80, 80},
-            {1.25f, 2.5f, 2.5f, 2.5f, 2.5f, 2.5f, 2.5f, 2.5f},
-            {1.25f, 2.5f, 5, 10, 20, 80, 160, 160}
-    }, transientSteps, orientationSteps;
-    private static final float[][][] OS_CUTOFF_FREQS = new float[][][]{
-            {
-                    {16f, 8f, 4f, 2f},
-                    {16f, 8f, 4f, 2f},
-                    {8f, 4f, 2f, 1f},
-                    {4f, 2f, 1f, 0.5f},
-                    {2f, 1f, 0.5f, 0.25f},
-                    {2f, 1f, 0.5f, 0.25f},
-                    {2f, 1f, 0.5f, 0.25f},
-                    {2f, 1f, 0.5f, 0.25f}
-            },
-            {
-                    {16f, 8f, 4f, 2f},
-                    {16f, 8f, 4f, 2f},
-                    {8f, 4f, 2f, 1f},
-                    {4f, 2f, 1f, 0.5f},
-                    {2f, 1f, 0.5f, 0.25f},
-                    {0.5f, 0.25f, 0.125f, 0.063f},
-                    {0.5f, 0.25f, 0.125f, 0.063f},
-                    {0.5f, 0.25f, 0.125f, 0.063f}
-            },
-            {
-                    {16f, 8f, 4f, 2f},
-                    {16f, 8f, 4f, 2f},
-                    {16f, 8f, 4f, 2f},
-                    {16f, 8f, 4f, 2f},
-                    {16f, 8f, 4f, 2f},
-                    {16f, 8f, 4f, 2f},
-                    {16f, 8f, 4f, 2f},
-                    {16f, 8f, 4f, 2f}
-            },
-            {
+    static const List<List<double>> motionCountSteps=  [
+            [1.25, 2.5, 5, 10, 20, 20, 20, 20],
+            [1.25, 2.5, 5, 10, 20, 80, 80, 80],
+            [1.25, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5],
+            [1.25, 2.5, 5, 10, 20, 80, 160, 160]
+    ], transientSteps = [
+      [1.25, 2.5, 5, 10, 20, 20, 20, 20],
+      [1.25, 2.5, 5, 10, 20, 80, 80, 80],
+      [1.25, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5],
+      [1.25, 2.5, 5, 10, 20, 80, 160, 160]
+    ], orientationSteps = [
+      [1.25, 2.5, 5, 10, 20, 20, 20, 20],
+      [1.25, 2.5, 5, 10, 20, 80, 80, 80],
+      [1.25, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5],
+      [1.25, 2.5, 5, 10, 20, 80, 160, 160]
+    ];
+    static const List<List<List<double>>> OS_CUTOFF_FREQS = [
+            [
+                    [16, 8, 4, 2],
+                    [16, 8, 4, 2],
+                    [8, 4, 2, 1],
+                    [4, 2, 1, 0.5],
+                    [2, 1, 0.5, 0.25],
+                    [2, 1, 0.5, 0.25],
+                    [2, 1, 0.5, 0.25],
+                    [2, 1, 0.5, 0.25]
+            ],
+            [
+                    [16, 8, 4, 2],
+                    [16, 8, 4, 2],
+                    [8, 4, 2, 1],
+                    [4, 2, 1, 0.5],
+                    [2, 1, 0.5, 0.25],
+                    [0.5, 0.25, 0.125, 0.063],
+                    [0.5, 0.25, 0.125, 0.063],
+                    [0.5, 0.25, 0.125, 0.063]
+            ],
+            [
+                    {16, 8, 4, 2},
+                    {16, 8, 4, 2},
+                    {16, 8, 4, 2},
+                    {16, 8, 4, 2},
+                    {16, 8, 4, 2},
+                    {16, 8, 4, 2},
+                    {16, 8, 4, 2},
+                    {16, 8, 4, 2}
+            ],
+            [
                     {16f, 8f, 4f, 2f},
                     {8f, 4f, 2f, 1f},
                     {4f, 2f, 1f, 0.5f},
@@ -105,8 +114,8 @@ class AccelerometerMma8452qImpl extends ModuleImplBase implements AccelerometerM
                     {0.25f, 0.125f, 0.063f, 0.031f},
                     {0.25f, 0.125f, 0.063f, 0.031f},
                     {0.25f, 0.125f, 0.063f, 0.031f}
-            }
-    },pulseTmltSteps= new float[][][] {
+            ]
+    ],pulseTmltSteps= new float[][][] {
             {{0.625f, 0.625f, 1.25f, 2.5f, 5, 5, 5, 5},
                     {0.625f, 0.625f, 1.25f, 2.5f, 5, 20, 20, 20},
                     {0.625f, 0.625f, 0.625f, 0.625f, 0.625f, 0.625f, 0.625f, 0.625f},

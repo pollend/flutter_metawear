@@ -36,9 +36,8 @@ class AmbientLightLtr329Impl extends ModuleImplBase implements AmbientLightLtr32
         }
     }
 
-    private final static String ILLUMINANCE_PRODUCER= "com.mbientlab.metawear.impl.AmbientLightLtr329Impl.ILLUMINANCE_PRODUCER";
-    private static final byte ENABLE = 1, CONFIG = 2, OUTPUT = 3;
-    private static final long serialVersionUID = 8287988596635899285L;
+    static const String ILLUMINANCE_PRODUCER= "com.mbientlab.metawear.impl.AmbientLightLtr329Impl.ILLUMINANCE_PRODUCER";
+    static const int ENABLE = 1, CONFIG = 2, OUTPUT = 3;
 
     private transient AsyncDataProducer illuminanceProducer;
 

@@ -89,7 +89,7 @@ class UFloatData extends DataTypeBase {
     }
 
     @override
-    Tuple2<? extends DataTypeBase, ? extends DataTypeBase> dataProcessorTransform(DataProcessorConfig config, DataProcessorImpl dpModule) {
+    Tuple2<DataTypeBase, DataTypeBase> dataProcessorTransform(DataProcessorConfig config, DataProcessorImpl dpModule) {
         switch(config.id) {
             case DataProcessorConfig.Maths.ID: {
                 DataProcessorConfig.Maths casted = (DataProcessorConfig.Maths) config;
