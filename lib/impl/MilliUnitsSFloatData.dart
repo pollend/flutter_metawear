@@ -39,12 +39,12 @@ class MilliUnitsSFloatData extends SFloatData {
         super(module, register, attributes);
     }
 
-    @Override
+    @override
     protected float scale(MetaWearBoardPrivate mwPrivate) {
         return 1000.f;
     }
 
-    @Override
+    @override
     public DataTypeBase copy(DataTypeBase input, Module module, byte register, byte id, DataAttributes attributes) {
         return new MilliUnitsSFloatData(input, module, register, id, attributes);
     }

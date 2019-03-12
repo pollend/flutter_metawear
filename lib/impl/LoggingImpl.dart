@@ -546,7 +546,7 @@ class LoggingImpl extends ModuleImplBase implements Logging {
         });
 
         return syncLoggerConfigTask.execute("Did not receive logger config for id=" + id + " within %dms", Constant.RESPONSE_TIMEOUT,
-                () -> mwPrivate.sendCommand(new byte[] {0x0b, Util.setRead(TRIGGER), id})
+                () -> mwPrivate.sendCommand(Uint8List.fromList([0x0b, Util.setRead(TRIGGER), id]))
         ).onSuccessTask(task -> {
             response.set(task.getResult());
             if (response.get().length > 2) {

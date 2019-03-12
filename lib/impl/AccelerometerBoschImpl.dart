@@ -90,22 +90,22 @@ abstract class AccelerometerBoschImpl extends ModuleImplBase implements Accelero
             super(input, module, register, id, attributes);
         }
 
-        @Override
+        @override
         public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
             return new BoschAccCartesianFloatData(input, module, register, id, attributes);
         }
 
-        @Override
+        @override
         public DataTypeBase[] createSplits() {
             return new DataTypeBase[] {new BoschAccSFloatData((byte) 0), new BoschAccSFloatData((byte) 2), new BoschAccSFloatData((byte) 4)};
         }
 
-        @Override
+        @override
         protected float scale(MetaWearBoardPrivate mwPrivate) {
             return ((AccelerometerBoschImpl) mwPrivate.getModules().get(AccelerometerBosch.class)).getAccDataScale();
         }
 
-        @Override
+        @override
         public Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, final byte[] data, final Calendar timestamp, DataPrivate.ClassToObject mapper) {
             ByteBuffer buffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN);
             short[] unscaled = new short[]{buffer.getShort(), buffer.getShort(), buffer.getShort()};
@@ -113,17 +113,17 @@ abstract class AccelerometerBoschImpl extends ModuleImplBase implements Accelero
             final Acceleration value= new Acceleration(unscaled[0] / scale, unscaled[1] / scale, unscaled[2] / scale);
 
             return new DataPrivate(timestamp, data, mapper) {
-                @Override
+                @override
                 public float scale() {
                     return scale;
                 }
 
-                @Override
+                @override
                 public Class<?>[] types() {
                     return new Class<?>[] {Acceleration.class, float[].class};
                 }
 
-                @Override
+                @override
                 public <T> T value(Class<T> clazz) {
                     if (clazz.equals(Acceleration.class)) {
                         return clazz.cast(value);
@@ -146,12 +146,12 @@ abstract class AccelerometerBoschImpl extends ModuleImplBase implements Accelero
             super(input, module, register, id, attributes);
         }
 
-        @Override
+        @override
         protected float scale(MetaWearBoardPrivate mwPrivate) {
             return ((AccelerometerBoschImpl) mwPrivate.getModules().get(AccelerometerBosch.class)).getAccDataScale();
         }
 
-        @Override
+        @override
         public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
             return new BoschAccSFloatData(input, module, register, id, attributes);
         }
@@ -167,18 +167,18 @@ abstract class AccelerometerBoschImpl extends ModuleImplBase implements Accelero
             super(input, module, register, id, attributes);
         }
 
-        @Override
+        @override
         public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
             return new BoschFlatData(input, module, register, id, attributes);
         }
 
-        @Override
+        @override
         public Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, byte[] data, Calendar timestamp, DataPrivate.ClassToObject mapper) {
             int mask = mwPrivate.lookupModuleInfo(ACCELEROMETER).revision >= FLAT_REVISION ? 0x4 : 0x2;
             final boolean isFlat = (data[0] & mask) == mask;
 
             return new DataPrivate(timestamp, data, mapper) {
-                @Override
+                @override
                 public <T> T value(Class<T> clazz) {
                     if (clazz.equals(Boolean.class)) {
                         return clazz.cast(isFlat);
@@ -186,7 +186,7 @@ abstract class AccelerometerBoschImpl extends ModuleImplBase implements Accelero
                     return super.value(clazz);
                 }
 
-                @Override
+                @override
                 public Class<?>[] types() {
                     return new Class<?>[] {Boolean.class};
                 }
@@ -204,17 +204,17 @@ abstract class AccelerometerBoschImpl extends ModuleImplBase implements Accelero
             super(input, module, register, id, attributes);
         }
 
-        @Override
+        @override
         public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
             return new BoschOrientationData(input, module, register, id, attributes);
         }
 
-        @Override
+        @override
         public Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, byte[] data, Calendar timestamp, DataPrivate.ClassToObject mapper) {
             final SensorOrientation orientation = SensorOrientation.values()[((data[0] & 0x6) >> 1) + 4 * ((data[0] & 0x8) >> 3)];
 
             return new DataPrivate(timestamp, data, mapper) {
-                @Override
+                @override
                 public <T> T value(Class<T> clazz) {
                     if (clazz.equals(SensorOrientation.class)) {
                         return clazz.cast(orientation);
@@ -222,7 +222,7 @@ abstract class AccelerometerBoschImpl extends ModuleImplBase implements Accelero
                     return super.value(clazz);
                 }
 
-                @Override
+                @override
                 public Class<?>[] types() {
                     return new Class<?>[] {SensorOrientation.class};
                 }
@@ -239,7 +239,7 @@ abstract class AccelerometerBoschImpl extends ModuleImplBase implements Accelero
             super(input, module, register, id, attributes);
         }
 
-        @Override
+        @override
         public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
             return new BoschLowHighData(input, module, register, id, attributes);
         }
@@ -249,7 +249,7 @@ abstract class AccelerometerBoschImpl extends ModuleImplBase implements Accelero
             return (value & mask) == mask;
         }
 
-        @Override
+        @override
         public Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, final byte[] data, Calendar timestamp, DataPrivate.ClassToObject mapper) {
             final byte highFirst = (byte) ((data[0] & 0x1c) >> 2);
             final LowHighResponse castedData = new LowHighResponse(
@@ -261,7 +261,7 @@ abstract class AccelerometerBoschImpl extends ModuleImplBase implements Accelero
                     (data[0] & 0x20) == 0x20 ? Sign.NEGATIVE : Sign.POSITIVE);
 
             return new DataPrivate(timestamp, data, mapper) {
-                @Override
+                @override
                 public <T> T value(Class<T> clazz) {
                     if (clazz.equals(LowHighResponse.class)) {
                         return clazz.cast(castedData);
@@ -269,7 +269,7 @@ abstract class AccelerometerBoschImpl extends ModuleImplBase implements Accelero
                     return super.value(clazz);
                 }
 
-                @Override
+                @override
                 public Class<?>[] types() {
                     return new Class<?>[] {LowHighResponse.class};
                 }
@@ -287,7 +287,7 @@ abstract class AccelerometerBoschImpl extends ModuleImplBase implements Accelero
             super(input, module, register, id, attributes);
         }
 
-        @Override
+        @override
         public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
             return new BoschMotionData(input, module, register, id, attributes);
         }
@@ -297,7 +297,7 @@ abstract class AccelerometerBoschImpl extends ModuleImplBase implements Accelero
             return (value & mask) == mask;
         }
 
-        @Override
+        @override
         public Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, final byte[] data, Calendar timestamp, DataPrivate.ClassToObject mapper) {
             final AnyMotion castedData = new AnyMotion(
                     (data[0] & 0x40) == 0x40 ? Sign.NEGATIVE : Sign.POSITIVE,
@@ -307,7 +307,7 @@ abstract class AccelerometerBoschImpl extends ModuleImplBase implements Accelero
             );
 
             return new DataPrivate(timestamp, data, mapper) {
-                @Override
+                @override
                 public <T> T value(Class<T> clazz) {
                     if (clazz.equals(AnyMotion.class)) {
                         return clazz.cast(castedData);
@@ -315,7 +315,7 @@ abstract class AccelerometerBoschImpl extends ModuleImplBase implements Accelero
                     return super.value(clazz);
                 }
 
-                @Override
+                @override
                 public Class<?>[] types() {
                     return new Class<?>[] {AnyMotion.class};
                 }
@@ -333,12 +333,12 @@ abstract class AccelerometerBoschImpl extends ModuleImplBase implements Accelero
             super(input, module, register, id, attributes);
         }
 
-        @Override
+        @override
         public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
             return new BoschTapData(input, module, register, id, attributes);
         }
 
-        @Override
+        @override
         public Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, final byte[] data, Calendar timestamp, DataPrivate.ClassToObject mapper) {
             TapType type = null;
             if ((data[0] & 0x1) == 0x1) {
@@ -349,7 +349,7 @@ abstract class AccelerometerBoschImpl extends ModuleImplBase implements Accelero
 
             final Tap castedData = new Tap(type, (data[0] & 0x20) == 0x20 ? Sign.NEGATIVE : Sign.POSITIVE);
             return new DataPrivate(timestamp, data, mapper) {
-                @Override
+                @override
                 public <T> T value(Class<T> clazz) {
                     if (clazz.equals(Tap.class)) {
                         return clazz.cast(castedData);
@@ -357,7 +357,7 @@ abstract class AccelerometerBoschImpl extends ModuleImplBase implements Accelero
                     return super.value(clazz);
                 }
 
-                @Override
+                @override
                 public Class<?>[] types() {
                     return new Class<?>[] {Tap.class};
                 }
@@ -366,22 +366,22 @@ abstract class AccelerometerBoschImpl extends ModuleImplBase implements Accelero
     }
 
     abstract class BoschFlatDataProducer implements FlatDataProducer {
-        @Override
+        @override
         public Task<Route> addRouteAsync(RouteBuilder builder) {
             return mwPrivate.queueRouteBuilder(builder, FLAT_PRODUCER);
         }
 
-        @Override
+        @override
         public String name() {
             return FLAT_PRODUCER;
         }
 
-        @Override
+        @override
         public void start() {
             mwPrivate.sendCommand(new byte[] {ACCELEROMETER.id, FLAT_INTERRUPT_ENABLE, (byte) 1, (byte) 0});
         }
 
-        @Override
+        @override
         public void stop() {
             mwPrivate.sendCommand(new byte[] {ACCELEROMETER.id, FLAT_INTERRUPT_ENABLE, (byte) 0, (byte) 1});
         }
@@ -396,7 +396,7 @@ abstract class AccelerometerBoschImpl extends ModuleImplBase implements Accelero
             this.durationStep = durationStep;
         }
 
-        @Override
+        @override
         public LowHighConfigEditor configure() {
             final byte[] lowHighConfig = Arrays.copyOf(initialConfig, initialConfig.length);
             lowHighEnableMask = 0;
@@ -405,73 +405,73 @@ abstract class AccelerometerBoschImpl extends ModuleImplBase implements Accelero
                 private Integer lowDuration= null, highDuration= null;
                 private Float lowThreshold= null, lowHysteresis= null, newHighThreshold= null, newHighHysteresis= null;
 
-                @Override
+                @override
                 public LowHighConfigEditor enableLowG() {
                     lowHighEnableMask |= 0x8;
                     return this;
                 }
 
-                @Override
+                @override
                 public LowHighConfigEditor enableHighGx() {
                     lowHighEnableMask |= 0x1;
                     return this;
                 }
 
-                @Override
+                @override
                 public LowHighConfigEditor enableHighGy() {
                     lowHighEnableMask |= 0x2;
                     return this;
                 }
 
-                @Override
+                @override
                 public LowHighConfigEditor enableHighGz() {
                     lowHighEnableMask |= 0x4;
                     return this;
                 }
 
-                @Override
+                @override
                 public LowHighConfigEditor lowDuration(int duration) {
                     lowDuration= duration;
                     return this;
                 }
 
-                @Override
+                @override
                 public LowHighConfigEditor lowThreshold(float threshold) {
                     lowThreshold= threshold;
                     return this;
                 }
 
-                @Override
+                @override
                 public LowHighConfigEditor lowHysteresis(float hysteresis) {
                     lowHysteresis= hysteresis;
                     return this;
                 }
 
-                @Override
+                @override
                 public LowHighConfigEditor lowGMode(LowGMode mode) {
                     lowGMode= mode;
                     return this;
                 }
 
-                @Override
+                @override
                 public LowHighConfigEditor highDuration(int duration) {
                     highDuration= duration;
                     return this;
                 }
 
-                @Override
+                @override
                 public LowHighConfigEditor highThreshold(float threshold) {
                     newHighThreshold= threshold;
                     return this;
                 }
 
-                @Override
+                @override
                 public LowHighConfigEditor highHysteresis(float hysteresis) {
                     newHighHysteresis= hysteresis;
                     return this;
                 }
 
-                @Override
+                @override
                 public void commit() {
                     if (lowDuration != null) {
                         lowHighConfig[0]= (byte) ((lowDuration / durationStep) - 1);
@@ -502,22 +502,22 @@ abstract class AccelerometerBoschImpl extends ModuleImplBase implements Accelero
             };
         }
 
-        @Override
+        @override
         public Task<Route> addRouteAsync(RouteBuilder builder) {
             return mwPrivate.queueRouteBuilder(builder, LOW_HIGH_PRODUCER);
         }
 
-        @Override
+        @override
         public String name() {
             return LOW_HIGH_PRODUCER;
         }
 
-        @Override
+        @override
         public void start() {
             mwPrivate.sendCommand(new byte[] {ACCELEROMETER.id, LOW_HIGH_G_INTERRUPT_ENABLE, lowHighEnableMask, (byte) 0x0});
         }
 
-        @Override
+        @override
         public void stop() {
             mwPrivate.sendCommand(new byte[] {ACCELEROMETER.id, LOW_HIGH_G_INTERRUPT_ENABLE, (byte) 0, 0xf});
         }
@@ -531,19 +531,19 @@ abstract class AccelerometerBoschImpl extends ModuleImplBase implements Accelero
             motionConfig = initialConfig;
         }
 
-        @Override
+        @override
         public AnyMotionConfigEditor count(int count) {
             this.count= count;
             return this;
         }
 
-        @Override
+        @override
         public AnyMotionConfigEditor threshold(float threshold) {
             this.threshold= threshold;
             return this;
         }
 
-        @Override
+        @override
         public void commit() {
             if (count != null) {
                 motionConfig[0]&= 0xfc;
@@ -566,19 +566,19 @@ abstract class AccelerometerBoschImpl extends ModuleImplBase implements Accelero
             motionConfig = initialConfig;
         }
 
-        @Override
+        @override
         public SlowMotionConfigEditor count(byte count) {
             this.count= count;
             return this;
         }
 
-        @Override
+        @override
         public SlowMotionConfigEditor threshold(float threshold) {
             this.threshold= threshold;
             return this;
         }
 
-        @Override
+        @override
         public void commit() {
             if (count != null) {
                 motionConfig[0]&= 0x3;
@@ -625,41 +625,41 @@ abstract class AccelerometerBoschImpl extends ModuleImplBase implements Accelero
         mwPrivate.sendCommand(ACCELEROMETER, FLAT_CONFIG, flatConfig);
     }
 
-    @Override
+    @override
     public AccelerationDataProducer acceleration() {
         if (acceleration == null) {
             acceleration = new AccelerationDataProducer() {
-                @Override
+                @override
                 public Task<Route> addRouteAsync(RouteBuilder builder) {
                     return mwPrivate.queueRouteBuilder(builder, ACCEL_PRODUCER);
                 }
 
-                @Override
+                @override
                 public String name() {
                     return ACCEL_PRODUCER;
                 }
 
-                @Override
+                @override
                 public void start() {
                     mwPrivate.sendCommand(new byte[] {ACCELEROMETER.id, DATA_INTERRUPT_ENABLE, 0x01, 0x00});
                 }
 
-                @Override
+                @override
                 public void stop() {
                     mwPrivate.sendCommand(new byte[] {ACCELEROMETER.id, DATA_INTERRUPT_ENABLE, 0x00, 0x01});
                 }
 
-                @Override
+                @override
                 public String xAxisName() {
                     return ACCEL_X_AXIS_PRODUCER;
                 }
 
-                @Override
+                @override
                 public String yAxisName() {
                     return ACCEL_Y_AXIS_PRODUCER;
                 }
 
-                @Override
+                @override
                 public String zAxisName() {
                     return ACCEL_Z_AXIS_PRODUCER;
                 }
@@ -668,27 +668,27 @@ abstract class AccelerometerBoschImpl extends ModuleImplBase implements Accelero
         return (AccelerationDataProducer) acceleration;
     }
 
-    @Override
+    @override
     public AsyncDataProducer packedAcceleration() {
         if (mwPrivate.lookupModuleInfo(ACCELEROMETER).revision >= PACKED_ACC_REVISION) {
             if (packedAcceleration == null) {
                 packedAcceleration = new AsyncDataProducer() {
-                    @Override
+                    @override
                     public Task<Route> addRouteAsync(RouteBuilder builder) {
                         return mwPrivate.queueRouteBuilder(builder, ACCEL_PACKED_PRODUCER);
                     }
 
-                    @Override
+                    @override
                     public String name() {
                         return ACCEL_PACKED_PRODUCER;
                     }
 
-                    @Override
+                    @override
                     public void start() {
                         mwPrivate.sendCommand(new byte[] {ACCELEROMETER.id, DATA_INTERRUPT_ENABLE, 0x01, 0x00});
                     }
 
-                    @Override
+                    @override
                     public void stop() {
                         mwPrivate.sendCommand(new byte[] {ACCELEROMETER.id, DATA_INTERRUPT_ENABLE, 0x00, 0x01});
                     }
@@ -699,39 +699,39 @@ abstract class AccelerometerBoschImpl extends ModuleImplBase implements Accelero
         return null;
     }
 
-    @Override
+    @override
     public void start() {
         mwPrivate.sendCommand(new byte[] {ACCELEROMETER.id, POWER_MODE, 0x01});
     }
 
-    @Override
+    @override
     public void stop() {
         mwPrivate.sendCommand(new byte[] {ACCELEROMETER.id, POWER_MODE, 0x00});
     }
 
-    @Override
+    @override
     public OrientationDataProducer orientation() {
         if (orientation == null) {
             orientation = new OrientationDataProducer() {
-                @Override
+                @override
                 public OrientationConfigEditor configure() {
                     return new OrientationConfigEditor() {
                         private Float hysteresis = null;
                         private OrientationMode mode = OrientationMode.SYMMETRICAL;
 
-                        @Override
+                        @override
                         public OrientationConfigEditor hysteresis(float hysteresis) {
                             this.hysteresis = hysteresis;
                             return this;
                         }
 
-                        @Override
+                        @override
                         public OrientationConfigEditor mode(OrientationMode mode) {
                             this.mode = mode;
                             return this;
                         }
 
-                        @Override
+                        @override
                         public void commit() {
                             byte[] orientationConfig = new byte[] {0x18, 0x48};
 
@@ -747,22 +747,22 @@ abstract class AccelerometerBoschImpl extends ModuleImplBase implements Accelero
                     };
                 }
 
-                @Override
+                @override
                 public Task<Route> addRouteAsync(RouteBuilder builder) {
                     return mwPrivate.queueRouteBuilder(builder, ORIENTATION_PRODUCER);
                 }
 
-                @Override
+                @override
                 public String name() {
                     return ORIENTATION_PRODUCER;
                 }
 
-                @Override
+                @override
                 public void start() {
                     mwPrivate.sendCommand(new byte[] {ACCELEROMETER.id, ORIENT_INTERRUPT_ENABLE, (byte) 0x1, (byte) 0x0});
                 }
 
-                @Override
+                @override
                 public void stop() {
                     mwPrivate.sendCommand(new byte[] {ACCELEROMETER.id, ORIENT_INTERRUPT_ENABLE, (byte) 0x0, (byte) 0x1});
                 }
@@ -771,31 +771,31 @@ abstract class AccelerometerBoschImpl extends ModuleImplBase implements Accelero
         return (OrientationDataProducer) orientation;
     }
 
-    @Override
+    @override
     public TapDataProducer tap() {
         if (tap == null) {
             tap = new TapDataProducer() {
-                @Override
+                @override
                 public Task<Route> addRouteAsync(RouteBuilder builder) {
                     return mwPrivate.queueRouteBuilder(builder, TAP_PRODUCER);
                 }
 
-                @Override
+                @override
                 public String name() {
                     return TAP_PRODUCER;
                 }
 
-                @Override
+                @override
                 public void start() {
                     mwPrivate.sendCommand(new byte[] {ACCELEROMETER.id, TAP_INTERRUPT_ENABLE, tapEnableMask, (byte) 0});
                 }
 
-                @Override
+                @override
                 public void stop() {
                     mwPrivate.sendCommand(new byte[] {ACCELEROMETER.id, TAP_INTERRUPT_ENABLE, (byte) 0, (byte) 0x3});
                 }
 
-                @Override
+                @override
                 public TapConfigEditor configure() {
                     return new TapConfigEditor() {
                         private TapQuietTime newTapTime= null;
@@ -804,43 +804,43 @@ abstract class AccelerometerBoschImpl extends ModuleImplBase implements Accelero
                         private Float newThs= null;
                         private final LinkedHashSet<TapType> types = new LinkedHashSet<>();
 
-                        @Override
+                        @override
                         public TapConfigEditor enableDoubleTap() {
                             types.add(TapType.DOUBLE);
                             return this;
                         }
 
-                        @Override
+                        @override
                         public TapConfigEditor enableSingleTap() {
                             types.add(TapType.SINGLE);
                             return this;
                         }
 
-                        @Override
+                        @override
                         public TapConfigEditor quietTime(TapQuietTime time) {
                             newTapTime= time;
                             return this;
                         }
 
-                        @Override
+                        @override
                         public TapConfigEditor shockTime(TapShockTime time) {
                             newShockTime= time;
                             return this;
                         }
 
-                        @Override
+                        @override
                         public TapConfigEditor doubleTapWindow(DoubleTapWindow window) {
                             newWindow= window;
                             return this;
                         }
 
-                        @Override
+                        @override
                         public TapConfigEditor threshold(float threshold) {
                             newThs= threshold;
                             return this;
                         }
 
-                        @Override
+                        @override
                         public void commit() {
                             byte[] tapConfig = new byte[] {0x04, 0x0a};
 

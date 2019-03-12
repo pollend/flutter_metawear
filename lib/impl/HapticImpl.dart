@@ -22,6 +22,9 @@
  * hello@mbientlab.com.
  */
 
+import 'package:flutter_metawear/impl/ModuleImplBase.dart';
+import 'package:flutter_metawear/module/Haptic.dart';
+
 /**
  * Created by etsai on 9/18/16.
  */
@@ -35,12 +38,12 @@ class HapticImpl extends ModuleImplBase implements Haptic {
         super(mwPrivate);
     }
 
-    @Override
+    @override
     public void startMotor(short pulseWidth) {
         startMotor(DEFAULT_DUTY_CYCLE, pulseWidth);
     }
 
-    @Override
+    @override
     public void startMotor(float dutyCycle, short pulseWidth) {
         short converted= (short)((dutyCycle / 100.f) * 248);
         ByteBuffer buffer= ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).put((byte) (converted & 0xff)).putShort(pulseWidth).put((byte) 0);
@@ -48,7 +51,7 @@ class HapticImpl extends ModuleImplBase implements Haptic {
         mwPrivate.sendCommand(HAPTIC, PULSE, buffer.array());
     }
 
-    @Override
+    @override
     public void startBuzzer(short pulseWidth) {
         ByteBuffer buffer= ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).put(BUZZER_DUTY_CYCLE).putShort(pulseWidth).put((byte) 1);
         mwPrivate.sendCommand(HAPTIC, PULSE, buffer.array());

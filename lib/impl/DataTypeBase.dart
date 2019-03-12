@@ -357,12 +357,12 @@ abstract class DataTypeBase implements DataToken {
 //            throw new IndexOutOfBoundsException("offset + length is greater than data length (" + attributes.length() + ")");
 //        }
 //        return new DataTypeBase(eventConfig, offset, length) {
-//            @Override
+//            @override
 //            public DataTypeBase copy(DataTypeBase input, Module module, byte register, byte id, DataAttributes attributes) {
 //                throw new UnsupportedOperationException();
 //            }
 //
-//            @Override
+//            @override
 //            public Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, byte[] data, Calendar timestamp, DataPrivate.ClassToObject mapper) {
 //                throw new UnsupportedOperationException();
 //            }

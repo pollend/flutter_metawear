@@ -37,12 +37,12 @@ class HumidityBme280SFloatData extends UFloatData {
         super(input, module, register, id, attributes);
     }
 
-    @Override
+    @override
     public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
         return new HumidityBme280SFloatData(input, module, register, id, attributes);
     }
 
-    @Override
+    @override
     protected float scale(MetaWearBoardPrivate mwPrivate) {
         return 1024.f;
     }
@@ -73,26 +73,26 @@ class HumidityBme280Impl extends ModuleImplBase implements HumidityBme280 {
         mwPrivate.tagProducer(PRODUCER, new HumidityBme280SFloatData());
     }
 
-    @Override
+    @override
     public void setOversampling(OversamplingMode mode) {
         mwPrivate.sendCommand(new byte[] {HUMIDITY.id, MODE, (byte) (mode.ordinal() + 1)});
     }
 
-    @Override
+    @override
     public ForcedDataProducer value() {
         if (humidityProducer == null) {
             humidityProducer = new ForcedDataProducer() {
-                @Override
+                @override
                 public void read() {
                     mwPrivate.lookupProducer(PRODUCER).read(mwPrivate);
                 }
 
-                @Override
+                @override
                 public Task<Route> addRouteAsync(RouteBuilder builder) {
                     return mwPrivate.queueRouteBuilder(builder, PRODUCER);
                 }
 
-                @Override
+                @override
                 public String name() {
                     return PRODUCER;
                 }

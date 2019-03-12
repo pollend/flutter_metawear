@@ -37,27 +37,27 @@ class IntData extends DataTypeBase {
         super(input, module, register, attributes);
     }
 
-    @Override
+    @override
     public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
         return new IntData(input, module, register, id, attributes);
     }
 
-    @Override
+    @override
     public Number convertToFirmwareUnits(MetaWearBoardPrivate mwPrivate, Number value) {
         return value;
     }
 
-    @Override
+    @override
     public Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, final byte[] data, final Calendar timestamp, DataPrivate.ClassToObject mapper) {
         final ByteBuffer buffer = Util.bytesToSIntBuffer(logData, data, attributes);
 
         return new DataPrivate(timestamp, data, mapper) {
-            @Override
+            @override
             public Class<?>[] types() {
                 return new Class<?>[] {Integer.class, Short.class, Byte.class, Boolean.class};
             }
 
-            @Override
+            @override
             public <T> T value(Class<T> clazz) {
                 if (clazz == Boolean.class) {
                     return clazz.cast(buffer.get(0) != 0);
@@ -76,7 +76,7 @@ class IntData extends DataTypeBase {
         };
     }
 
-    @Override
+    @override
     Pair<? extends DataTypeBase, ? extends DataTypeBase> dataProcessorTransform(DataProcessorConfig config, DataProcessorImpl dpModule) {
         switch(config.id) {
             case DataProcessorConfig.Maths.ID: {

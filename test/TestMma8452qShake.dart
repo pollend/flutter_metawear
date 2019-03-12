@@ -101,7 +101,7 @@ public class TestMma8452qShake extends UnitTestBase {
         actual.set(new Movement[6]);
         mma8452qAcc.shake().addRouteAsync(source -> source.stream(new Subscriber() {
             int i = 0;
-            @Override
+            @override
             public void apply(Data data, Object... env) {
                 actual.get()[i] = data.value(Movement.class);
                 i++;

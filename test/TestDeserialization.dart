@@ -64,7 +64,7 @@ public class TestDeserialization {
     }
 
     public static class TestDeserializeI2C extends TestI2C {
-        @Override
+        @override
         protected Task<Route> setupI2cRoute() {
             junitPlatform.boardStateSuffix = "i2c_stream";
             try {
@@ -136,7 +136,7 @@ public class TestDeserialization {
     }
 
     public static class TestDeserializeLoggingData extends TestLoggingData {
-        @Override
+        @override
         protected Task<Route> setupLogDataRoute() {
             try {
                 junitPlatform.boardStateSuffix = "log_acc";
@@ -150,7 +150,7 @@ public class TestDeserialization {
             }
         }
 
-        @Override
+        @override
         protected Task<Route> setupLogOffsetRoute() {
             try {
                 junitPlatform.boardStateSuffix= "log_offset";
@@ -176,12 +176,12 @@ public class TestDeserialization {
         /*
         // For editReference test
         mwBoard.getModule(Gpio.class).getVirtualPin((byte) 0x15).analogAdc().addRouteAsync(new RouteBuilder() {
-            @Override
+            @override
             public void configure(RouteComponent source) {
                 source.filter(Comparison.GTE, ComparisonOutput.ABSOLUTE, 1024, 512, 256, 128).name("multi_comp");
             }
         }).continueWith(new Continuation<Route, Void>() {
-            @Override
+            @override
             public Void then(Task<Route> task) throws Exception {
                 junitPlatform.boardStateSuffix = "multi_comparator";
                 mwBoard.serialize();
@@ -214,7 +214,7 @@ public class TestDeserialization {
     }
 
     public static class TestDeserializeSPI extends TestSPI {
-        @Override
+        @override
         protected Task<Route> setupSpiStream() {
             try {
                 junitPlatform.boardStateSuffix = "spi_stream";

@@ -31,6 +31,7 @@ import 'package:flutter_metawear/impl/Util.dart';
 import 'package:flutter_metawear/module/Gpio.dart';
 import 'package:flutter_metawear/impl/ModuleType.dart';
 import 'package:sprintf/sprintf.dart';
+import 'dart:typed_data';
 
 const String ADC_PRODUCER_FORMAT= "com.mbientlab.metawear.impl.GpioImpl.ADC_PRODUCER_$%d",
     ABS_REF_PRODUCER_FORMAT= "com.mbientlab.metawear.impl.GpioImpl.ABS_REF_PRODUCER_$%d",
@@ -72,7 +73,7 @@ class AnalogInner implements Analog {
           return sprintf(producerNameFormat, [pin]);
       }
 
-//    @Override
+//    @override
 //    public void read(byte pullup, byte pulldown, short delay, byte virtual) {
 //        if (mwPrivate.lookupModuleInfo(Constant.Module.GPIO).revision >= REVISION_ENHANCED_ANALOG) {
 //            mwPrivate.lookupProducer(name()).read(mwPrivate, new byte[] {pullup, pulldown, (byte) (delay / 4), virtual});
@@ -81,17 +82,17 @@ class AnalogInner implements Analog {
 //        }
 //    }
 //
-//    @Override
+//    @override
 //    public Task<Route> addRouteAsync(RouteBuilder builder) {
 //        return mwPrivate.queueRouteBuilder(builder, name());
 //    }
 //
-//    @Override
+//    @override
 //    public String name() {
 //        return String.format(Locale.US, producerNameFormat, pin);
 //    }
 //
-//    @Override
+//    @override
 //    public void read() {
 //        if (mwPrivate.lookupModuleInfo(Constant.Module.GPIO).revision >= REVISION_ENHANCED_ANALOG) {
 //            mwPrivate.lookupProducer(name()).read(mwPrivate, new byte[] {UNUSED_READ_PIN, UNUSED_READ_PIN, UNUSED_READ_DELAY, UNUSED_READ_PIN});
@@ -99,6 +100,127 @@ class AnalogInner implements Analog {
 //            mwPrivate.lookupProducer(name()).read(mwPrivate);
 //        }
 //    }
+}
+
+
+class GpioPinImpl implements Pin {
+    final int pin;
+    final bool virtual;
+    final MetaWearBoardPrivate mwPrivate;
+
+    GpioPinImpl(this.pin,this.virtual, this.mwPrivate);
+
+    @override
+    bool isVirtual() {
+        return virtual;
+    }
+
+    @override
+    void setChangeType(PinChangeType type) {
+        mwPrivate.sendCommand(Uint8List.fromList([ModuleType.GPIO.id, PIN_CHANGE, pin, (byte) (type.ordinal() + 1)]));
+    }
+
+    @override
+    void setPullMode(PullMode mode) {
+        switch (mode) {
+            case PULL_UP:
+                mwPrivate.sendCommand(Uint8List.fromList([ModuleType.GPIO.id, PULL_UP_DI, pin]));
+                break;
+            case PULL_DOWN:
+                mwPrivate.sendCommand(Uint8List.fromList([ModuleType.GPIO.id, PULL_DOWN_DI, pin]));
+                break;
+            case NO_PULL:
+                mwPrivate.sendCommand(Uint8List.fromList([ModuleType.GPIO.id, NO_PULL_DI, pin]));
+                break;
+        }
+    }
+
+    @override
+    void clearOutput() {
+        mwPrivate.sendCommand(Uint8List.fromList([ModuleType.GPIO.id, CLEAR_DO, pin]));
+    }
+
+    @override
+    void setOutput() {
+        mwPrivate.sendCommand(Uint8List.fromList([ModuleType.GPIO.id, SET_DO, pin]));
+    }
+
+    @override
+    Analog analogAdc() {
+        Analog producer= new AnalogInner(mwPrivate, pin, ADC_PRODUCER_FORMAT);
+
+        if (!mwPrivate.hasProducer(producer.name())) {
+            mwPrivate.tagProducer(producer.name(), new UintData(ModuleType.GPIO, Util.setSilentRead(READ_AI_ADC), pin, new DataAttributes(new byte[] {2}, (byte) 1, (byte) 0, false)));
+        }
+
+        return producer;
+    }
+
+    @override
+    Analog analogAbsRef() {
+        Analog producer=  new AnalogInner(mwPrivate, pin, ABS_REF_PRODUCER_FORMAT);
+        if (!mwPrivate.hasProducer(producer.name())) {
+            mwPrivate.tagProducer(producer.name(), new MilliUnitsUFloatData(ModuleType.GPIO, Util.setSilentRead(READ_AI_ABS_REF), pin, new DataAttributes(new byte[] {2}, (byte) 1, (byte) 0, false)));
+        }
+
+        return producer;
+    }
+
+    @override
+    ForcedDataProducer digital() {
+        ForcedDataProducer producer=  new ForcedDataProducer() {
+            @override
+            public Task<Route> addRouteAsync(RouteBuilder builder) {
+        return mwPrivate.queueRouteBuilder(builder, name());
+        }
+
+        @override
+        public String name() {
+        return String.format(Locale.US, DIGITAL_PRODUCER_FORMAT, pin);
+        }
+
+        @override
+        public void read() {
+        mwPrivate.lookupProducer(name()).read(mwPrivate);
+        }
+        };
+        if (!mwPrivate.hasProducer(producer.name())) {
+        mwPrivate.tagProducer(producer.name(), new UintData(GPIO, Util.setSilentRead(READ_DI), pin, new DataAttributes(new byte[] {1}, (byte) 1, (byte) 0, false)));
+        }
+
+        return producer;
+    }
+
+    @override
+    AsyncDataProducer monitor() {
+        AsyncDataProducer producer=  new AsyncDataProducer() {
+            @override
+            public Task<Route> addRouteAsync(RouteBuilder builder) {
+        return mwPrivate.queueRouteBuilder(builder, name());
+        }
+
+        @override
+        public String name() {
+        return String.format(Locale.US, MONITOR_PRODUCER_FORMAT, pin);
+        }
+
+        @override
+        public void start() {
+        mwPrivate.sendCommand(new byte[]{GPIO.id, PIN_CHANGE_NOTIFY_ENABLE, pin, 1});
+        }
+
+        @override
+        public void stop() {
+        mwPrivate.sendCommand(new byte[]{GPIO.id, PIN_CHANGE_NOTIFY_ENABLE, pin, 0});
+        }
+        };
+        if (!mwPrivate.hasProducer(producer.name())) {
+        mwPrivate.tagProducer(producer.name(), new UintData(GPIO, Util.setSilentRead(READ_DI), pin, new DataAttributes(new byte[] {1}, (byte) 1, (byte) 0, false)));
+        }
+        mwPrivate.tagProducer(producer.name(), new UintData(GPIO, PIN_CHANGE_NOTIFY, pin, new DataAttributes(new byte[] {1}, (byte) 1, (byte) 0, false)));
+
+        return producer;
+        }
 }
 
 /**
@@ -123,147 +245,21 @@ class GpioImpl extends ModuleImplBase implements Gpio {
     }
 
 
-
-
-    private static class GpioPinImpl implements Pin {
-        private final byte pin;
-        private final boolean virtual;
-        private final transient MetaWearBoardPrivate mwPrivate;
-
-        GpioPinImpl(byte pin, boolean virtual, MetaWearBoardPrivate mwPrivate) {
-            this.pin= pin;
-            this.virtual= virtual;
-            this.mwPrivate = mwPrivate;
-        }
-
-        @Override
-        public boolean isVirtual() {
-            return virtual;
-        }
-
-        @Override
-        public void setChangeType(PinChangeType type) {
-            mwPrivate.sendCommand(new byte[] {GPIO.id, PIN_CHANGE, pin, (byte) (type.ordinal() + 1)});
-        }
-
-        @Override
-        public void setPullMode(PullMode mode) {
-            switch (mode) {
-                case PULL_UP:
-                    mwPrivate.sendCommand(new byte[] {GPIO.id, PULL_UP_DI, pin});
-                    break;
-                case PULL_DOWN:
-                    mwPrivate.sendCommand(new byte[] {GPIO.id, PULL_DOWN_DI, pin});
-                    break;
-                case NO_PULL:
-                    mwPrivate.sendCommand(new byte[] {GPIO.id, NO_PULL_DI, pin});
-                    break;
-            }
-        }
-
-        @Override
-        public void clearOutput() {
-            mwPrivate.sendCommand(new byte[] {GPIO.id, CLEAR_DO, pin});
-        }
-
-        @Override
-        public void setOutput() {
-            mwPrivate.sendCommand(new byte[] {GPIO.id, SET_DO, pin});
-        }
-
-        @Override
-        public Analog analogAdc() {
-            Analog producer= new AnalogInner(mwPrivate, pin, ADC_PRODUCER_FORMAT);
-
-            if (!mwPrivate.hasProducer(producer.name())) {
-                mwPrivate.tagProducer(producer.name(), new UintData(GPIO, Util.setSilentRead(READ_AI_ADC), pin, new DataAttributes(new byte[] {2}, (byte) 1, (byte) 0, false)));
-            }
-
-            return producer;
-        }
-
-        @Override
-        public Analog analogAbsRef() {
-            Analog producer=  new AnalogInner(mwPrivate, pin, ABS_REF_PRODUCER_FORMAT);
-            if (!mwPrivate.hasProducer(producer.name())) {
-                mwPrivate.tagProducer(producer.name(), new MilliUnitsUFloatData(GPIO, Util.setSilentRead(READ_AI_ABS_REF), pin, new DataAttributes(new byte[] {2}, (byte) 1, (byte) 0, false)));
-            }
-
-            return producer;
-        }
-
-        @Override
-        public ForcedDataProducer digital() {
-            ForcedDataProducer producer=  new ForcedDataProducer() {
-                @Override
-                public Task<Route> addRouteAsync(RouteBuilder builder) {
-                    return mwPrivate.queueRouteBuilder(builder, name());
-                }
-
-                @Override
-                public String name() {
-                    return String.format(Locale.US, DIGITAL_PRODUCER_FORMAT, pin);
-                }
-
-                @Override
-                public void read() {
-                    mwPrivate.lookupProducer(name()).read(mwPrivate);
-                }
-            };
-            if (!mwPrivate.hasProducer(producer.name())) {
-                mwPrivate.tagProducer(producer.name(), new UintData(GPIO, Util.setSilentRead(READ_DI), pin, new DataAttributes(new byte[] {1}, (byte) 1, (byte) 0, false)));
-            }
-
-            return producer;
-        }
-
-        @Override
-        public AsyncDataProducer monitor() {
-            AsyncDataProducer producer=  new AsyncDataProducer() {
-                @Override
-                public Task<Route> addRouteAsync(RouteBuilder builder) {
-                    return mwPrivate.queueRouteBuilder(builder, name());
-                }
-
-                @Override
-                public String name() {
-                    return String.format(Locale.US, MONITOR_PRODUCER_FORMAT, pin);
-                }
-
-                @Override
-                public void start() {
-                    mwPrivate.sendCommand(new byte[]{GPIO.id, PIN_CHANGE_NOTIFY_ENABLE, pin, 1});
-                }
-
-                @Override
-                public void stop() {
-                    mwPrivate.sendCommand(new byte[]{GPIO.id, PIN_CHANGE_NOTIFY_ENABLE, pin, 0});
-                }
-            };
-            if (!mwPrivate.hasProducer(producer.name())) {
-                mwPrivate.tagProducer(producer.name(), new UintData(GPIO, Util.setSilentRead(READ_DI), pin, new DataAttributes(new byte[] {1}, (byte) 1, (byte) 0, false)));
-            }
-            mwPrivate.tagProducer(producer.name(), new UintData(GPIO, PIN_CHANGE_NOTIFY, pin, new DataAttributes(new byte[] {1}, (byte) 1, (byte) 0, false)));
-
-            return producer;
-        }
-    }
-
     private transient HashMap<Byte, GpioPinImpl> gpioPins;
 
     GpioImpl(MetaWearBoardPrivate mwPrivate) {
         super(mwPrivate);
     }
 
-    @Override
-    protected void init() {
+    @override
+    void init() {
         super.init();
 
         gpioPins = new HashMap<>();
     }
 
-    @Override
-    public Pin pin(byte index) {
+    @override
+    Pin pin(int index) {
         if (index < 0 || index >= mwPrivate.lookupModuleInfo(GPIO).extra.length) {
             return null;
         }
@@ -275,8 +271,8 @@ class GpioImpl extends ModuleImplBase implements Gpio {
         return gpioPins.get(index);
     }
 
-    @Override
-    public Pin getVirtualPin(byte index) {
+    @override
+    Pin getVirtualPin(byte index) {
         if (!gpioPins.containsKey(index)) {
             gpioPins.put(index, new GpioPinImpl(index, true, mwPrivate));
         }

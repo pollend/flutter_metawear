@@ -94,7 +94,7 @@ public class TestSettingsRev5 extends UnitTestBase {
         settings.powerStatus().addRouteAsync(source -> source.stream(new Subscriber() {
             int i = 0;
 
-            @Override
+            @override
             public void apply(Data data, Object... env) {
                 actual[i] = data.value(Byte.class);
                 i++;
@@ -153,7 +153,7 @@ public class TestSettingsRev5 extends UnitTestBase {
         settings.chargeStatus().addRouteAsync(source -> source.stream(new Subscriber() {
             int i = 0;
 
-            @Override
+            @override
             public void apply(Data data, Object... env) {
                 actual[i] = data.value(Byte.class);
                 i++;

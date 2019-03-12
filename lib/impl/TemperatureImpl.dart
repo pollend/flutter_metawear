@@ -85,22 +85,22 @@ class TemperatureImpl extends ModuleImplBase implements Temperature {
             this.mwPrivate = mwPrivate;
         }
 
-        @Override
+        @override
         public Task<Route> addRouteAsync(RouteBuilder builder) {
             return mwPrivate.queueRouteBuilder(builder, name());
         }
 
-        @Override
+        @override
         public String name() {
             return String.format(Locale.US, PRODUCER_FORMAT, channel);
         }
 
-        @Override
+        @override
         public void read() {
             mwPrivate.lookupProducer(name()).read(mwPrivate);
         }
 
-        @Override
+        @override
         public SensorType type() {
             return type;
         }
@@ -113,7 +113,7 @@ class TemperatureImpl extends ModuleImplBase implements Temperature {
             super(SensorType.EXT_THERMISTOR, channel, mwPrivate);
         }
 
-        @Override
+        @override
         public void configure(byte dataPin, byte pulldownPin, boolean activeHigh) {
             mwPrivate.sendCommand(new byte[] {TEMPERATURE.id, MODE, channel, dataPin, pulldownPin, (byte) (activeHigh ? 1 : 0)});
         }
@@ -146,7 +146,7 @@ class TemperatureImpl extends ModuleImplBase implements Temperature {
         }
     }
 
-    @Override
+    @override
     public void restoreTransientVars(MetaWearBoardPrivate mwPrivate) {
         super.restoreTransientVars(mwPrivate);
 
@@ -155,12 +155,12 @@ class TemperatureImpl extends ModuleImplBase implements Temperature {
         }
     }
 
-    @Override
+    @override
     public Sensor[] sensors() {
         return sources;
     }
 
-    @Override
+    @override
     public Sensor[] findSensors(SensorType type) {
         ArrayList<Integer> matchIndices= new ArrayList<>();
         for(int i= 0; i < sources.length; i++) {

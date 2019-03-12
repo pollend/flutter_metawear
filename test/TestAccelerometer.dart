@@ -353,7 +353,7 @@ public class TestAccelerometer extends UnitTestBase {
         final String[] timestamps = new String[3];
         accelerometer.packedAcceleration().addRouteAsync(source -> source.stream(new Subscriber() {
             int i = 0;
-            @Override
+            @override
             public void apply(Data data, Object... env) {
                 ((Acceleration[]) env[0])[i] = data.value(Acceleration.class);
                 ((String[]) env[1])[i] = data.formattedTimestamp();

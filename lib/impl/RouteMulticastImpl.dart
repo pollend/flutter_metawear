@@ -22,18 +22,20 @@
  * hello@mbientlab.com.
  */
 
+import 'package:flutter_metawear/builder/RouteComponent.dart';
+import 'package:flutter_metawear/builder/RouteMulticast.dart';
+import 'package:flutter_metawear/impl/RouteComponentImpl.dart';
+
 /**
  * Created by etsai on 9/22/16.
  */
 class RouteMulticastImpl implements RouteMulticast {
     final RouteComponentImpl caller;
 
-    RouteMulticastImpl(RouteComponentImpl caller) {
-        this.caller= caller;
-    }
+    RouteMulticastImpl(this.caller);
 
-    @Override
-    public RouteComponent to() {
-        return caller.persistantData.stashedSignals.peek();
+    @override
+    RouteComponent to() {
+        return caller.persistantData.stashedSignals.last;
     }
 }

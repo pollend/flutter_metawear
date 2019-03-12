@@ -91,7 +91,7 @@ public class TestAccelerometerBoschFlatRev2 extends UnitTestBase {
         actual.set(new boolean[2]);
         acc.flat().addRouteAsync(source -> source.stream(new Subscriber() {
             int i = 0;
-            @Override
+            @override
             public void apply(Data data, Object... env) {
                 actual.get()[i] = data.value(Boolean.class);
                 i++;
@@ -115,7 +115,7 @@ public class TestAccelerometerBoschFlatRev2 extends UnitTestBase {
         actual.set(new boolean[2]);
         acc.flat().addRouteAsync(source -> source.limit(Passthrough.ALL, (short) 0).stream(new Subscriber() {
             int i = 0;
-            @Override
+            @override
             public void apply(Data data, Object... env) {
                 actual.get()[i] = data.value(Boolean.class);
                 i++;
@@ -141,7 +141,7 @@ public class TestAccelerometerBoschFlatRev2 extends UnitTestBase {
         actual.set(new boolean[2]);
         acc.flat().addRouteAsync(source -> source.log(new Subscriber() {
             int i = 0;
-            @Override
+            @override
             public void apply(Data data, Object... env) {
                 actual.get()[i] = data.value(Boolean.class);
                 i++;

@@ -78,7 +78,7 @@ public class TestGpioPinMonitor extends UnitTestBase {
         gpio.pin((byte) 0).monitor().addRouteAsync(source -> source.stream(new Subscriber() {
             private byte i= 0;
 
-            @Override
+            @override
             public void apply(Data data, Object ... env) {
                 ((byte[]) env[0])[i]= data.value(Byte.class);
                 i++;

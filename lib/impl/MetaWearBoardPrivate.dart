@@ -67,9 +67,9 @@ abstract class MetaWearBoardPrivate {
     List<DataTypeBase> getDataTypes();
     Map<Type, Module> getModules();
     void addDataIdHeader(Tuple2<int, int> key);
-    void addDataHandler(Tuple3<int, int, int> key, RegisterResponseHandler handler);
-    void addResponseHandler(Tuple2<int, int> key, RegisterResponseHandler handler);
-    void removeDataHandler(Tuple3<int, int, int> key, RegisterResponseHandler handler);
+    void addDataHandler(Tuple3<int, int, int> key, void handler(Uint8List handler));
+    void addResponseHandler(Tuple2<int, int> key, void handler(Uint8List handler));
+    void removeDataHandler(Tuple3<int, int, int> key, void handler(Uint8List handler));
     int numDataHandlers(Tuple3<int, int, int> key);
 
     void removeProcessor(bool sync, int id);

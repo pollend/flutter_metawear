@@ -32,28 +32,28 @@ class _BatteryStateData extends DataTypeBase {
         super(input, module, register, id, attributes);
     }
 
-    @Override
+    @override
     public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
         return new BatteryStateData(input, module, register, id, attributes);
     }
 
-    @Override
+    @override
     public Number convertToFirmwareUnits(MetaWearBoardPrivate mwPrivate, Number value) {
         return value;
     }
 
-    @Override
+    @override
     public Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, final byte[] data, final Calendar timestamp, DataPrivate.ClassToObject mapper) {
     final float voltage= ByteBuffer.wrap(data, 1, 2).order(ByteOrder.LITTLE_ENDIAN).getShort() / 1000f;
     final BatteryState state= new BatteryState(data[0], voltage);
 
     return new DataPrivate(timestamp, data, mapper) {
-    @Override
+    @override
     public Class<?>[] types() {
     return new Class<?>[]{BatteryState.class};
     }
 
-    @Override
+    @override
     public <T> T value(Class<T> clazz) {
     if (clazz == BatteryState.class) {
     return clazz.cast(state);
@@ -63,7 +63,7 @@ class _BatteryStateData extends DataTypeBase {
     };
     }
 
-    @Override
+    @override
     public DataTypeBase[] createSplits() {
         return new DataTypeBase[] {
             new UintData(SETTINGS, eventConfig[1], eventConfig[2], new DataAttributes(new byte[] {1}, (byte) 1, (byte) 0, false)),
@@ -122,28 +122,28 @@ class SettingsImpl extends ModuleImplBase implements Settings {
             super(input, module, register, id, attributes);
         }
 
-        @Override
+        @override
         public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
             return new BatteryStateData(input, module, register, id, attributes);
         }
 
-        @Override
+        @override
         public Number convertToFirmwareUnits(MetaWearBoardPrivate mwPrivate, Number value) {
             return value;
         }
 
-        @Override
+        @override
         public Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, final byte[] data, final Calendar timestamp, DataPrivate.ClassToObject mapper) {
             final float voltage= ByteBuffer.wrap(data, 1, 2).order(ByteOrder.LITTLE_ENDIAN).getShort() / 1000f;
             final BatteryState state= new BatteryState(data[0], voltage);
 
             return new DataPrivate(timestamp, data, mapper) {
-                @Override
+                @override
                 public Class<?>[] types() {
                     return new Class<?>[]{BatteryState.class};
                 }
 
-                @Override
+                @override
                 public <T> T value(Class<T> clazz) {
                     if (clazz == BatteryState.class) {
                         return clazz.cast(state);
@@ -153,7 +153,7 @@ class SettingsImpl extends ModuleImplBase implements Settings {
             };
         }
 
-        @Override
+        @override
         public DataTypeBase[] createSplits() {
             return new DataTypeBase[] {
                     new UintData(SETTINGS, eventConfig[1], eventConfig[2], new DataAttributes(new byte[] {1}, (byte) 1, (byte) 0, false)),
@@ -181,7 +181,7 @@ class SettingsImpl extends ModuleImplBase implements Settings {
         disconnectDummyProducer= new UintData(SETTINGS, DISCONNECT_EVENT, new DataAttributes(new byte[] {}, (byte) 0, (byte) 0, false));
     }
 
-    @Override
+    @override
     protected void init() {
         readConnParamsTask = new TimedTask<>();
         readAdConfigTask = new TimedTask<>();
@@ -200,12 +200,12 @@ class SettingsImpl extends ModuleImplBase implements Settings {
         }
     }
 
-    @Override
+    @override
     public void startBleAdvertising() {
         mwPrivate.sendCommand(new byte[] {SETTINGS.id, START_ADVERTISING});
     }
 
-    @Override
+    @override
     public BleAdvertisementConfigEditor editBleAdConfig() {
         return new BleAdvertisementConfigEditor() {
             private String newAdvName= null;
@@ -213,37 +213,37 @@ class SettingsImpl extends ModuleImplBase implements Settings {
             private Byte newAdvTimeout= null, newAdvTxPower= null;
             private byte[] newAdvResponse= null;
 
-            @Override
+            @override
             public BleAdvertisementConfigEditor deviceName(String name) {
                 newAdvName = name;
                 return this;
             }
 
-            @Override
+            @override
             public BleAdvertisementConfigEditor interval(short interval) {
                 newAdvInterval= interval;
                 return this;
             }
 
-            @Override
+            @override
             public BleAdvertisementConfigEditor timeout(byte timeout) {
                 newAdvTimeout = timeout;
                 return this;
             }
 
-            @Override
+            @override
             public BleAdvertisementConfigEditor txPower(byte power) {
                 newAdvTxPower = power;
                 return this;
             }
 
-            @Override
+            @override
             public BleAdvertisementConfigEditor scanResponse(byte[] response) {
                 newAdvResponse = response;
                 return this;
             }
 
-            @Override
+            @override
             public void commit() {
                 if (newAdvName != null) {
                     try {
@@ -292,7 +292,7 @@ class SettingsImpl extends ModuleImplBase implements Settings {
         };
     }
 
-    @Override
+    @override
     public Task<BleAdvertisementConfig> readBleAdConfigAsync() {
         final Capture<String> deviceName = new Capture<>();
         final Capture<Integer> interval = new Capture<>();
@@ -334,7 +334,7 @@ class SettingsImpl extends ModuleImplBase implements Settings {
         });
     }
 
-    @Override
+    @override
     public BleConnectionParametersEditor editBleConnParams() {
         if (mwPrivate.lookupModuleInfo(SETTINGS).revision < CONN_PARAMS_REVISION) {
             return null;
@@ -343,31 +343,31 @@ class SettingsImpl extends ModuleImplBase implements Settings {
         return new BleConnectionParametersEditor() {
             private Short minConnInterval= 6, maxConnInterval= 0x320, slaveLatency= 0, supervisorTimeout= 0x258;
 
-            @Override
+            @override
             public BleConnectionParametersEditor minConnectionInterval(float interval) {
                 minConnInterval= (short) (interval / CONN_INTERVAL_STEP);
                 return this;
             }
 
-            @Override
+            @override
             public BleConnectionParametersEditor maxConnectionInterval(float interval) {
                 maxConnInterval= (short) (interval / CONN_INTERVAL_STEP);
                 return this;
             }
 
-            @Override
+            @override
             public BleConnectionParametersEditor slaveLatency(short latency) {
                 slaveLatency= latency;
                 return this;
             }
 
-            @Override
+            @override
             public BleConnectionParametersEditor supervisorTimeout(short timeout) {
                 supervisorTimeout= (short) (timeout / SUPERVISOR_TIMEOUT_STEP);
                 return this;
             }
 
-            @Override
+            @override
             public void commit() {
                 ByteBuffer buffer= ByteBuffer.allocate(8).order(ByteOrder.LITTLE_ENDIAN);
 
@@ -377,7 +377,7 @@ class SettingsImpl extends ModuleImplBase implements Settings {
         };
     }
 
-    @Override
+    @override
     public Task<BleConnectionParameters> readBleConnParamsAsync() {
         if (mwPrivate.lookupModuleInfo(SETTINGS).revision < CONN_PARAMS_REVISION) {
             return Task.forError(new UnsupportedOperationException("Reading BLE connection parameters is not supported on this firmware"));
@@ -395,31 +395,31 @@ class SettingsImpl extends ModuleImplBase implements Settings {
         });
     }
 
-    @Override
+    @override
     public BatteryDataProducer battery() {
         if (mwPrivate.lookupModuleInfo(SETTINGS).revision >= BATTERY_REVISION) {
             return new BatteryDataProducer() {
-                @Override
+                @override
                 public String chargeName() {
                     return BATTERY_CHARGE_PRODUCER;
                 }
 
-                @Override
+                @override
                 public String voltageName() {
                     return BATTERY_VOLTAGE_PRODUCER;
                 }
 
-                @Override
+                @override
                 public Task<Route> addRouteAsync(RouteBuilder builder) {
                     return mwPrivate.queueRouteBuilder(builder, BATTERY_PRODUCER);
                 }
 
-                @Override
+                @override
                 public String name() {
                     return BATTERY_PRODUCER;
                 }
 
-                @Override
+                @override
                 public void read() {
                     mwPrivate.lookupProducer(BATTERY_PRODUCER).read(mwPrivate);
                 }
@@ -428,18 +428,18 @@ class SettingsImpl extends ModuleImplBase implements Settings {
         return null;
     }
 
-    @Override
+    @override
     public ActiveDataProducer powerStatus() {
         ModuleInfo info = mwPrivate.lookupModuleInfo(SETTINGS);
         if (info.revision >= CHARGE_STATUS_REVISION && (info.extra.length > 0 && (info.extra[0] & 0x1) == 0x1)) {
             if (powerStatus == null) {
                 powerStatus = new ActiveDataProducer() {
-                    @Override
+                    @override
                     public Task<Route> addRouteAsync(RouteBuilder builder) {
                         return mwPrivate.queueRouteBuilder(builder, POWER_STATUS_PRODUCER);
                     }
 
-                    @Override
+                    @override
                     public String name() {
                         return POWER_STATUS_PRODUCER;
                     }
@@ -450,7 +450,7 @@ class SettingsImpl extends ModuleImplBase implements Settings {
         return null;
     }
 
-    @Override
+    @override
     public Task<Byte> readCurrentPowerStatusAsync() {
         ModuleInfo info = mwPrivate.lookupModuleInfo(SETTINGS);
         if (info.revision >= CHARGE_STATUS_REVISION && (info.extra.length > 0 && (info.extra[0] & 0x1) == 0x1)) {
@@ -460,18 +460,18 @@ class SettingsImpl extends ModuleImplBase implements Settings {
         return Task.forError(new UnsupportedOperationException("Reading power status not supported on this board / firmware"));
     }
 
-    @Override
+    @override
     public ActiveDataProducer chargeStatus() {
         ModuleInfo info = mwPrivate.lookupModuleInfo(SETTINGS);
         if (info.revision >= CHARGE_STATUS_REVISION && (info.extra.length > 0 && (info.extra[0] & 0x2) == 0x2)) {
             if (chargeStatus == null) {
                 chargeStatus = new ActiveDataProducer() {
-                    @Override
+                    @override
                     public Task<Route> addRouteAsync(RouteBuilder builder) {
                         return mwPrivate.queueRouteBuilder(builder, CHARGE_STATUS_PRODUCER);
                     }
 
-                    @Override
+                    @override
                     public String name() {
                         return CHARGE_STATUS_PRODUCER;
                     }
@@ -482,7 +482,7 @@ class SettingsImpl extends ModuleImplBase implements Settings {
         return null;
     }
 
-    @Override
+    @override
     public Task<Byte> readCurrentChargeStatusAsync() {
         ModuleInfo info = mwPrivate.lookupModuleInfo(SETTINGS);
         if (info.revision >= CHARGE_STATUS_REVISION && (info.extra.length > 0 && (info.extra[0] & 0x2) == 0x2)) {
@@ -492,7 +492,7 @@ class SettingsImpl extends ModuleImplBase implements Settings {
         return Task.forError(new UnsupportedOperationException("Reading charge status not supported on this board / firmware"));
     }
 
-    @Override
+    @override
     public Task<Observer> onDisconnectAsync(CodeBlock codeBlock) {
         if (mwPrivate.lookupModuleInfo(SETTINGS).revision < DISCONNECTED_EVENT_REVISION) {
             return Task.forError(new UnsupportedOperationException("Responding to disconnect events on-board is not supported on this firmware"));

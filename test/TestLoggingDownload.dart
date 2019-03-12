@@ -104,7 +104,7 @@ public class TestLoggingDownload extends UnitTestBase {
 
         logging.downloadAsync(20, new Logging.LogDownloadUpdateHandler() {
             private int i;
-            @Override
+            @override
             public void receivedUpdate(long nEntriesLeft, long totalEntries) {
                 actual[i]= nEntriesLeft;
                 i++;

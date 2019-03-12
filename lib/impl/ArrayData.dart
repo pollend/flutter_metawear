@@ -40,17 +40,17 @@ class ArrayData extends DataTypeBase {
         super(input, module, register, id, attributes);
     }
 
-    @Override
+    @override
     public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
         return new ArrayData(input, module, register, id, attributes);
     }
 
-    @Override
+    @override
     public Number convertToFirmwareUnits(MetaWearBoardPrivate mwPrivate, Number value) {
         return value;
     }
 
-    @Override
+    @override
     public Data createMessage(boolean logData, final MetaWearBoardPrivate mwPrivate, final byte[] data, final Calendar timestamp, DataPrivate.ClassToObject mapper) {
         DataProcessorImpl dpModules = (DataProcessorImpl) mwPrivate.getModules().get(DataProcessor.class);
         DataProcessorImpl.Processor fuser = dpModules.activeProcessors.get(eventConfig[2]);
@@ -78,17 +78,17 @@ class ArrayData extends DataTypeBase {
         }
 
         return new DataPrivate(timestamp, data, mapper) {
-            @Override
+            @override
             public Class<?>[] types() {
                 return new Class<?>[] { Data[].class };
             }
 
-            @Override
+            @override
             public float scale() {
                 return ArrayData.this.scale(mwPrivate);
             }
 
-            @Override
+            @override
             public <T> T value(Class<T> clazz) {
                 if (clazz.equals(Data[].class)) {
                     return clazz.cast(unwrappedData);

@@ -40,10 +40,6 @@ import 'package:flutter_metawear/Route.dart';
 import 'package:flutter_metawear/module/Logging.dart';
 
 
-abstract class RegisterResponseHandler {
-    void onResponseReceived(Uint8List response);
-}
-
 enum RouteType {
     DATA,
     TIMER,
@@ -185,12 +181,12 @@ class RouteInner implements Route {
 
 //
 //class _MetaWearBoardPrivate implements MetawearBoardPrivate{
-//    @Override
+//    @override
 //    public Task<Void> boardDisconnect() {
 //    return gatt.remoteDisconnectAsync();
 //    }
 //
-//    @Override
+//    @override
 //    public void sendCommand(byte[] command) {
 //    if (event.activeDataType != null) {
 //    event.convertToEventCommand(command);
@@ -207,7 +203,7 @@ class RouteInner implements Route {
 //    }
 //    }
 //
-//    @Override
+//    @override
 //    public void sendCommand(byte[] command, int dest, DataToken input) {
 //    DataTypeBase producer= (DataTypeBase) input;
 //    event.feedbackParams= new Tuple3<>(producer.attributes.length(), producer.attributes.offset, (byte) dest);
@@ -215,7 +211,7 @@ class RouteInner implements Route {
 //    event.feedbackParams= null;
 //    }
 //
-//    @Override
+//    @override
 //    public void sendCommand(Constant.Module module, byte register, byte... parameters) {
 //    byte[] command= new byte[parameters.length + 2];
 //    System.arraycopy(parameters, 0, command, 2, parameters.length);
@@ -225,7 +221,7 @@ class RouteInner implements Route {
 //    sendCommand(command);
 //    }
 //
-//    @Override
+//    @override
 //    public void sendCommand(Constant.Module module, byte register, byte id, byte... parameters) {
 //    byte[] command= new byte[parameters.length + 3];
 //    System.arraycopy(parameters, 0, command, 3, parameters.length);
@@ -236,52 +232,52 @@ class RouteInner implements Route {
 //    sendCommand(command);
 //    }
 //
-//    @Override
+//    @override
 //    public void tagProducer(String name, DataTypeBase producer) {
 //    persist.taggedProducers.put(name, producer);
 //    }
 //
-//    @Override
+//    @override
 //    public DataTypeBase lookupProducer(String name) {
 //    return persist.taggedProducers.get(name);
 //    }
 //
-//    @Override
+//    @override
 //    public boolean hasProducer(String name) {
 //    return persist.taggedProducers.containsKey(name);
 //    }
 //
-//    @Override
+//    @override
 //    public void removeProducerTag(String name) {
 //    persist.taggedProducers.remove(name);
 //    }
 //
-//    @Override
+//    @override
 //    public ModuleInfo lookupModuleInfo(Constant.Module id) {
 //    return persist.boardInfo.moduleInfo.get(id);
 //    }
 //
-//    @Override
+//    @override
 //    public Collection<DataTypeBase> getDataTypes() {
 //    return persist.taggedProducers.values();
 //    }
 //
-//    @Override
+//    @override
 //    public Map<Class<? extends Module>, Module> getModules() {
 //    return Collections.unmodifiableMap(persist.modules);
 //    }
 //
-//    @Override
+//    @override
 //    public void addResponseHandler(Pair<Byte, Byte> key, RegisterResponseHandler handler) {
 //    registerResponseHandlers.put(key, handler);
 //    }
 //
-//    @Override
+//    @override
 //    public void addDataIdHeader(Pair<Byte, Byte> key) {
 //    dataIdHeaders.add(key);
 //    }
 //
-//    @Override
+//    @override
 //    public void addDataHandler(Tuple3<Byte, Byte, Byte> key, RegisterResponseHandler handler) {
 //    if (!dataHandlers.containsKey(key)) {
 //    dataHandlers.put(key, new LinkedHashSet<>());
@@ -289,34 +285,34 @@ class RouteInner implements Route {
 //    dataHandlers.get(key).add(handler);
 //    }
 //
-//    @Override
+//    @override
 //    public void removeDataHandler(Tuple3<Byte, Byte, Byte> key, RegisterResponseHandler handler) {
 //    if (dataHandlers.containsKey(key) && dataHandlers.get(key).contains(handler)) {
 //    dataHandlers.get(key).remove(handler);
 //    }
 //    }
 //
-//    @Override
+//    @override
 //    public int numDataHandlers(Tuple3<Byte, Byte, Byte> key) {
 //    return dataHandlers.containsKey(key) ? dataHandlers.get(key).size() : 0;
 //    }
 //
-//    @Override
+//    @override
 //    public void removeRoute(int id) {
 //    persist.activeRoutes.remove(id);
 //    }
 //
-//    @Override
+//    @override
 //    public void removeProcessor(boolean sync, byte id) {
 //    dataprocessor.removeProcessor(sync, id);
 //    }
 //
-//    @Override
+//    @override
 //    public void removeEventManager(int id) {
 //    persist.activeEventManagers.remove(id);
 //    }
 //
-//    @Override
+//    @override
 //    public Task<Route> queueRouteBuilder(RouteBuilder builder, String producerTag) {
 //    TaskCompletionSource<Route> taskSrc= new TaskCompletionSource<>();
 //    if (persist.taggedProducers.containsKey(producerTag)) {
@@ -329,7 +325,7 @@ class RouteInner implements Route {
 //    return taskSrc.getTask();
 //    }
 //
-//    @Override
+//    @override
 //    public Task<ScheduledTask> queueTaskManager(CodeBlock mwCode, byte[] timerConfig) {
 //    TaskCompletionSource<ScheduledTask> createManagerTask= new TaskCompletionSource<>();
 //    pendingTaskManagers.add(new Tuple3<>(createManagerTask, mwCode, timerConfig));
@@ -338,7 +334,7 @@ class RouteInner implements Route {
 //    return createManagerTask.getTask();
 //    }
 //
-//    @Override
+//    @override
 //    public Task<Observer> queueEvent(DataTypeBase owner, CodeBlock codeBlock) {
 //    TaskCompletionSource<Observer> createManagerTask= new TaskCompletionSource<>();
 //    pendingEventManagers.add(new Tuple3<>(createManagerTask, owner, codeBlock));
@@ -347,12 +343,12 @@ class RouteInner implements Route {
 //    return createManagerTask.getTask();
 //    }
 //
-//    @Override
+//    @override
 //    public void logWarn(String message) {
 //    io.logWarn(LOG_TAG, message);
 //    }
 //
-//    @Override
+//    @override
 //    public Version getFirmwareVersion() {
 //    return persist.boardInfo.firmware;
 //    }
@@ -416,12 +412,12 @@ class RouteInner implements Route {
 //    private boolean connected;
 //
 //    final MetaWearBoardPrivate mwPrivate = new MetaWearBoardPrivate() {
-//        @Override
+//        @override
 //        public Task<Void> boardDisconnect() {
 //            return gatt.remoteDisconnectAsync();
 //        }
 //
-//        @Override
+//        @override
 //        public void sendCommand(byte[] command) {
 //            if (event.activeDataType != null) {
 //                event.convertToEventCommand(command);
@@ -438,7 +434,7 @@ class RouteInner implements Route {
 //            }
 //        }
 //
-//        @Override
+//        @override
 //        public void sendCommand(byte[] command, int dest, DataToken input) {
 //            DataTypeBase producer= (DataTypeBase) input;
 //            event.feedbackParams= new Tuple3<>(producer.attributes.length(), producer.attributes.offset, (byte) dest);
@@ -446,7 +442,7 @@ class RouteInner implements Route {
 //            event.feedbackParams= null;
 //        }
 //
-//        @Override
+//        @override
 //        public void sendCommand(Constant.Module module, byte register, byte... parameters) {
 //            byte[] command= new byte[parameters.length + 2];
 //            System.arraycopy(parameters, 0, command, 2, parameters.length);
@@ -456,7 +452,7 @@ class RouteInner implements Route {
 //            sendCommand(command);
 //        }
 //
-//        @Override
+//        @override
 //        public void sendCommand(Constant.Module module, byte register, byte id, byte... parameters) {
 //            byte[] command= new byte[parameters.length + 3];
 //            System.arraycopy(parameters, 0, command, 3, parameters.length);
@@ -467,52 +463,52 @@ class RouteInner implements Route {
 //            sendCommand(command);
 //        }
 //
-//        @Override
+//        @override
 //        public void tagProducer(String name, DataTypeBase producer) {
 //            persist.taggedProducers.put(name, producer);
 //        }
 //
-//        @Override
+//        @override
 //        public DataTypeBase lookupProducer(String name) {
 //            return persist.taggedProducers.get(name);
 //        }
 //
-//        @Override
+//        @override
 //        public boolean hasProducer(String name) {
 //            return persist.taggedProducers.containsKey(name);
 //        }
 //
-//        @Override
+//        @override
 //        public void removeProducerTag(String name) {
 //            persist.taggedProducers.remove(name);
 //        }
 //
-//        @Override
+//        @override
 //        public ModuleInfo lookupModuleInfo(Constant.Module id) {
 //            return persist.boardInfo.moduleInfo.get(id);
 //        }
 //
-//        @Override
+//        @override
 //        public Collection<DataTypeBase> getDataTypes() {
 //            return persist.taggedProducers.values();
 //        }
 //
-//        @Override
+//        @override
 //        public Map<Class<? extends Module>, Module> getModules() {
 //            return Collections.unmodifiableMap(persist.modules);
 //        }
 //
-//        @Override
+//        @override
 //        public void addResponseHandler(Pair<Byte, Byte> key, RegisterResponseHandler handler) {
 //            registerResponseHandlers.put(key, handler);
 //        }
 //
-//        @Override
+//        @override
 //        public void addDataIdHeader(Pair<Byte, Byte> key) {
 //            dataIdHeaders.add(key);
 //        }
 //
-//        @Override
+//        @override
 //        public void addDataHandler(Tuple3<Byte, Byte, Byte> key, RegisterResponseHandler handler) {
 //            if (!dataHandlers.containsKey(key)) {
 //                dataHandlers.put(key, new LinkedHashSet<>());
@@ -520,34 +516,34 @@ class RouteInner implements Route {
 //            dataHandlers.get(key).add(handler);
 //        }
 //
-//        @Override
+//        @override
 //        public void removeDataHandler(Tuple3<Byte, Byte, Byte> key, RegisterResponseHandler handler) {
 //            if (dataHandlers.containsKey(key) && dataHandlers.get(key).contains(handler)) {
 //                dataHandlers.get(key).remove(handler);
 //            }
 //        }
 //
-//        @Override
+//        @override
 //        public int numDataHandlers(Tuple3<Byte, Byte, Byte> key) {
 //            return dataHandlers.containsKey(key) ? dataHandlers.get(key).size() : 0;
 //        }
 //
-//        @Override
+//        @override
 //        public void removeRoute(int id) {
 //            persist.activeRoutes.remove(id);
 //        }
 //
-//        @Override
+//        @override
 //        public void removeProcessor(boolean sync, byte id) {
 //            dataprocessor.removeProcessor(sync, id);
 //        }
 //
-//        @Override
+//        @override
 //        public void removeEventManager(int id) {
 //            persist.activeEventManagers.remove(id);
 //        }
 //
-//        @Override
+//        @override
 //        public Task<Route> queueRouteBuilder(RouteBuilder builder, String producerTag) {
 //            TaskCompletionSource<Route> taskSrc= new TaskCompletionSource<>();
 //            if (persist.taggedProducers.containsKey(producerTag)) {
@@ -560,7 +556,7 @@ class RouteInner implements Route {
 //            return taskSrc.getTask();
 //        }
 //
-//        @Override
+//        @override
 //        public Task<ScheduledTask> queueTaskManager(CodeBlock mwCode, byte[] timerConfig) {
 //            TaskCompletionSource<ScheduledTask> createManagerTask= new TaskCompletionSource<>();
 //            pendingTaskManagers.add(new Tuple3<>(createManagerTask, mwCode, timerConfig));
@@ -569,7 +565,7 @@ class RouteInner implements Route {
 //            return createManagerTask.getTask();
 //        }
 //
-//        @Override
+//        @override
 //        public Task<Observer> queueEvent(DataTypeBase owner, CodeBlock codeBlock) {
 //            TaskCompletionSource<Observer> createManagerTask= new TaskCompletionSource<>();
 //            pendingEventManagers.add(new Tuple3<>(createManagerTask, owner, codeBlock));
@@ -578,12 +574,12 @@ class RouteInner implements Route {
 //            return createManagerTask.getTask();
 //        }
 //
-//        @Override
+//        @override
 //        public void logWarn(String message) {
 //            io.logWarn(LOG_TAG, message);
 //        }
 //
-//        @Override
+//        @override
 //        public Version getFirmwareVersion() {
 //            return persist.boardInfo.firmware;
 //        }
@@ -603,7 +599,7 @@ class RouteInner implements Route {
 //
 //        readModuleInfoTask = new TimedTask<>();
 //        gatt.onDisconnect(new BtleGatt.DisconnectHandler() {
-//            @Override
+//            @override
 //            public void onDisconnect() {
 //                connected = false;
 //                for(Module it: persist.modules.values()) {
@@ -611,7 +607,7 @@ class RouteInner implements Route {
 //                }
 //            }
 //
-//            @Override
+//            @override
 //            public void onUnexpectedDisconnect(int status) {
 //                onDisconnect();
 //
@@ -681,7 +677,7 @@ class RouteInner implements Route {
 //        return null;
 //    }
 //
-//    @Override
+//    @override
 //    public String getModelString() {
 //        Model model;
 //
@@ -716,22 +712,22 @@ class RouteInner implements Route {
 //        }
 //    }
 //
-//    @Override
+//    @override
 //    public String getMacAddress() {
 //        return macAddress;
 //    }
 //
-//    @Override
+//    @override
 //    public Task<Integer> readRssiAsync() {
 //        return gatt.readRssiAsync();
 //    }
 //
-//    @Override
+//    @override
 //    public Task<Byte> readBatteryLevelAsync() {
 //        return gatt.readCharacteristicAsync(BatteryService.BATTERY_LEVEL).onSuccessTask(task -> Task.forResult(task.getResult()[0]));
 //    }
 //
-//    @Override
+//    @override
 //    public Task<DeviceInformation> readDeviceInformationAsync() {
 //        if (serialNumber != null && manufacturer != null) {
 //            return Task.forResult(new DeviceInformation(manufacturer, persist.boardInfo.modelNumber, serialNumber,
@@ -798,7 +794,7 @@ class RouteInner implements Route {
 //        return files;
 //    }
 //
-//    @Override
+//    @override
 //    public Task<List<File>> downloadFirmwareUpdateFilesAsync(final String version) {
 //        if (persist.boardInfo.hardwareRevision == null) {
 //            return Task.forError(new IllegalStateException("Hardware revision unavailable"));
@@ -856,7 +852,7 @@ class RouteInner implements Route {
 //    }
 //
 //
-//    @Override
+//    @override
 //    public Task<List<File>> downloadFirmwareUpdateFilesAsync() {
 //        return downloadFirmwareUpdateFilesAsync(null);
 //    }
@@ -889,7 +885,7 @@ class RouteInner implements Route {
 //
 //        return new Pair<>(attrs, target);
 //    }
-//    @Override
+//    @override
 //    public Task<String> findLatestAvailableFirmwareAsync() {
 //        if (persist.boardInfo.hardwareRevision == null) {
 //            return Task.forError(new IllegalStateException("Hardware revision unavailable"));
@@ -916,7 +912,7 @@ class RouteInner implements Route {
 //        });
 //    }
 //
-//    @Override
+//    @override
 //    public Task<File> downloadFirmwareAsync(final String version) {
 //        return downloadFirmwareUpdateFilesAsync(version).onSuccessTask(task -> {
 //            if (task.getResult().size() > 1) {
@@ -927,12 +923,12 @@ class RouteInner implements Route {
 //        });
 //    }
 //
-//    @Override
+//    @override
 //    public Task<File> downloadLatestFirmwareAsync() {
 //        return downloadFirmwareAsync(null);
 //    }
 //
-//    @Override
+//    @override
 //    public Task<Boolean> checkForFirmwareUpdateAsync() {
 //        return findLatestAvailableFirmwareAsync().onSuccessTask(task -> Task.forResult(task.getResult() != null));
 //    }
@@ -984,7 +980,7 @@ class RouteInner implements Route {
 //            });
 //        }).continueWithTask(task -> task.isFaulted() ? Task.forError(new TaskTimeoutException(task.getError(), info)) : Task.forResult(info));
 //    }
-//    @Override
+//    @override
 //    public Task<Void> connectAsync() {
 //        if (connectTask != null && !connectTask.isCompleted()) {
 //            return connectTask;
@@ -1116,34 +1112,34 @@ class RouteInner implements Route {
 //        return connectTask;
 //    }
 //
-//    @Override
+//    @override
 //    public Task<Void> connectAsync(long delay) {
 //        return Task.delay(delay).continueWithTask(task -> connectAsync());
 //    }
 //
-//    @Override
+//    @override
 //    public Task<Void> disconnectAsync() {
 //        connectCts.cancel();
 //
 //        return gatt.localDisconnectAsync();
 //    }
 //
-//    @Override
+//    @override
 //    public void onUnexpectedDisconnect(UnexpectedDisconnectHandler handler) {
 //        unexpectedDcHandler = handler;
 //    }
 //
-//    @Override
+//    @override
 //    public boolean isConnected() {
 //        return connected;
 //    }
 //
-//    @Override
+//    @override
 //    public boolean inMetaBootMode() {
 //        return gatt.serviceExists(METABOOT_SERVICE);
 //    }
 //
-//    @Override
+//    @override
 //    public <T extends Module> T getModule(Class<T> moduleClass) {
 //        if (inMetaBootMode()) {
 //            return null;
@@ -1151,7 +1147,7 @@ class RouteInner implements Route {
 //        return persist.modules.containsKey(moduleClass) ? moduleClass.cast(persist.modules.get(moduleClass)) : null;
 //    }
 //
-//    @Override
+//    @override
 //    public <T extends Module> T getModuleOrThrow(Class<T> moduleClass) throws UnsupportedModuleException {
 //        if (inMetaBootMode()) {
 //            throw new UnsupportedModuleException("Cannot access modules while in MetaBoot mode");
@@ -1163,17 +1159,17 @@ class RouteInner implements Route {
 //        throw new UnsupportedModuleException(String.format("Module \'%s\' not supported on this board", moduleClass.toString()));
 //    }
 //
-//    @Override
+//    @override
 //    public Route lookupRoute(int id) {
 //        return persist.activeRoutes.get(id);
 //    }
 //
-//    @Override
+//    @override
 //    public Observer lookupObserver(int id) {
 //        return persist.activeEventManagers.get(id);
 //    }
 //
-//    @Override
+//    @override
 //    public void tearDown() {
 //        for(RouteInner it: persist.activeRoutes.values()) {
 //            it.remove(false);
@@ -1192,7 +1188,7 @@ class RouteInner implements Route {
 //        persist.activeEventManagers.clear();
 //    }
 //
-//    @Override
+//    @override
 //    public void serialize() throws IOException {
 //        ByteArrayOutputStream buffer= new ByteArrayOutputStream(1024);
 //        serialize(buffer);
@@ -1200,7 +1196,7 @@ class RouteInner implements Route {
 //        io.localSave(BOARD_STATE, buffer.toByteArray());
 //    }
 //
-//    @Override
+//    @override
 //    public void serialize(OutputStream outs) throws IOException {
 //        ObjectOutputStream oos = new ObjectOutputStream(outs);
 //        oos.writeObject(persist);
@@ -1239,17 +1235,17 @@ class RouteInner implements Route {
 //        }
 //    }
 //
-//    @Override
+//    @override
 //    public void deserialize() throws IOException, ClassNotFoundException {
 //        deserializeInner(io.localRetrieve(BOARD_STATE));
 //    }
 //
-//    @Override
+//    @override
 //    public void deserialize(InputStream ins) throws IOException, ClassNotFoundException {
 //        deserializeInner(ins);
 //    }
 //
-//    @Override
+//    @override
 //    public Task<JSONObject> dumpModuleInfo(JSONObject partial) {
 //        final Map<String, JSONObject> diagnosticResult = new HashMap<>();
 //        Collection<Constant.Module> ignore = new HashSet<>();
@@ -1294,22 +1290,22 @@ class RouteInner implements Route {
 //            this.bridge = bridge;
 //        }
 //
-//        @Override
+//        @override
 //        public String identifier() {
 //            return Util.createProducerChainString(consumer.source, bridge);
 //        }
 //
-//        @Override
+//        @override
 //        public void subscribe(Subscriber subscriber) {
 //            consumer.subscriber = subscriber;
 //        }
 //
-//        @Override
+//        @override
 //        public void setEnvironment(Object... env) {
 //            consumer.environment = env;
 //        }
 //    }
-//    @Override
+//    @override
 //    public Task<AnonymousRoute[]> createAnonymousRoutesAsync() {
 //        Accelerometer accelerometer = getModule(Accelerometer.class);
 //        final GyroBmi160 gyro = getModule(GyroBmi160.class);
@@ -1491,7 +1487,7 @@ class RouteInner implements Route {
 //            }
 //        }
 //
-//        @Override
+//        @override
 //        public String generateIdentifier(int pos) {
 //            try {
 //                return Util.createProducerChainString(consumers.get(pos).source, mwPrivate);
@@ -1500,7 +1496,7 @@ class RouteInner implements Route {
 //            }
 //        }
 //
-//        @Override
+//        @override
 //        public boolean setEnvironment(int pos, Object ... env) {
 //            try {
 //                consumers.get(pos).environment= env;
@@ -1510,7 +1506,7 @@ class RouteInner implements Route {
 //            }
 //        }
 //
-//        @Override
+//        @override
 //        public boolean unsubscribe(int pos) {
 //            try {
 //                consumers.get(pos).disableStream(mwPrivate);
@@ -1520,7 +1516,7 @@ class RouteInner implements Route {
 //            }
 //        }
 //
-//        @Override
+//        @override
 //        public boolean resubscribe(int pos) {
 //            try {
 //                consumers.get(pos).enableStream(mwPrivate);
@@ -1530,7 +1526,7 @@ class RouteInner implements Route {
 //            }
 //        }
 //
-//        @Override
+//        @override
 //        public boolean resubscribe(int pos, Subscriber subscriber) {
 //            try {
 //                consumers.get(pos).subscriber= subscriber;
@@ -1573,17 +1569,17 @@ class RouteInner implements Route {
 //            }
 //        }
 //
-//        @Override
+//        @override
 //        public void remove() {
 //            remove(true);
 //        }
 //
-//        @Override
+//        @override
 //        public boolean isActive() {
 //            return active;
 //        }
 //
-//        @Override
+//        @override
 //        public int id() {
 //            return id;
 //        }
@@ -1607,12 +1603,12 @@ class RouteInner implements Route {
 //            this.mwPrivate = mwPrivate;
 //        }
 //
-//        @Override
+//        @override
 //        public int id() {
 //            return id;
 //        }
 //
-//        @Override
+//        @override
 //        public void remove() {
 //            remove(true);
 //        }

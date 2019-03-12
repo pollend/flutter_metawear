@@ -36,12 +36,12 @@ abstract class FloatVectorData extends DataTypeBase {
         super(input, module, register, id, attributes);
     }
 
-    @Override
+    @override
     public Number convertToFirmwareUnits(MetaWearBoardPrivate mwPrivate, Number value) {
         return value.floatValue() * scale(mwPrivate);
     }
 
-    @Override
+    @override
     Pair<? extends DataTypeBase, ? extends DataTypeBase> dataProcessorTransform(DataProcessorConfig config, DataProcessorImpl dpModule) {
         switch(config.id) {
             case DataProcessorConfig.Combiner.ID: {

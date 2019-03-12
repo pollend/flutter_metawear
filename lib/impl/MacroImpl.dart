@@ -22,45 +22,48 @@
  * hello@mbientlab.com.
  */
 
+import 'package:flutter_metawear/impl/ModuleImplBase.dart';
+import 'package:flutter_metawear/module/Macro.dart';
+
 /**
  * Created by etsai on 11/30/16.
  */
 class MacroImpl extends ModuleImplBase implements Macro {
-    static const int WRITE_MACRO_DELAY = 2000L;
+    static const int WRITE_MACRO_DELAY = 2000;
     static const int ENABLE = 0x1,
             BEGIN = 0x2, ADD_COMMAND = 0x3, END = 0x4,
             EXECUTE = 0x5, NOTIFY_ENABLE = 0x6, NOTIFY = 0x7,
             ERASE_ALL = 0x8,
             ADD_PARTIAL = 0x9;
 
-    private transient boolean isRecording= false;
-    private transient Queue<byte[]> commands;
-    private transient boolean execOnBoot;
-    private transient TimedTask<Byte> startMacroTask;
+    bool isRecording= false;
+    Queue<Uint8List> commands;
+    bool execOnBoot;
+    TimedTask<Byte> startMacroTask;
 
     MacroImpl(MetaWearBoardPrivate mwPrivate) {
         super(mwPrivate);
     }
 
-    @Override
+    @override
     protected void init() {
         startMacroTask = new TimedTask<>();
         this.mwPrivate.addResponseHandler(new Pair<>(MACRO.id, BEGIN), response -> startMacroTask.setResult(response[2]));
     }
 
-    @Override
+    @override
     public void startRecord() {
         startRecord(true);
     }
 
-    @Override
+    @override
     public void startRecord(boolean execOnBoot) {
         isRecording = true;
         commands = new LinkedList<>();
         this.execOnBoot = execOnBoot;
     }
 
-    @Override
+    @override
     public Task<Byte> endRecordAsync() {
         isRecording = false;
         return Task.delay(WRITE_MACRO_DELAY).onSuccessTask(ignored ->
@@ -79,12 +82,12 @@ class MacroImpl extends ModuleImplBase implements Macro {
         });
     }
 
-    @Override
+    @override
     public void execute(byte id) {
         mwPrivate.sendCommand(new byte[] {MACRO.id, EXECUTE, id});
     }
 
-    @Override
+    @override
     public void eraseAll() {
         mwPrivate.sendCommand(new byte[] {MACRO.id, ERASE_ALL});
     }

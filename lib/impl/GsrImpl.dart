@@ -65,7 +65,6 @@ class GsrImpl extends ModuleImplBase implements Gsr {
     static const  int CONDUCTANCE = 0x1, CALIBRATE = 0x2, CONFIG= 0x3;
 
     private static class Channel implements ForcedDataProducer, Serializable {
-        private static final long serialVersionUID = 5552089355271489517L;
 
         private final byte id;
         private transient MetaWearBoardPrivate mwPrivate;
@@ -80,17 +79,17 @@ class GsrImpl extends ModuleImplBase implements Gsr {
             this.mwPrivate = mwPrivate;
         }
 
-        @Override
+        @override
         public void read() {
             mwPrivate.lookupProducer(name()).read(mwPrivate);
         }
 
-        @Override
+        @override
         public Task<Route> addRouteAsync(RouteBuilder builder) {
             return mwPrivate.queueRouteBuilder(builder, name());
         }
 
-        @Override
+        @override
         public String name() {
             return String.format(Locale.US, CONDUCTANCE_PRODUCER_FORMAT, id);
         }
@@ -107,7 +106,7 @@ class GsrImpl extends ModuleImplBase implements Gsr {
         }
     }
 
-    @Override
+    @override
     public void restoreTransientVars(MetaWearBoardPrivate mwPrivate) {
         super.restoreTransientVars(mwPrivate);
 
@@ -116,37 +115,37 @@ class GsrImpl extends ModuleImplBase implements Gsr {
         }
     }
 
-    @Override
+    @override
     public ConfigEditor configure() {
         return new ConfigEditor() {
             private ConstantVoltage newCv= ConstantVoltage.CV_500MV;
             private Gain newGain= Gain.GSR_499K;
 
-            @Override
+            @override
             public ConfigEditor constantVoltage(ConstantVoltage cv) {
                 newCv= cv;
                 return this;
             }
 
-            @Override
+            @override
             public ConfigEditor gain(Gain gain) {
                 newGain= gain;
                 return this;
             }
 
-            @Override
+            @override
             public void commit() {
                 mwPrivate.sendCommand(GSR, CONFIG, new byte[] {(byte) newCv.ordinal(), (byte) newGain.ordinal()});
             }
         };
     }
 
-    @Override
+    @override
     public Channel[] channels() {
         return conductanceChannels;
     }
 
-    @Override
+    @override
     public void calibrate() {
         mwPrivate.sendCommand(new byte[] {GSR.id, CALIBRATE});
     }

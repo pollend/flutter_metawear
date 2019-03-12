@@ -22,35 +22,87 @@
  * hello@mbientlab.com.
  */
 
+import 'dart:typed_data';
+
+import 'package:flutter_metawear/Subscriber.dart';
 import 'package:flutter_metawear/builder/RouteComponent.dart';
+import 'package:flutter_metawear/builder/RouteComponent.dart';
+import 'package:flutter_metawear/builder/RouteMulticast.dart';
+import 'package:flutter_metawear/impl/DataProcessorImpl.dart';
+import 'package:flutter_metawear/impl/DataTypeBase.dart';
+import 'package:flutter_metawear/impl/RouteMulticastImpl.dart';
 import 'package:flutter_metawear/impl/Version.dart';
+import 'dart:collection';
+import 'MetaWearBoardPrivate.dart';
+import 'dart:core';
+import 'package:tuple/tuple.dart';
+
 
 enum BranchElement {
     MULTICAST,
     SPLIT
 }
 
+class CounterEditorInner extends EditorImplBase implements DataProcessor.CounterEditor {
+
+    CounterEditorInner(DataProcessorConfig configObj, DataTypeBase source, MetaWearBoardPrivate mwPrivate) {
+        super(configObj, source, mwPrivate);
+    }
+
+    @override
+    void reset() {
+        mwPrivate.sendCommand(new byte[]{DATA_PROCESSOR.id, DataProcessorImpl.STATE, source.eventConfig[2],
+        0x00, 0x00, 0x00, 0x00});
+    }
+
+    @override
+    void set(int value) {
+        ByteBuffer buffer = ByteBuffer.allocate(7).order(ByteOrder.LITTLE_ENDIAN)
+            .put(DATA_PROCESSOR.id)
+            .put(DataProcessorImpl.STATE)
+            .put(source.eventConfig[2])
+            .putInt(value);
+        mwPrivate.sendCommand(buffer.array());
+    }
+}
+class AccumulatorEditorInner extends EditorImplBase implements DataProcessor.AccumulatorEditor {
+
+    AccumulatorEditorInner(DataProcessorConfig configObj, DataTypeBase source, MetaWearBoardPrivate mwPrivate) {
+        super(configObj, source, mwPrivate);
+    }
+
+    @override
+    void reset() {
+        mwPrivate.sendCommand(new byte[] {DATA_PROCESSOR.id, DataProcessorImpl.STATE, source.eventConfig[2],
+        0x00, 0x00, 0x00, 0x00});
+    }
+
+    @override
+    void set(Number value) {
+        Number scaledValue = source.convertToFirmwareUnits(mwPrivate, value);
+        ByteBuffer buffer = ByteBuffer.allocate(7).order(ByteOrder.LITTLE_ENDIAN)
+            .put(DATA_PROCESSOR.id)
+            .put(DataProcessorImpl.STATE)
+            .put(source.eventConfig[2])
+            .putInt(scaledValue.intValue());
+
+        mwPrivate.sendCommand(buffer.array());
+    }
+}
+
 
 class Cache {
-    final List<Tuple3<DataTypeBase, Subscriber, Boolean>> subscribedProducers;
-    final List<Pair<String, Tuple3<DataTypeBase, Integer, byte[]>>> feedback;
-    final List<Tuple2<? extends DataTypeBase, ? extends Action>> reactions;
-    final List<Processor> dataProcessors;
+    final List<Tuple3<DataTypeBase, Subscriber, bool>> subscribedProducers = List();
+    final List<Tuple2<String, Tuple3<DataTypeBase, int, Uint8List>>> feedback = List();
+    final List<Tuple2<DataTypeBase, Action>> reactions = List();
+    final List<Processor> dataProcessors = List();
     final MetaWearBoardPrivate mwPrivate;
-    final ListQueue<RouteComponentImpl> stashedSignals= new Stack<>();
-    final ListQueue<BranchElement> elements;
-    final ListQueue<Pair<RouteComponentImpl, DataTypeBase[]>> splits;
-    final Map<String, Processor> taggedProcessors = new LinkedHashMap<>();
+    final ListQueue<RouteComponentImpl> stashedSignals= ListQueue();
+    final ListQueue<BranchElement> elements = ListQueue();
+    final ListQueue<Tuple2<RouteComponentImpl, List<DataTypeBase>>> splits = ListQueue();
+    final Map<String, Processor> taggedProcessors = Map();
 
-    Cache(MetaWearBoardPrivate mwPrivate) {
-    this.subscribedProducers= new ArrayList<>();
-    this.feedback = new ArrayList<>();
-    this.reactions= new LinkedList<>();
-    this.dataProcessors = new LinkedList<>();
-    this.mwPrivate = mwPrivate;
-    this.elements= new Stack<>();
-    this.splits= new Stack<>();
-    }
+    Cache(this.mwPrivate);
 }
 
 /**
@@ -62,8 +114,7 @@ class RouteComponentImpl implements RouteComponent {
     final DataTypeBase source;
     Cache persistantData= null;
 
-    RouteComponentImpl(this.source,[RouteComponentImpl original]):
-            original == null ? null : persistantData = original.persistantData;
+    RouteComponentImpl(this.source,[RouteComponentImpl original]): this.persistantData =  original == null ? null: original.persistantData;
 
 //    RouteComponentImpl(DataTypeBase source, RouteComponentImpl original) {
 //        this.source= source;
@@ -76,17 +127,17 @@ class RouteComponentImpl implements RouteComponent {
 
     @override
     RouteMulticast multicast() {
-        persistantData.elements.push(BranchElement.MULTICAST);
-        persistantData.stashedSignals.push(this);
-        return new RouteMulticastImpl(this);
+        persistantData.elements.add(BranchElement.MULTICAST);
+        persistantData.stashedSignals.addLast(this);
+        return RouteMulticastImpl(this);
     }
 
     @override
     RouteComponent to() {
         try {
-            return persistantData.stashedSignals.peek();
+            return persistantData.stashedSignals.last;
         } catch (EmptyStackException e) {
-            throw new IllegalRouteOperationException("No multicast source to direct data from", e);
+            throw IllegalRouteOperationException("No multicast source to direct data from", e);
         }
     }
 
@@ -98,7 +149,7 @@ class RouteComponentImpl implements RouteComponent {
 
         persistantData.elements.push(BranchElement.SPLIT);
         persistantData.splits.push(new Pair<>(this, source.split));
-        return new RouteSplitImpl(this);
+        return RouteSplitImpl(this);
     }
 
     @override
@@ -111,7 +162,7 @@ class RouteComponentImpl implements RouteComponent {
     }
 
     @override
-    public RouteComponent end() {
+    RouteComponent end() {
         try {
             switch (persistantData.elements.pop()) {
                 case MULTICAST:
@@ -129,7 +180,7 @@ class RouteComponentImpl implements RouteComponent {
     }
 
     @override
-    public RouteComponent name(String name) {
+    RouteComponent name(String name) {
         if (persistantData.taggedProcessors.containsKey(name)) {
             throw new IllegalRouteOperationException(String.format("Duplicate processor key \'%s\' found", name));
         }
@@ -139,7 +190,7 @@ class RouteComponentImpl implements RouteComponent {
     }
 
     @override
-    public RouteComponent stream(Subscriber subscriber) {
+    RouteComponent stream(Subscriber subscriber) {
         if (source.attributes.length() > 0) {
             source.markLive();
             persistantData.subscribedProducers.add(new Tuple3<>(source, subscriber, false));
@@ -149,7 +200,7 @@ class RouteComponentImpl implements RouteComponent {
     }
 
     @override
-    public RouteComponent log(Subscriber subscriber) {
+    RouteComponent log(Subscriber subscriber) {
         if (source.attributes.length() > 0) {
             persistantData.subscribedProducers.add(new Tuple3<>(source, subscriber, true));
             return this;
@@ -158,13 +209,13 @@ class RouteComponentImpl implements RouteComponent {
     }
 
     @override
-    public RouteComponent react(Action action) {
+    RouteComponent react(Action action) {
         persistantData.reactions.add(new Pair<>(source, action));
         return this;
     }
 
     @override
-    public RouteComponent buffer() {
+    RouteComponent buffer() {
         if (source.attributes.length() <= 0) {
             throw new IllegalRouteOperationException("Cannot apply \'buffer\' filter to null data");
         }
@@ -175,54 +226,7 @@ class RouteComponentImpl implements RouteComponent {
         return postCreate(next.second, new NullEditor(config, next.first, persistantData.mwPrivate));
     }
 
-    private static class CounterEditorInner extends EditorImplBase implements DataProcessor.CounterEditor {
-        private static final long serialVersionUID = 4873789798519714460L;
 
-        CounterEditorInner(DataProcessorConfig configObj, DataTypeBase source, MetaWearBoardPrivate mwPrivate) {
-            super(configObj, source, mwPrivate);
-        }
-
-        @Override
-        public void reset() {
-            mwPrivate.sendCommand(new byte[]{DATA_PROCESSOR.id, DataProcessorImpl.STATE, source.eventConfig[2],
-                    0x00, 0x00, 0x00, 0x00});
-        }
-
-        @Override
-        public void set(int value) {
-            ByteBuffer buffer = ByteBuffer.allocate(7).order(ByteOrder.LITTLE_ENDIAN)
-                    .put(DATA_PROCESSOR.id)
-                    .put(DataProcessorImpl.STATE)
-                    .put(source.eventConfig[2])
-                    .putInt(value);
-            mwPrivate.sendCommand(buffer.array());
-        }
-    }
-    private static class AccumulatorEditorInner extends EditorImplBase implements DataProcessor.AccumulatorEditor {
-        private static final long serialVersionUID = -5044680524938752249L;
-
-        AccumulatorEditorInner(DataProcessorConfig configObj, DataTypeBase source, MetaWearBoardPrivate mwPrivate) {
-            super(configObj, source, mwPrivate);
-        }
-
-        @Override
-        public void reset() {
-            mwPrivate.sendCommand(new byte[] {DATA_PROCESSOR.id, DataProcessorImpl.STATE, source.eventConfig[2],
-                    0x00, 0x00, 0x00, 0x00});
-        }
-
-        @Override
-        public void set(Number value) {
-            Number scaledValue = source.convertToFirmwareUnits(mwPrivate, value);
-            ByteBuffer buffer = ByteBuffer.allocate(7).order(ByteOrder.LITTLE_ENDIAN)
-                    .put(DATA_PROCESSOR.id)
-                    .put(DataProcessorImpl.STATE)
-                    .put(source.eventConfig[2])
-                    .putInt(scaledValue.intValue());
-
-            mwPrivate.sendCommand(buffer.array());
-        }
-    }
     private RouteComponentImpl createReducer(boolean counter) {
         if (!counter) {
             if (source.attributes.length() <= 0) {
@@ -262,13 +266,13 @@ class RouteComponentImpl implements RouteComponent {
             super(configObj, source, mwPrivate);
         }
 
-        @Override
+        @override
         public void modify(byte samples) {
             config[2]= samples;
             mwPrivate.sendCommand(DATA_PROCESSOR, DataProcessorImpl.PARAMETER, source.eventConfig[2], config);
         }
 
-        @Override
+        @override
         public void reset() {
             mwPrivate.sendCommand(new byte[] {DATA_PROCESSOR.id, DataProcessorImpl.STATE, source.eventConfig[2]});
         }
@@ -291,23 +295,23 @@ class RouteComponentImpl implements RouteComponent {
 
         return postCreate(next.second, new AverageEditorInner(config, next.first, persistantData.mwPrivate));
     }
-    @Override
+    @override
     public RouteComponent highpass(byte nSamples) {
         if (persistantData.mwPrivate.lookupModuleInfo(DATA_PROCESSOR).revision < DataProcessorImpl.HPF_REVISION) {
             throw new IllegalRouteOperationException("High pass filtering not supported on this firmware version");
         }
         return applyAverager(nSamples, true, "high-pass");
     }
-    @Override
+    @override
     public RouteComponent lowpass(byte nSamples) {
         return applyAverager(nSamples, false, "low-pass");
     }
-    @Override
+    @override
     public RouteComponent average(byte nSamples) {
         return lowpass(nSamples);
     }
 
-    @Override
+    @override
     public RouteComponent delay(byte samples) {
         if (source.attributes.length() <= 0) {
             throw new IllegalRouteOperationException("Cannot delay null data");
@@ -341,7 +345,7 @@ class RouteComponentImpl implements RouteComponent {
         return postCreate(next.second, new NullEditor(config, next.first, persistantData.mwPrivate));
     }
 
-    @Override
+    @override
     public RouteComponent map(Function1 fn) {
         switch(fn) {
             case ABS_VALUE:
@@ -362,7 +366,7 @@ class RouteComponentImpl implements RouteComponent {
         throw new RuntimeException("Only here so the compiler won't get mad");
     }
 
-    @Override
+    @override
     public RouteComponent map(Function2 fn, String ... dataNames) {
         RouteComponent next= map(fn, 0);
         if (next != null) {
@@ -374,7 +378,7 @@ class RouteComponentImpl implements RouteComponent {
         return next;
     }
 
-    @Override
+    @override
     public RouteComponent map(Function2 fn, Number rhs) {
         switch(fn) {
             case ADD:
@@ -406,7 +410,7 @@ class RouteComponentImpl implements RouteComponent {
             super(configObj, source, mwPrivate);
         }
 
-        @Override
+        @override
         public void modifyRhs(Number rhs) {
             final Number scaledRhs;
 
@@ -473,7 +477,7 @@ class RouteComponentImpl implements RouteComponent {
             super(configObj, source, mwPrivate);
         }
 
-        @Override
+        @override
         public void modify(int period) {
             byte[] newPeriod= ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).putInt(period).array();
             System.arraycopy(newPeriod, 0, config, 2, newPeriod.length);
@@ -481,7 +485,7 @@ class RouteComponentImpl implements RouteComponent {
             mwPrivate.sendCommand(DATA_PROCESSOR, DataProcessorImpl.PARAMETER, source.eventConfig[2], config);
         }
     }
-    @Override
+    @override
     public RouteComponent limit(int period) {
         if (source.attributes.length() <= 0) {
             throw new IllegalRouteOperationException("Cannot limit frequency of null data");
@@ -506,14 +510,14 @@ class RouteComponentImpl implements RouteComponent {
             super(configObj, source, mwPrivate);
         }
 
-        @Override
+        @override
         public void set(short value) {
             byte[] newValue= ByteBuffer.allocate(2).order(ByteOrder.LITTLE_ENDIAN).putShort(value).array();
 
             mwPrivate.sendCommand(DATA_PROCESSOR, DataProcessorImpl.STATE, source.eventConfig[2], newValue);
         }
 
-        @Override
+        @override
         public void modify(Passthrough type, short value) {
             byte[] newValue= ByteBuffer.allocate(2).order(ByteOrder.LITTLE_ENDIAN).putShort(value).array();
             System.arraycopy(newValue, 0, config, 2, newValue.length);
@@ -522,7 +526,7 @@ class RouteComponentImpl implements RouteComponent {
             mwPrivate.sendCommand(DATA_PROCESSOR, DataProcessorImpl.PARAMETER, source.eventConfig[2], config);
         }
     }
-    @Override
+    @override
     public RouteComponent limit(Passthrough type, short value) {
         if (source.attributes.length() <= 0) {
             throw new IllegalRouteOperationException("Cannot limit null data");
@@ -542,7 +546,7 @@ class RouteComponentImpl implements RouteComponent {
             super(configObj, source, mwPrivate);
         }
 
-        @Override
+        @override
         public void modify(Number threshold, short samples) {
             byte[] newConfig= ByteBuffer.allocate(6).order(ByteOrder.LITTLE_ENDIAN)
                     .putInt(source.convertToFirmwareUnits(mwPrivate, threshold).intValue())
@@ -553,7 +557,7 @@ class RouteComponentImpl implements RouteComponent {
             mwPrivate.sendCommand(DATA_PROCESSOR, DataProcessorImpl.PARAMETER, source.eventConfig[2], config);
         }
     }
-    @Override
+    @override
     public RouteComponent find(PulseOutput output, Number threshold, short samples) {
         if (source.attributes.length() > 4) {
             throw new IllegalRouteOperationException("Cannot find pulses for data longer than 4 bytes");
@@ -575,17 +579,17 @@ class RouteComponentImpl implements RouteComponent {
         return postCreate(next.second, new PulseEditorInner(config, next.first, persistantData.mwPrivate));
     }
 
-    @Override
+    @override
     public RouteComponent filter(Comparison op, String ... dataNames) {
         return filter(op, ComparisonOutput.ABSOLUTE, dataNames);
     }
 
-    @Override
+    @override
     public RouteComponent filter(Comparison op, Number ... references) {
         return filter(op, ComparisonOutput.ABSOLUTE, references);
     }
 
-    @Override
+    @override
     public RouteComponent filter(Comparison op, ComparisonOutput output, String ... dataNames) {
         RouteComponent next= filter(op, output, 0);
         if (next != null) {
@@ -611,7 +615,7 @@ class RouteComponentImpl implements RouteComponent {
             super(configObj, source, mwPrivate);
         }
 
-        @Override
+        @override
         public void modify(Comparison op, Number... references) {
             byte[] newConfig= ByteBuffer.allocate(6).order(ByteOrder.LITTLE_ENDIAN)
                     .put((byte) op.ordinal())
@@ -651,7 +655,7 @@ class RouteComponentImpl implements RouteComponent {
             super(configObj, source, mwPrivate);
         }
 
-        @Override
+        @override
         public void modify(Comparison op, Number... references) {
             ByteBuffer buffer= ByteBuffer.allocate(references.length * source.attributes.length()).order(ByteOrder.LITTLE_ENDIAN);
             fillReferences(source, mwPrivate, buffer, source.attributes.length(), references);
@@ -667,7 +671,7 @@ class RouteComponentImpl implements RouteComponent {
             mwPrivate.sendCommand(DATA_PROCESSOR, DataProcessorImpl.PARAMETER, source.eventConfig[2], config);
         }
     }
-    @Override
+    @override
     public RouteComponent filter(Comparison op, ComparisonOutput mode, Number... references) {
         if (source.attributes.length() > 4) {
             throw new IllegalRouteOperationException("Cannot compare data longer than 4 bytes");
@@ -713,7 +717,7 @@ class RouteComponentImpl implements RouteComponent {
             super(configObj, source, mwPrivate);
         }
 
-        @Override
+        @override
         public void modify(Number threshold, Number hysteresis) {
             byte[] newConfig= ByteBuffer.allocate(6).order(ByteOrder.LITTLE_ENDIAN)
                     .putInt(source.convertToFirmwareUnits(mwPrivate, threshold).intValue())
@@ -724,12 +728,12 @@ class RouteComponentImpl implements RouteComponent {
             mwPrivate.sendCommand(DATA_PROCESSOR, DataProcessorImpl.PARAMETER, source.eventConfig[2], config);
         }
     }
-    @Override
+    @override
     public RouteComponent filter(ThresholdOutput output, Number threshold) {
         return filter(output, threshold, 0);
     }
 
-    @Override
+    @override
     public RouteComponent filter(ThresholdOutput mode, Number threshold, Number hysteresis) {
         if (source.attributes.length() > 4) {
             throw new IllegalRouteOperationException("Cannot use threshold filter on data longer than 4 bytes");
@@ -759,7 +763,7 @@ class RouteComponentImpl implements RouteComponent {
             super(configObj, source, mwPrivate);
         }
 
-        @Override
+        @override
         public void modify(Number distance) {
             byte[] newDiff= ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).putInt(source.convertToFirmwareUnits(mwPrivate, distance).intValue()).array();
             System.arraycopy(newDiff, 0, config, 2, newDiff.length);
@@ -767,7 +771,7 @@ class RouteComponentImpl implements RouteComponent {
             mwPrivate.sendCommand(DATA_PROCESSOR, DataProcessorImpl.PARAMETER, source.eventConfig[2], config);
         }
     }
-    @Override
+    @override
     public RouteComponent filter(DifferentialOutput mode, Number distance) {
         if (source.attributes.length() > 4) {
             throw new IllegalRouteOperationException("Cannot use differential filter for data longer than 4 bytes");
@@ -797,12 +801,12 @@ class RouteComponentImpl implements RouteComponent {
             super(configObj, source, mwPrivate);
         }
 
-        @Override
+        @override
         public void clear() {
             mwPrivate.sendCommand(new byte[] {DATA_PROCESSOR.id, DataProcessorImpl.STATE, source.eventConfig[2]});
         }
     }
-    @Override
+    @override
     public RouteComponent pack(byte count) {
         if (persistantData.mwPrivate.lookupModuleInfo(DATA_PROCESSOR).revision < DataProcessorImpl.ENHANCED_STREAMING_REVISION) {
             throw new IllegalRouteOperationException("Current firmware does not support data packing");
@@ -819,12 +823,12 @@ class RouteComponentImpl implements RouteComponent {
         return postCreate(next.second, new PackerEditorInner(config, next.first, persistantData.mwPrivate));
     }
 
-    @Override
+    @override
     public RouteComponent account() {
         return account(AccountType.TIME);
     }
 
-    @Override
+    @override
     public RouteComponent account(AccountType type) {
         if (persistantData.mwPrivate.lookupModuleInfo(DATA_PROCESSOR).revision < DataProcessorImpl.ENHANCED_STREAMING_REVISION) {
             throw new IllegalRouteOperationException("Current firmware does not support data accounting");
@@ -842,7 +846,7 @@ class RouteComponentImpl implements RouteComponent {
         return postCreate(next.second, new NullEditor(config, next.first, persistantData.mwPrivate));
     }
 
-    @Override
+    @override
     public RouteComponent fuse(String... bufferNames) {
         if (persistantData.mwPrivate.lookupModuleInfo(DATA_PROCESSOR).revision < DataProcessorImpl.FUSE_REVISION) {
             throw new IllegalRouteOperationException("Current firmware does not support data fusing");
@@ -859,5 +863,7 @@ class RouteComponentImpl implements RouteComponent {
         persistantData.dataProcessors.add(new Processor(state, editor));
         return new RouteComponentImpl(editor.source, this);
     }
+
+
 }
 

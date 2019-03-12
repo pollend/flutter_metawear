@@ -57,17 +57,17 @@ class ColorTcs34725Impl extends ModuleImplBase implements ColorTcs34725 {
             super(input, module, register, id, attributes);
         }
 
-        @Override
+        @override
         public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
             return new ColorAdcData(input, module, register, id, attributes);
         }
 
-        @Override
+        @override
         public Number convertToFirmwareUnits(MetaWearBoardPrivate mwPrivate, Number value) {
             return value;
         }
 
-        @Override
+        @override
         public Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, final byte[] data, final Calendar timestamp, DataPrivate.ClassToObject mapper) {
             ByteBuffer buffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN);
             final ColorAdc wrapper= new ColorAdc(
@@ -78,12 +78,12 @@ class ColorTcs34725Impl extends ModuleImplBase implements ColorTcs34725 {
             );
 
             return new DataPrivate(timestamp, data, mapper) {
-                @Override
+                @override
                 public Class<?>[] types() {
                     return new Class<?>[] {ColorAdc.class};
                 }
 
-                @Override
+                @override
                 public <T> T value(Class<T> clazz) {
                     if (clazz == ColorAdc.class) {
                         return clazz.cast(wrapper);
@@ -93,13 +93,13 @@ class ColorTcs34725Impl extends ModuleImplBase implements ColorTcs34725 {
             };
         }
 
-        @Override
+        @override
         public DataTypeBase[] createSplits() {
             return new DataTypeBase[] {createAdcUintDataProducer((byte) 0), createAdcUintDataProducer((byte) 2),
                     createAdcUintDataProducer((byte) 4), createAdcUintDataProducer((byte) 6)};
         }
 
-        @Override
+        @override
         Pair<? extends DataTypeBase, ? extends DataTypeBase> dataProcessorTransform(DataProcessorConfig config, DataProcessorImpl dpModule) {
             switch(config.id) {
                 case DataProcessorConfig.Combiner.ID: {
@@ -125,73 +125,73 @@ class ColorTcs34725Impl extends ModuleImplBase implements ColorTcs34725 {
         this.mwPrivate.tagProducer(ADC_BLUE_PRODUCER, adcProducer.split[3]);
     }
 
-    @Override
+    @override
     public ConfigEditor configure() {
         return new ConfigEditor() {
             private byte aTime= (byte) 0xff;
             private Gain gain= Gain.TCS34725_1X;
             private byte illuminate= 0;
 
-            @Override
+            @override
             public ConfigEditor integrationTime(float time) {
                 aTime= (byte) (256.f - time / 2.4f);
                 return this;
             }
 
-            @Override
+            @override
             public ConfigEditor gain(Gain gain) {
                 this.gain= gain;
                 return this;
             }
 
-            @Override
+            @override
             public ConfigEditor enableIlluminatorLed() {
                 illuminate= 1;
                 return this;
             }
 
-            @Override
+            @override
             public void commit() {
                 mwPrivate.sendCommand(new byte[] {COLOR_DETECTOR.id, MODE, aTime, (byte) gain.ordinal(), illuminate});
             }
         };
     }
 
-    @Override
+    @override
     public ColorAdcDataProducer adc() {
         if (adcProducer == null) {
             adcProducer = new ColorAdcDataProducer() {
-                @Override
+                @override
                 public void read() {
                     mwPrivate.lookupProducer(ADC_PRODUCER).read(mwPrivate);
                 }
 
-                @Override
+                @override
                 public String clearName() {
                     return ADC_CLEAR_PRODUCER;
                 }
 
-                @Override
+                @override
                 public String redName() {
                     return ADC_RED_PRODUCER;
                 }
 
-                @Override
+                @override
                 public String greenName() {
                     return ADC_GREEN_PRODUCER;
                 }
 
-                @Override
+                @override
                 public String blueName() {
                     return ADC_BLUE_PRODUCER;
                 }
 
-                @Override
+                @override
                 public Task<Route> addRouteAsync(RouteBuilder builder) {
                     return mwPrivate.queueRouteBuilder(builder, ADC_PRODUCER);
                 }
 
-                @Override
+                @override
                 public String name() {
                     return ADC_PRODUCER;
                 }

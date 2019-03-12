@@ -84,42 +84,42 @@ class AccelerometerBmi160Impl extends AccelerometerBoschImpl implements Accelero
         return 0xf;
     }
 
-    @Override
+    @override
     public AccelerometerBmi160.ConfigEditor configure() {
         return new AccelerometerBmi160.ConfigEditor() {
             private OutputDataRate odr= OutputDataRate.ODR_100_HZ;
             private AccRange ar= AccRange.AR_2G;
             private FilterMode mode = FilterMode.NORMAL;
 
-            @Override
+            @override
             public AccelerometerBmi160.ConfigEditor odr(OutputDataRate odr) {
                 this.odr= odr;
                 return this;
             }
 
-            @Override
+            @override
             public AccelerometerBmi160.ConfigEditor range(AccRange ar) {
                 this.ar= ar;
                 return this;
             }
 
-            @Override
+            @override
             public AccelerometerBmi160.ConfigEditor filter(FilterMode mode) {
                 this.mode = mode;
                 return this;
             }
 
-            @Override
+            @override
             public AccelerometerBmi160.ConfigEditor odr(float odr) {
                 return odr(OutputDataRate.values()[Util.closestIndex(OutputDataRate.frequencies(), odr)]);
             }
 
-            @Override
+            @override
             public AccelerometerBmi160.ConfigEditor range(float fsr) {
                 return range(AccRange.values()[Util.closestIndex(AccRange.ranges(), fsr)]);
             }
 
-            @Override
+            @override
             public void commit() {
                 accDataConfig[0]&= 0xf0;
                 accDataConfig[0]|= odr.ordinal() + 1;
@@ -169,13 +169,13 @@ class AccelerometerBmi160Impl extends AccelerometerBoschImpl implements Accelero
             }
         }
 
-        @Override
+        @override
         public StepConfigEditor mode(StepDetectorMode mode) {
             this.mode = mode;
             return this;
         }
 
-        @Override
+        @override
         public void commit() {
             switch (mode) {
                 case NORMAL:
@@ -195,31 +195,31 @@ class AccelerometerBmi160Impl extends AccelerometerBoschImpl implements Accelero
         }
     }
 
-    @Override
+    @override
     public StepDetectorDataProducer stepDetector() {
         if (stepDetector == null) {
             stepDetector = new StepDetectorDataProducer() {
-                @Override
+                @override
                 public StepConfigEditor configure() {
                     return new StepConfigEditorInner(false);
                 }
 
-                @Override
+                @override
                 public Task<Route> addRouteAsync(RouteBuilder builder) {
                     return mwPrivate.queueRouteBuilder(builder, STEP_DETECTOR_PRODUCER);
                 }
 
-                @Override
+                @override
                 public String name() {
                     return STEP_DETECTOR_PRODUCER;
                 }
 
-                @Override
+                @override
                 public void start() {
                     mwPrivate.sendCommand(new byte[] {ACCELEROMETER.id, STEP_DETECTOR_INTERRUPT_ENABLE, (byte) 1, (byte) 0});
                 }
 
-                @Override
+                @override
                 public void stop() {
                     mwPrivate.sendCommand(new byte[] {ACCELEROMETER.id, STEP_DETECTOR_INTERRUPT_ENABLE, (byte) 0, (byte) 1});
                 }
@@ -232,27 +232,27 @@ class AccelerometerBmi160Impl extends AccelerometerBoschImpl implements Accelero
     StepCounterDataProducer stepCounter() {
         if (stepCounter == null) {
             stepCounter = new StepCounterDataProducer() {
-                @Override
+                @override
                 public StepConfigEditor configure() {
                     return new StepConfigEditorInner(true);
                 }
 
-                @Override
+                @override
                 public void reset() {
                     mwPrivate.sendCommand(new byte[] {ACCELEROMETER.id, STEP_COUNTER_RESET});
                 }
 
-                @Override
+                @override
                 public Task<Route> addRouteAsync(RouteBuilder builder) {
                     return mwPrivate.queueRouteBuilder(builder, STEP_COUNTER_PRODUCER);
                 }
 
-                @Override
+                @override
                 public String name() {
                     return STEP_COUNTER_PRODUCER;
                 }
 
-                @Override
+                @override
                 public void read() {
                     mwPrivate.lookupProducer(STEP_COUNTER_PRODUCER).read(mwPrivate);
                 }
@@ -262,30 +262,30 @@ class AccelerometerBmi160Impl extends AccelerometerBoschImpl implements Accelero
     }
 
     private class Bmi160FlatDataProducer extends BoschFlatDataProducer implements AccelerometerBmi160.FlatDataProducer {
-        @Override
+        @override
         public AccelerometerBmi160.FlatConfigEditor configure() {
             return new AccelerometerBmi160.FlatConfigEditor() {
                 private FlatHoldTime holdTime = FlatHoldTime.FHT_640_MS;
                 private float theta = 5.6889f;
 
-                @Override
+                @override
                 public AccelerometerBmi160.FlatConfigEditor holdTime(FlatHoldTime time) {
                     holdTime = time;
                     return this;
                 }
 
-                @Override
+                @override
                 public AccelerometerBmi160.FlatConfigEditor holdTime(float time) {
                     return holdTime(FlatHoldTime.values()[Util.closestIndex(FlatHoldTime.delays(), time)]);
                 }
 
-                @Override
+                @override
                 public AccelerometerBmi160.FlatConfigEditor flatTheta(float angle) {
                     theta = angle;
                     return this;
                 }
 
-                @Override
+                @override
                 public void commit() {
                     writeFlatConfig(holdTime.ordinal(), theta);
                 }
@@ -293,12 +293,12 @@ class AccelerometerBmi160Impl extends AccelerometerBoschImpl implements Accelero
         }
     }
 
-    @Override
+    @override
     public AccelerometerBmi160.FlatDataProducer flat() {
         return new Bmi160FlatDataProducer();
     }
 
-    @Override
+    @override
     public LowHighDataProducer lowHigh() {
         if (lowhigh == null) {
             lowhigh = new LowHighDataProducerInner(new byte[] {0x07, 0x30, (byte) 0x81, 0x0b, (byte) 0xc0}, 2.5f);
@@ -306,7 +306,7 @@ class AccelerometerBmi160Impl extends AccelerometerBoschImpl implements Accelero
         return (LowHighDataProducer) lowhigh;
     }
 
-    @Override
+    @override
     public <T extends MotionDetection> T motion(Class<T> motionClass) {
         if (motionClass.equals(SignificantMotionDataProducer.class)) {
             return motionClass.cast(significantMotion());
@@ -326,36 +326,36 @@ class AccelerometerBmi160Impl extends AccelerometerBoschImpl implements Accelero
     private SignificantMotionDataProducer significantMotion() {
         if (significantMotion == null) {
             significantMotion = new SignificantMotionDataProducer() {
-                @Override
+                @override
                 public void start() {
                     mwPrivate.sendCommand(new byte[] {ACCELEROMETER.id, MOTION_INTERRUPT_ENABLE, (byte) 0x07, (byte) 0});
                 }
 
-                @Override
+                @override
                 public void stop() {
                     mwPrivate.sendCommand(new byte[] {ACCELEROMETER.id, MOTION_INTERRUPT_ENABLE, (byte) 0x0, (byte) 0x7});
                 }
 
-                @Override
+                @override
                 public SignificantMotionConfigEditor configure() {
                     return new SignificantMotionConfigEditor() {
                         private SkipTime newSkipTime= null;
                         private ProofTime newProofTime= null;
 
-                        @Override
+                        @override
                         public SignificantMotionConfigEditor skipTime(SkipTime time) {
                             newSkipTime= time;
                             return this;
                         }
 
-                        @Override
+                        @override
                         public SignificantMotionConfigEditor proofTime(ProofTime time) {
                             newProofTime= time;
                             return this;
                         }
 
 
-                        @Override
+                        @override
                         public void commit() {
                             byte[] motionConfig = Arrays.copyOf(DEFAULT_MOTION_CONFIG, DEFAULT_MOTION_CONFIG.length);
                             motionConfig[3]|= 0x2;
@@ -372,12 +372,12 @@ class AccelerometerBmi160Impl extends AccelerometerBoschImpl implements Accelero
                     };
                 }
 
-                @Override
+                @override
                 public Task<Route> addRouteAsync(RouteBuilder builder) {
                     return mwPrivate.queueRouteBuilder(builder, MOTION_PRODUCER);
                 }
 
-                @Override
+                @override
                 public String name() {
                     return MOTION_PRODUCER;
                 }
@@ -388,35 +388,35 @@ class AccelerometerBmi160Impl extends AccelerometerBoschImpl implements Accelero
     private NoMotionDataProducer noMotion() {
         if (noMotion == null) {
             noMotion = new NoMotionDataProducer() {
-                @Override
+                @override
                 public void start() {
                     mwPrivate.sendCommand(new byte[] {ACCELEROMETER.id, MOTION_INTERRUPT_ENABLE, (byte) 0x38, (byte) 0});
                 }
 
-                @Override
+                @override
                 public void stop() {
                     mwPrivate.sendCommand(new byte[] {ACCELEROMETER.id, MOTION_INTERRUPT_ENABLE, (byte) 0, (byte) 0x38});
                 }
 
-                @Override
+                @override
                 public NoMotionConfigEditor configure() {
                     return new NoMotionConfigEditor() {
                         private Integer duration= null;
                         private Float threshold= null;
 
-                        @Override
+                        @override
                         public NoMotionConfigEditor duration(int duration) {
                             this.duration= duration;
                             return this;
                         }
 
-                        @Override
+                        @override
                         public NoMotionConfigEditor threshold(float threshold) {
                             this.threshold= threshold;
                             return this;
                         }
 
-                        @Override
+                        @override
                         public void commit() {
                             byte[] motionConfig = Arrays.copyOf(DEFAULT_MOTION_CONFIG, DEFAULT_MOTION_CONFIG.length);
                             motionConfig[3]|= 0x1;
@@ -442,12 +442,12 @@ class AccelerometerBmi160Impl extends AccelerometerBoschImpl implements Accelero
                     };
                 }
 
-                @Override
+                @override
                 public Task<Route> addRouteAsync(RouteBuilder builder) {
                     return mwPrivate.queueRouteBuilder(builder, MOTION_PRODUCER);
                 }
 
-                @Override
+                @override
                 public String name() {
                     return MOTION_PRODUCER;
                 }
@@ -458,29 +458,29 @@ class AccelerometerBmi160Impl extends AccelerometerBoschImpl implements Accelero
     private AnyMotionDataProducer anyMotion() {
         if (anyMotion == null) {
             anyMotion = new AnyMotionDataProducer() {
-                @Override
+                @override
                 public void start() {
                     mwPrivate.sendCommand(new byte[] {ACCELEROMETER.id, MOTION_INTERRUPT_ENABLE, (byte) 0x07, (byte) 0});
                 }
 
-                @Override
+                @override
                 public void stop() {
                     mwPrivate.sendCommand(new byte[] {ACCELEROMETER.id, MOTION_INTERRUPT_ENABLE, (byte) 0x0, (byte) 0x7});
                 }
 
-                @Override
+                @override
                 public AnyMotionConfigEditor configure() {
                     byte[] initialConfig = Arrays.copyOf(DEFAULT_MOTION_CONFIG, DEFAULT_MOTION_CONFIG.length);
                     initialConfig[3]&= (~0x2);
                     return new AnyMotionConfigEditorInner(initialConfig);
                 }
 
-                @Override
+                @override
                 public Task<Route> addRouteAsync(RouteBuilder builder) {
                     return mwPrivate.queueRouteBuilder(builder, MOTION_PRODUCER);
                 }
 
-                @Override
+                @override
                 public String name() {
                     return MOTION_PRODUCER;
                 }
@@ -491,29 +491,29 @@ class AccelerometerBmi160Impl extends AccelerometerBoschImpl implements Accelero
     private SlowMotionDataProducer slowMotion() {
         if (slowMotion == null) {
             slowMotion = new SlowMotionDataProducer() {
-                @Override
+                @override
                 public void start() {
                     mwPrivate.sendCommand(new byte[] {ACCELEROMETER.id, MOTION_INTERRUPT_ENABLE, (byte) 0x38, (byte) 0});
                 }
 
-                @Override
+                @override
                 public void stop() {
                     mwPrivate.sendCommand(new byte[] {ACCELEROMETER.id, MOTION_INTERRUPT_ENABLE, (byte) 0, (byte) 0x38});
                 }
 
-                @Override
+                @override
                 public SlowMotionConfigEditor configure() {
                     byte[] initialConfig = Arrays.copyOf(DEFAULT_MOTION_CONFIG, DEFAULT_MOTION_CONFIG.length);
                     initialConfig[3]&= (~0x1);
                     return new SlowMotionConfigEditorInner(initialConfig);
                 }
 
-                @Override
+                @override
                 public Task<Route> addRouteAsync(RouteBuilder builder) {
                     return mwPrivate.queueRouteBuilder(builder, MOTION_PRODUCER);
                 }
 
-                @Override
+                @override
                 public String name() {
                     return MOTION_PRODUCER;
                 }

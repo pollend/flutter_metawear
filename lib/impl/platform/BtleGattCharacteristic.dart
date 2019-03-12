@@ -54,7 +54,7 @@ class BtleGattCharacteristic {
 //
 //
 //
-//    @Override
+//    @override
 //    public boolean equals(Object o) {
 //        if (this == o) return true;
 //        if (o == null || getClass() != o.getClass()) return false;
@@ -65,7 +65,7 @@ class BtleGattCharacteristic {
 //
 //    }
 //
-//    @Override
+//    @override
 //    public int hashCode() {
 //        int result = serviceUuid.hashCode();
 //        result = 31 * result + uuid.hashCode();

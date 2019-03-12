@@ -320,7 +320,7 @@ main() {
             final Temperature.Sensor thermometer = mwBoard.getModule(Temperature.class).findSensors(Temperature.SensorType.NRF_SOC)[0];
             thermometer.addRouteAsync(source -> source.pack((byte) 4).stream(new Subscriber() {
                 int i = 0;
-                @Override
+                @override
                 public void apply(Data data, Object... env) {
                     actual[i++] = data.value(Float.class);
                 }
@@ -367,7 +367,7 @@ main() {
         private final Subscriber timeExtractor = new Subscriber() {
             int i = 0;
             long prev = -1;
-            @Override
+            @override
             public void apply(Data data, Object... env) {
                 if (prev == -1) {
                     prev = data.timestamp().getTimeInMillis();
@@ -541,7 +541,7 @@ main() {
 
             mwBoard.lookupRoute(0).resubscribe(0, new Subscriber() {
                 int i = 0;
-                @Override
+                @override
                 public void apply(Data data, Object... env) {
                     actual[i++] = data.value(Float.class);
                 }
@@ -560,7 +560,7 @@ main() {
             mwBoard.lookupRoute(0).resubscribe(0, new Subscriber() {
                 int i = 0;
                 long prev = -1;
-                @Override
+                @override
                 public void apply(Data data, Object... env) {
                     if (prev == -1) {
                         prev = data.timestamp().getTimeInMillis();
@@ -612,7 +612,7 @@ main() {
 
             mwBoard.lookupRoute(0).resubscribe(0, new Subscriber() {
                 int i = 0;
-                @Override
+                @override
                 public void apply(Data data, Object... env) {
                     actual[i++] = data.value(Float.class);
                 }
@@ -631,7 +631,7 @@ main() {
             mwBoard.lookupRoute(0).resubscribe(0, new Subscriber() {
                 int i = 0;
                 long prev = -1;
-                @Override
+                @override
                 public void apply(Data data, Object... env) {
                     if (prev == -1) {
                         prev = data.timestamp().getTimeInMillis();

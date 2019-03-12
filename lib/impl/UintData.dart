@@ -71,12 +71,12 @@ class UintData extends DataTypeBase {
         final ByteBuffer buffer = Util.bytesToUIntBuffer(logData, data, attributes);
 
         return new DataPrivate(timestamp, data, mapper) {
-            @Override
+            @override
             public Class<?>[] types() {
                 return new Class<?>[] {Long.class, Integer.class, Short.class, Byte.class, Boolean.class};
             }
 
-            @Override
+            @override
             public <T> T value(Class<T> clazz) {
                 if (clazz == Boolean.class) {
                     return clazz.cast(buffer.get(0) != 0);

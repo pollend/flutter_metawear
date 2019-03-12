@@ -41,30 +41,30 @@ class ByteArrayData extends DataTypeBase {
         super(input, module, register, id, attributes);
     }
 
-    @Override
+    @override
     public DataTypeBase copy(DataTypeBase input, Module module, byte register, byte id, DataAttributes attributes) {
         return new ByteArrayData(input, module, register, id, attributes);
     }
 
-    @Override
+    @override
     public Number convertToFirmwareUnits(MetaWearBoardPrivate mwPrivate, Number value) {
         return value;
     }
 
-    @Override
+    @override
     public Data createMessage(boolean logData, final MetaWearBoardPrivate mwPrivate, final byte[] data, final Calendar timestamp, DataPrivate.ClassToObject mapper) {
         return new DataPrivate(timestamp, data, mapper) {
-            @Override
+            @override
             public Class<?>[] types() {
                 return new Class<?>[] { byte[].class };
             }
 
-            @Override
+            @override
             public float scale() {
                 return ByteArrayData.this.scale(mwPrivate);
             }
 
-            @Override
+            @override
             public <T> T value(Class<T> clazz) {
                 if (clazz.equals(byte[].class)) {
                     return clazz.cast(data);

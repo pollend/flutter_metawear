@@ -52,55 +52,55 @@ class IBeaconImpl extends ModuleImplBase implements IBeacon {
             private Byte newRxPower= null, newTxPower= null;
             private DataToken majorToken = null, newMinorDataToken = null;
 
-            @Override
+            @override
             public ConfigEditor uuid(UUID adUuid) {
                 newUuid = adUuid;
                 return this;
             }
 
-            @Override
+            @override
             public ConfigEditor major(short major) {
                 newMajor = major;
                 return this;
             }
 
-            @Override
+            @override
             public ConfigEditor major(DataToken major) {
                 majorToken = major;
                 return this;
             }
 
-            @Override
+            @override
             public ConfigEditor minor(short minor) {
                 newMinor = minor;
                 return this;
             }
 
-            @Override
+            @override
             public ConfigEditor minor(DataToken minor) {
                 newMinorDataToken = minor;
                 return this;
             }
 
-            @Override
+            @override
             public ConfigEditor rxPower(byte power) {
                 newRxPower = power;
                 return this;
             }
 
-            @Override
+            @override
             public ConfigEditor txPower(byte power) {
                 newTxPower = power;
                 return this;
             }
 
-            @Override
+            @override
             public ConfigEditor period(short period) {
                 newPeriod = period;
                 return this;
             }
 
-            @Override
+            @override
             public void commit() {
                 if (newUuid != null) {
                     byte[] uuidBytes = ByteBuffer.allocate(16)

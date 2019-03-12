@@ -52,7 +52,7 @@ class ProximityTsl2671Impl extends ModuleImplBase implements ProximityTsl2671 {
         mwPrivate.tagProducer(PRODUCER, new UintData(PROXIMITY, Util.setSilentRead(ADC), new DataAttributes(new byte[] {2}, (byte) 1, (byte) 0, false)));
     }
 
-    @Override
+    @override
     public ConfigEditor configure() {
         return new ConfigEditor() {
             private ReceiverDiode diode= ReceiverDiode.CHANNEL_1;
@@ -60,31 +60,31 @@ class ProximityTsl2671Impl extends ModuleImplBase implements ProximityTsl2671 {
             private byte nPulses= 1;
             private byte pTime= (byte) 0xff;
 
-            @Override
+            @override
             public ConfigEditor integrationTime(float time) {
                 pTime= (byte) (256.f - time / 2.72f);
                 return this;
             }
 
-            @Override
+            @override
             public ConfigEditor pulseCount(byte nPulses) {
                 this.nPulses= nPulses;
                 return this;
             }
 
-            @Override
+            @override
             public ConfigEditor receiverDiode(ReceiverDiode diode) {
                 this.diode= diode;
                 return this;
             }
 
-            @Override
+            @override
             public ConfigEditor transmitterDriveCurrent(TransmitterDriveCurrent current) {
                 this.driveCurrent= current;
                 return this;
             }
 
-            @Override
+            @override
             public void commit() {
                 byte[] config= new byte[] {pTime, nPulses, (byte) (((diode.ordinal() + 1) << 4) | (driveCurrent.ordinal() << 6))};
                 mwPrivate.sendCommand(PROXIMITY, MODE, config);
@@ -92,21 +92,21 @@ class ProximityTsl2671Impl extends ModuleImplBase implements ProximityTsl2671 {
         };
     }
 
-    @Override
+    @override
     public ForcedDataProducer adc() {
         if (proximityProducer == null) {
             proximityProducer = new ForcedDataProducer() {
-                @Override
+                @override
                 public void read() {
                     mwPrivate.lookupProducer(PRODUCER).read(mwPrivate);
                 }
 
-                @Override
+                @override
                 public Task<Route> addRouteAsync(RouteBuilder builder) {
                     return mwPrivate.queueRouteBuilder(builder, PRODUCER);
                 }
 
-                @Override
+                @override
                 public String name() {
                     return PRODUCER;
                 }

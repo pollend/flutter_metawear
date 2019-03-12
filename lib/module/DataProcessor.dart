@@ -212,7 +212,7 @@ abstract class DataProcessor extends Module {
      * @param <T>               Runtime type the return value is casted as
      * @return Editor object to modify the processor
      */
-    T edit<T extends Editor>(String name, Type editorClass);
+    T edit<T extends Editor>(String name);
 
     /**
      * Gets a ForcedDataProducer for the processor's internal state

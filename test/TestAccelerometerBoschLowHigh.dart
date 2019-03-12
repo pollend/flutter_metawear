@@ -190,7 +190,7 @@ public class TestAccelerometerBoschLowHigh extends UnitTestBase {
         actual.set(new LowHighResponse[6]);
         boschAcc.lowHigh().addRouteAsync(source -> source.stream(new Subscriber() {
             int i = 0;
-            @Override
+            @override
             public void apply(Data data, Object... env) {
                 actual.get()[i] = data.value(LowHighResponse.class);
                 i++;

@@ -39,7 +39,7 @@ class BarometerBmp280Impl extends BarometerBoschImpl implements BarometerBmp280 
         super(mwPrivate);
     }
 
-    @Override
+    @override
     public BarometerBmp280.ConfigEditor configure() {
         return new BarometerBmp280.ConfigEditor() {
             private OversamplingMode samplingMode= OversamplingMode.STANDARD;
@@ -47,33 +47,33 @@ class BarometerBmp280Impl extends BarometerBoschImpl implements BarometerBmp280 
             private StandbyTime time= StandbyTime.TIME_0_5;
             private byte tempOversampling= 1;
 
-            @Override
+            @override
             public BarometerBmp280.ConfigEditor standbyTime(StandbyTime time) {
                 this.time= time;
                 return this;
             }
 
-            @Override
+            @override
             public void commit() {
                 mwPrivate.sendCommand(new byte[] {BAROMETER.id, CONFIG,
                         (byte) ((samplingMode.ordinal() << 2) | (tempOversampling << 5)),
                         (byte) ((filterCoeff.ordinal() << 2) | (time.ordinal() << 5))});
             }
 
-            @Override
+            @override
             public BarometerBmp280.ConfigEditor pressureOversampling(OversamplingMode mode) {
                 samplingMode= mode;
                 tempOversampling= (byte) ((mode == OversamplingMode.ULTRA_HIGH) ? 2 : 1);
                 return this;
             }
 
-            @Override
+            @override
             public BarometerBmp280.ConfigEditor filterCoeff(FilterCoeff coeff) {
                 filterCoeff = coeff;
                 return this;
             }
 
-            @Override
+            @override
             public BarometerBmp280.ConfigEditor standbyTime(float time) {
                 float[] availableTimes= StandbyTime.times();
                 return standbyTime(StandbyTime.values()[Util.closestIndex(availableTimes, time)]);

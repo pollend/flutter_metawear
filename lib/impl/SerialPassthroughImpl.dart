@@ -22,6 +22,45 @@
  * hello@mbientlab.com.
  */
 
+import 'package:flutter_metawear/impl/ByteArrayData.dart';
+
+class SerialPassthroughData extends ByteArrayData {
+
+    SerialPassthroughData(int register, int id, int length): super() {
+        super(SERIAL_PASSTHROUGH, register, id, new DataAttributes(new byte[] {length}, (byte) 1, (byte) 0, false));
+    }
+
+    SerialPassthroughData(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
+        super(input, module, register, id, attributes);
+    }
+
+    public DataTypeBase dataProcessorCopy(DataTypeBase input, DataAttributes attributes) {
+        return new ByteArrayData(input, DATA_PROCESSOR, DataProcessorImpl.NOTIFY, NO_DATA_ID, attributes);
+    }
+    public DataTypeBase dataProcessorStateCopy(DataTypeBase input, DataAttributes attributes) {
+        return new ByteArrayData(input, DATA_PROCESSOR, Util.setSilentRead(DataProcessorImpl.STATE), NO_DATA_ID, attributes);
+    }
+
+    @override
+    public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
+        return new SerialPassthroughData(input, module, register, id, attributes);
+    }
+
+    @override
+    public void read(MetaWearBoardPrivate mwPrivate) {
+        throw new UnsupportedOperationException("Serial passthrough reads require parameters");
+    }
+
+    @override
+    public void read(MetaWearBoardPrivate mwPrivate, byte[] parameters) {
+    byte[] command= new byte[eventConfig.length - 1 + parameters.length];
+    System.arraycopy(eventConfig, 0, command, 0, 2);
+    System.arraycopy(parameters, 0, command, 2, parameters.length);
+
+    mwPrivate.sendCommand(command);
+    }
+}
+
 /**
  * Created by etsai on 10/3/16.
  */
@@ -42,42 +81,7 @@ class SerialPassthroughImpl extends ModuleImplBase implements SerialPassthrough 
     static const String I2C_PRODUCER_FORMAT= "com.mbientlab.metawear.impl.SerialPassthroughImpl.I2C_PRODUCER_%d",
             SPI_PRODUCER_FORMAT= "com.mbientlab.metawear.impl.SerialPassthroughImpl.SPI_PRODUCER_%d";
 
-    private static class SerialPassthroughData extends ByteArrayData {
 
-        SerialPassthroughData(byte register, byte id, byte length) {
-            super(SERIAL_PASSTHROUGH, register, id, new DataAttributes(new byte[] {length}, (byte) 1, (byte) 0, false));
-        }
-
-        SerialPassthroughData(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
-            super(input, module, register, id, attributes);
-        }
-
-        public DataTypeBase dataProcessorCopy(DataTypeBase input, DataAttributes attributes) {
-            return new ByteArrayData(input, DATA_PROCESSOR, DataProcessorImpl.NOTIFY, NO_DATA_ID, attributes);
-        }
-        public DataTypeBase dataProcessorStateCopy(DataTypeBase input, DataAttributes attributes) {
-            return new ByteArrayData(input, DATA_PROCESSOR, Util.setSilentRead(DataProcessorImpl.STATE), NO_DATA_ID, attributes);
-        }
-
-        @Override
-        public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
-            return new SerialPassthroughData(input, module, register, id, attributes);
-        }
-
-        @Override
-        public void read(MetaWearBoardPrivate mwPrivate) {
-            throw new UnsupportedOperationException("Serial passthrough reads require parameters");
-        }
-
-        @Override
-        public void read(MetaWearBoardPrivate mwPrivate, byte[] parameters) {
-            byte[] command= new byte[eventConfig.length - 1 + parameters.length];
-            System.arraycopy(eventConfig, 0, command, 0, 2);
-            System.arraycopy(parameters, 0, command, 2, parameters.length);
-
-            mwPrivate.sendCommand(command);
-        }
-    }
     private static class I2cInner implements I2C, Serializable {
         private static final long serialVersionUID = 8518548885863146365L;
         private final byte id;
@@ -94,18 +98,18 @@ class SerialPassthroughImpl extends ModuleImplBase implements SerialPassthrough 
             this.mwPrivate = mwPrivate;
         }
 
-        @Override
+        @override
         public void read(byte deviceAddr, byte registerAddr) {
             DataTypeBase i2cProducer= mwPrivate.lookupProducer(name());
             i2cProducer.read(mwPrivate, new byte[]{deviceAddr, registerAddr, id, i2cProducer.attributes.length()});
         }
 
-        @Override
+        @override
         public Task<Route> addRouteAsync(RouteBuilder builder) {
             return mwPrivate.queueRouteBuilder(builder, name());
         }
 
-        @Override
+        @override
         public String name() {
             return String.format(Locale.US, I2C_PRODUCER_FORMAT, id);
         }
@@ -127,11 +131,11 @@ class SerialPassthroughImpl extends ModuleImplBase implements SerialPassthrough 
             this.mwPrivate = mwPrivate;
         }
 
-        @Override
+        @override
         public SpiParameterBuilder<Void> read() {
             final DataTypeBase spiProducer= mwPrivate.lookupProducer(name());
             return new SpiParameterBuilderInner<Void>((byte) ((spiProducer.attributes.length() - 1) | (id << 4))) {
-                @Override
+                @override
                 public Void commit() {
                     spiProducer.read(mwPrivate, config);
                     return null;
@@ -139,12 +143,12 @@ class SerialPassthroughImpl extends ModuleImplBase implements SerialPassthrough 
             };
         }
 
-        @Override
+        @override
         public Task<Route> addRouteAsync(RouteBuilder builder) {
             return mwPrivate.queueRouteBuilder(builder, name());
         }
 
-        @Override
+        @override
         public String name() {
             return String.format(Locale.US, SPI_PRODUCER_FORMAT, id);
         }
@@ -165,7 +169,7 @@ class SerialPassthroughImpl extends ModuleImplBase implements SerialPassthrough 
             config[5] = fifthValue;
         }
 
-        @Override
+        @override
         public SpiParameterBuilder<T> data(byte[] data) {
             byte[] copy = new byte[config.length + data.length];
             System.arraycopy(config, 0, copy, 0, this.originalLength);
@@ -174,49 +178,49 @@ class SerialPassthroughImpl extends ModuleImplBase implements SerialPassthrough 
             return this;
         }
 
-        @Override
+        @override
         public SpiParameterBuilder<T> slaveSelectPin(byte pin) {
             config[0]= pin;
             return this;
         }
 
-        @Override
+        @override
         public SpiParameterBuilder<T> clockPin(byte pin) {
             config[1]= pin;
             return this;
         }
 
-        @Override
+        @override
         public SpiParameterBuilder<T> mosiPin(byte pin) {
             config[2]= pin;
             return this;
         }
 
-        @Override
+        @override
         public SpiParameterBuilder<T> misoPin(byte pin) {
             config[3]= pin;
             return this;
         }
 
-        @Override
+        @override
         public SpiParameterBuilder<T> lsbFirst() {
             config[4]|= 0x1;
             return this;
         }
 
-        @Override
+        @override
         public SpiParameterBuilder<T> mode(byte mode) {
             config[4]|= (mode << 1);
             return this;
         }
 
-        @Override
+        @override
         public SpiParameterBuilder<T> frequency(SpiFrequency freq) {
             config[4]|= (freq.ordinal() << 3);
             return this;
         }
 
-        @Override
+        @override
         public SpiParameterBuilder<T> useNativePins() {
             config[4]|= (0x1 << 6);
             return this;
@@ -231,7 +235,7 @@ class SerialPassthroughImpl extends ModuleImplBase implements SerialPassthrough 
         super(mwPrivate);
     }
 
-    @Override
+    @override
     public void restoreTransientVars(MetaWearBoardPrivate mwPrivate) {
         super.restoreTransientVars(mwPrivate);
 
@@ -244,7 +248,7 @@ class SerialPassthroughImpl extends ModuleImplBase implements SerialPassthrough 
         }
     }
 
-    @Override
+    @override
     protected void init() {
         readI2cDataTask = new TimedTask<>();
         readSpiDataTask = new TimedTask<>();
@@ -256,7 +260,7 @@ class SerialPassthroughImpl extends ModuleImplBase implements SerialPassthrough 
         mwPrivate.addDataHandler(new Tuple3<>(SERIAL_PASSTHROUGH.id, Util.setRead(SPI_RW), DIRECT_SPI_READ_ID), response -> readSpiDataTask.setResult(response));
     }
 
-    @Override
+    @override
     public I2C i2c(final byte length, final byte id) {
         if (!i2cDataProducers.containsKey(id)) {
             i2cDataProducers.put(id, new I2cInner(id, length, mwPrivate));
@@ -265,7 +269,7 @@ class SerialPassthroughImpl extends ModuleImplBase implements SerialPassthrough 
         return i2cDataProducers.get(id);
     }
 
-    @Override
+    @override
     public void writeI2c(byte deviceAddr, byte registerAddr, byte[] data) {
         byte[] params= new byte[data.length + 4];
         params[0]= deviceAddr;
@@ -277,7 +281,7 @@ class SerialPassthroughImpl extends ModuleImplBase implements SerialPassthrough 
         mwPrivate.sendCommand(SERIAL_PASSTHROUGH, I2C_RW, params);
     }
 
-    @Override
+    @override
     public Task<byte[]> readI2cAsync(final byte deviceAddr, final byte registerAddr, final byte length) {
         return readI2cDataTask.execute("Did not receive I2C data within %dms", Constant.RESPONSE_TIMEOUT,
                 () -> mwPrivate.sendCommand(new byte[] {SERIAL_PASSTHROUGH.id, Util.setRead(I2C_RW), deviceAddr, registerAddr, DIRECT_I2C_READ_ID, length})
@@ -293,7 +297,7 @@ class SerialPassthroughImpl extends ModuleImplBase implements SerialPassthrough 
         });
     }
 
-    @Override
+    @override
     public SPI spi(final byte length, final byte id) {
         if (mwPrivate.lookupModuleInfo(Constant.Module.SERIAL_PASSTHROUGH).revision < SPI_REVISION) {
             return null;
@@ -306,11 +310,11 @@ class SerialPassthroughImpl extends ModuleImplBase implements SerialPassthrough 
         return spiDataProducers.get(id);
     }
 
-    @Override
+    @override
     public SpiParameterBuilder<Void> writeSpi() {
         return mwPrivate.lookupModuleInfo(Constant.Module.SERIAL_PASSTHROUGH).revision >= SPI_REVISION ?
                 new SpiParameterBuilderInner<Void>() {
-                    @Override
+                    @override
                     public Void commit() {
                         mwPrivate.sendCommand(SERIAL_PASSTHROUGH, SPI_RW, config);
                         return null;
@@ -319,10 +323,10 @@ class SerialPassthroughImpl extends ModuleImplBase implements SerialPassthrough 
                 null;
     }
 
-    @Override
+    @override
     public SpiParameterBuilder<Task<byte[]>> readSpiAsync(byte length) {
         return new SpiParameterBuilderInner<Task<byte[]>>((byte) ((length - 1) | (DIRECT_SPI_READ_ID << 4))) {
-            @Override
+            @override
             public Task<byte[]> commit() {
                 return readSpiDataTask.execute("Did not received SPI data within %dms", Constant.RESPONSE_TIMEOUT,
                         () -> mwPrivate.sendCommand(SERIAL_PASSTHROUGH, Util.setRead(SPI_RW), config)

@@ -79,7 +79,7 @@ class BtleService extends Service {
 
     private final Map<BluetoothDevice, AndroidPlatform> btleDevices = new HashMap<>();
     private final BluetoothGattCallback btleGattCallback= new BluetoothGattCallback() {
-        @Override
+        @override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
             final AndroidPlatform platform = btleDevices.get(gatt.getDevice());
 
@@ -98,7 +98,7 @@ class BtleService extends Service {
             }
         }
 
-        @Override
+        @override
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             final AndroidPlatform platform = btleDevices.get(gatt.getDevice());
             if (status != 0) {
@@ -109,7 +109,7 @@ class BtleService extends Service {
             }
         }
 
-        @Override
+        @override
         public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             if (status != 0) {
                 gattOpTask.setError(new IllegalStateException(String.format(Locale.US, "Non-zero onCharacteristicRead status (%d)", status)));
@@ -118,7 +118,7 @@ class BtleService extends Service {
             }
         }
 
-        @Override
+        @override
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             if (status != 0) {
                 gattOpTask.setError(new IllegalStateException(String.format(Locale.US, "Non-zero onCharacteristicWrite status (%d)", status)));
@@ -127,12 +127,12 @@ class BtleService extends Service {
             }
         }
 
-        @Override
+        @override
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
             btleDevices.get(gatt.getDevice()).notificationListener.onChange(characteristic.getValue());
         }
 
-        @Override
+        @override
         public void onDescriptorWrite(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
             if (status != 0) {
                 gattOpTask.setError(new IllegalStateException(String.format(Locale.US, "Non-zero onDescriptorWrite status (%d)", status)));
@@ -141,7 +141,7 @@ class BtleService extends Service {
             }
         }
 
-        @Override
+        @override
         public void onReadRemoteRssi(BluetoothGatt gatt, int rssi, int status) {
             if (status != 0) {
                 gattOpTask.setError(new IllegalStateException(String.format(Locale.US, "Non-zero onReadRemoteRssi status (%d)", status)));
@@ -215,14 +215,14 @@ class BtleService extends Service {
             }
         }
 
-        @Override
+        @override
         public void localSave(String key, byte[] data) {
             SharedPreferences.Editor editor= BtleService.this.getSharedPreferences(btDevice.getAddress(), MODE_PRIVATE).edit();
             editor.putString(key, new String(Base64.encode(data, Base64.DEFAULT)));
             editor.apply();
         }
 
-        @Override
+        @override
         public InputStream localRetrieve(String key) {
             SharedPreferences prefs= BtleService.this.getSharedPreferences(btDevice.getAddress(), MODE_PRIVATE);
             return prefs.contains(key) ?
@@ -230,7 +230,7 @@ class BtleService extends Service {
                     null;
         }
 
-        @Override
+        @override
         public Task<File> downloadFileAsync(final String srcUrl, final String dest) {
             final Capture<HttpURLConnection> urlConn = new Capture<>();
             return Task.callInBackground(() -> {
@@ -266,23 +266,23 @@ class BtleService extends Service {
             });
         }
 
-        @Override
+        @override
         public File findDownloadedFile(String filename) {
             File downloadFolder = new File(getFilesDir(), DOWNLOAD_DIR_NAME);
             return new File(downloadFolder, filename);
         }
 
-        @Override
+        @override
         public void logWarn(String tag, String message) {
             Log.w(tag, message);
         }
 
-        @Override
+        @override
         public void logWarn(String tag, String message, Throwable tr) {
             Log.w(tag, message, tr);
         }
 
-        @Override
+        @override
         public void onDisconnect(DisconnectHandler handler) {
             dcHandler = handler;
         }
@@ -291,7 +291,7 @@ class BtleService extends Service {
             return androidBtGatt != null && androidBtGatt.getService(gattService) != null;
         }
 
-        @Override
+        @override
         public Task<Void> writeCharacteristicAsync(final BtleGattCharacteristic characteristic, final WriteType type, final byte[] value) {
             if (androidBtGatt == null) {
                 return Task.forError(new IllegalStateException("Not connected to the BTLE gatt server"));
@@ -318,7 +318,7 @@ class BtleService extends Service {
             }).onSuccessTask(task -> Task.<Void>forResult(null));
         }
 
-        @Override
+        @override
         public Task<byte[][]> readCharacteristicAsync(final BtleGattCharacteristic[] characteristics) {
             // Can use do this in parallel since internally, gatt operations are queued and only executed 1 by 1
             final ArrayList<Task<byte[]>> tasks = new ArrayList<>();
@@ -336,7 +336,7 @@ class BtleService extends Service {
             });
         }
 
-        @Override
+        @override
         public Task<byte[]> readCharacteristicAsync(final BtleGattCharacteristic characteristic) {
             if (androidBtGatt == null) {
                 return Task.forError(new IllegalStateException("Not connected to the BTLE gatt server"));
@@ -385,12 +385,12 @@ class BtleService extends Service {
             return Task.forError(new IllegalStateException(("Characteristic does not have 'notify property' bit set")));
         }
 
-        @Override
+        @override
         public Task<Void> enableNotificationsAsync(BtleGattCharacteristic characteristic, final NotificationListener listener) {
             return editNotifications(characteristic, listener);
         }
 
-        @Override
+        @override
         public Task<Void> localDisconnectAsync() {
             Task<Void> task = remoteDisconnectAsync();
 
@@ -409,7 +409,7 @@ class BtleService extends Service {
             return task;
         }
 
-        @Override
+        @override
         public Task<Void> remoteDisconnectAsync() {
             if (androidBtGatt == null) {
                 return Task.forResult(null);
@@ -419,7 +419,7 @@ class BtleService extends Service {
             return disconnectTaskSrc.getTask();
         }
 
-        @Override
+        @override
         public Task<Void> connectAsync() {
             if (androidBtGatt != null) {
                 return Task.forResult(null);
@@ -435,7 +435,7 @@ class BtleService extends Service {
             });
         }
 
-        @Override
+        @override
         public Task<Integer> readRssiAsync() {
             return androidBtGatt != null ?
                     addGattOperation(this, "onReadRemoteRssi not called within %dms", () -> androidBtGatt.readRemoteRssi())
@@ -494,12 +494,12 @@ class BtleService extends Service {
         }
     }
 
-    @Override
+    @override
     public IBinder onBind(Intent intent) {
         return mBinder;
     }
 
-    @Override
+    @override
     public void onDestroy() {
         for(Map.Entry<BluetoothDevice, AndroidPlatform> it: btleDevices.entrySet()) {
             it.getValue().closeGatt();

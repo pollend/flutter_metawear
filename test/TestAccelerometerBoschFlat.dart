@@ -99,7 +99,7 @@ public class TestAccelerometerBoschFlat extends UnitTestBase {
         actual.set(new boolean[2]);
         boschAcc.flat().addRouteAsync(source -> source.stream(new Subscriber() {
             int i = 0;
-            @Override
+            @override
             public void apply(Data data, Object... env) {
                 actual.get()[i] = data.value(Boolean.class);
                 i++;

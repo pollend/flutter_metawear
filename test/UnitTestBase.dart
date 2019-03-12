@@ -54,12 +54,12 @@ public abstract class UnitTestBase implements MwBridge {
         }
     }
 
-    @Override
+    @override
     public void disconnected() {
         junitPlatform.dcHandler.onDisconnect();
     }
 
-    @Override
+    @override
     public void sendMockResponse(byte[] response) {
         junitPlatform.notificationListener.onChange(response);
     }

@@ -96,7 +96,7 @@ public class TestMma8452qMovement extends UnitTestBase {
         actual.set(new Movement[3]);
         mma8452qAcc.freeFall().addRouteAsync(source -> source.stream(new Subscriber() {
             int i = 0;
-            @Override
+            @override
             public void apply(Data data, Object... env) {
                 actual.get()[i] = data.value(Movement.class);
                 i++;
@@ -137,7 +137,7 @@ public class TestMma8452qMovement extends UnitTestBase {
         actual.set(new Movement[3]);
         mma8452qAcc.motion().addRouteAsync(source -> source.stream(new Subscriber() {
             int i = 0;
-            @Override
+            @override
             public void apply(Data data, Object... env) {
                 actual.get()[i] = data.value(Movement.class);
                 i++;

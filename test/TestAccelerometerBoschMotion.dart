@@ -216,7 +216,7 @@ public class TestAccelerometerBoschMotion extends UnitTestBase {
         actual.set(new AccelerometerBosch.AnyMotion[6]);
         boschAcc.motion(AnyMotionDataProducer.class).addRouteAsync(source -> source.stream(new Subscriber() {
             int i = 0;
-            @Override
+            @override
             public void apply(Data data, Object... env) {
                 actual.get()[i] = data.value(AccelerometerBosch.AnyMotion.class);
                 i++;

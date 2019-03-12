@@ -68,17 +68,17 @@ class UFloatData extends DataTypeBase {
         final float scaled= buffer.getLong(0) / scale(mwPrivate);
 
         return new DataPrivate(timestamp, data, mapper) {
-            @Override
+            @override
             public float scale() {
                 return UFloatData.this.scale(mwPrivate);
             }
 
-            @Override
+            @override
             public Class<?>[] types() {
                 return new Class<?>[] {Float.class};
             }
 
-            @Override
+            @override
             public <T> T value(Class<T> clazz) {
                 if (clazz.equals(Float.class)) {
                     return clazz.cast(scaled);

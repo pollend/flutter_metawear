@@ -64,7 +64,7 @@ public class TestSensorFusion {
 
     public static class TestRev1 extends TestBase {
         @Before
-        @Override
+        @override
         public void setup() throws Exception {
             junitPlatform.addCustomModuleInfo(new byte[] {0x19, (byte) 0x80, 0x00, 0x01, 0x03, 0x00, 0x06, 0x00, 0x02, 0x00, 0x01, 0x00});
             super.setup();

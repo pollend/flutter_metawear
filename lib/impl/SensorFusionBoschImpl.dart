@@ -74,23 +74,23 @@ class SensorFusionBoschImpl extends ModuleImplBase implements SensorFusionBosch 
             super(input, module, register, id, attributes);
         }
 
-        @Override
+        @override
         public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
             return new EulerAngleData(input, module, register, id, attributes);
         }
 
-        @Override
+        @override
         public Number convertToFirmwareUnits(MetaWearBoardPrivate mwPrivate, Number value) {
             return value;
         }
 
-        @Override
+        @override
         public Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, final byte[] data, final Calendar timestamp, DataPrivate.ClassToObject mapper) {
             ByteBuffer buffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN);
             final float[] values = new float[] {buffer.getFloat(), buffer.getFloat(), buffer.getFloat(), buffer.getFloat()};
 
             return new DataPrivate(timestamp, data, mapper) {
-                @Override
+                @override
                 public <T> T value(Class<T> clazz) {
                     if (clazz.equals(EulerAngles.class)) {
                         return clazz.cast(new EulerAngles(values[0], values[1], values[2], values[3]));
@@ -100,7 +100,7 @@ class SensorFusionBoschImpl extends ModuleImplBase implements SensorFusionBosch 
                     return super.value(clazz);
                 }
 
-                @Override
+                @override
                 public Class<?>[] types() {
                     return new Class<?>[] {EulerAngles.class, float[].class};
                 }
@@ -118,23 +118,23 @@ class SensorFusionBoschImpl extends ModuleImplBase implements SensorFusionBosch 
             super(input, module, register, id, attributes);
         }
 
-        @Override
+        @override
         public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
             return new QuaternionData(input, module, register, id, attributes);
         }
 
-        @Override
+        @override
         public Number convertToFirmwareUnits(MetaWearBoardPrivate mwPrivate, Number value) {
             return value;
         }
 
-        @Override
+        @override
         public Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, final byte[] data, final Calendar timestamp, DataPrivate.ClassToObject mapper) {
             ByteBuffer buffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN);
             final float[] values = new float[] {buffer.getFloat(), buffer.getFloat(), buffer.getFloat(), buffer.getFloat()};
 
             return new DataPrivate(timestamp, data, mapper) {
-                @Override
+                @override
                 public <T> T value(Class<T> clazz) {
                     if (clazz.equals(Quaternion.class)) {
                         return clazz.cast(new Quaternion(values[0], values[1], values[2], values[3]));
@@ -144,7 +144,7 @@ class SensorFusionBoschImpl extends ModuleImplBase implements SensorFusionBosch 
                     return super.value(clazz);
                 }
 
-                @Override
+                @override
                 public Class<?>[] types() {
                     return new Class<?>[] {Quaternion.class, float[].class};
                 }
@@ -163,23 +163,23 @@ class SensorFusionBoschImpl extends ModuleImplBase implements SensorFusionBosch 
             super(input, module, register, id, attributes);
         }
 
-        @Override
+        @override
         public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
             return new AccelerationData(input, module, register, id, attributes);
         }
 
-        @Override
+        @override
         public Number convertToFirmwareUnits(MetaWearBoardPrivate mwPrivate, Number value) {
             return value;
         }
 
-        @Override
+        @override
         public Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, final byte[] data, final Calendar timestamp, DataPrivate.ClassToObject mapper) {
             ByteBuffer buffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN);
             final float[] values = new float[] {buffer.getFloat() / MSS_TO_G, buffer.getFloat() / MSS_TO_G, buffer.getFloat() / MSS_TO_G};
 
             return new DataPrivate(timestamp, data, mapper) {
-                @Override
+                @override
                 public <T> T value(Class<T> clazz) {
                     if (clazz.equals(Acceleration.class)) {
                         return clazz.cast(new Acceleration(values[0], values[1], values[2]));
@@ -189,7 +189,7 @@ class SensorFusionBoschImpl extends ModuleImplBase implements SensorFusionBosch 
                     return super.value(clazz);
                 }
 
-                @Override
+                @override
                 public Class<?>[] types() {
                     return new Class<?>[] {Acceleration.class, float[].class};
                 }
@@ -207,7 +207,7 @@ class SensorFusionBoschImpl extends ModuleImplBase implements SensorFusionBosch 
             super(input, module, register, id, attributes);
         }
 
-        @Override
+        @override
         public Number convertToFirmwareUnits(MetaWearBoardPrivate mwPrivate, Number value) {
             return value;
         }
@@ -223,18 +223,18 @@ class SensorFusionBoschImpl extends ModuleImplBase implements SensorFusionBosch 
             super(input, module, register, id, attributes);
         }
 
-        @Override
+        @override
         public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
             return new CorrectedAccelerationData(input, module, register, id, attributes);
         }
 
-        @Override
+        @override
         public Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, final byte[] data, final Calendar timestamp, DataPrivate.ClassToObject mapper) {
             ByteBuffer buffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN);
             final CorrectedAcceleration value = new CorrectedAcceleration(buffer.getFloat() / 1000f, buffer.getFloat() / 1000f, buffer.getFloat() / 1000f, buffer.get());
 
             return new DataPrivate(timestamp, data, mapper) {
-                @Override
+                @override
                 public <T> T value(Class<T> clazz) {
                     if (clazz.equals(CorrectedAcceleration.class)) {
                         return clazz.cast(value);
@@ -242,7 +242,7 @@ class SensorFusionBoschImpl extends ModuleImplBase implements SensorFusionBosch 
                     return super.value(clazz);
                 }
 
-                @Override
+                @override
                 public Class<?>[] types() {
                     return new Class<?>[] {CorrectedAcceleration.class};
                 }
@@ -260,18 +260,18 @@ class SensorFusionBoschImpl extends ModuleImplBase implements SensorFusionBosch 
             super(input, module, register, id, attributes);
         }
 
-        @Override
+        @override
         public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
             return new CorrectedAngularVelocityData(input, module, register, id, attributes);
         }
 
-        @Override
+        @override
         public Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, final byte[] data, final Calendar timestamp, DataPrivate.ClassToObject mapper) {
             ByteBuffer buffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN);
             final CorrectedAngularVelocity value = new CorrectedAngularVelocity(buffer.getFloat(), buffer.getFloat(), buffer.getFloat(), buffer.get());
 
             return new DataPrivate(timestamp, data, mapper) {
-                @Override
+                @override
                 public <T> T value(Class<T> clazz) {
                     if (clazz.equals(CorrectedAngularVelocity.class)) {
                         return clazz.cast(value);
@@ -279,7 +279,7 @@ class SensorFusionBoschImpl extends ModuleImplBase implements SensorFusionBosch 
                     return super.value(clazz);
                 }
 
-                @Override
+                @override
                 public Class<?>[] types() {
                     return new Class<?>[] {CorrectedAngularVelocity.class};
                 }
@@ -297,18 +297,18 @@ class SensorFusionBoschImpl extends ModuleImplBase implements SensorFusionBosch 
             super(input, module, register, id, attributes);
         }
 
-        @Override
+        @override
         public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
             return new CorrectedMagneticFieldData(input, module, register, id, attributes);
         }
 
-        @Override
+        @override
         public Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, final byte[] data, final Calendar timestamp, DataPrivate.ClassToObject mapper) {
             ByteBuffer buffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN);
             final CorrectedMagneticField value = new CorrectedMagneticField(buffer.getFloat() / 1000000f, buffer.getFloat() / 1000000f, buffer.getFloat() / 1000000f, buffer.get());
 
             return new DataPrivate(timestamp, data, mapper) {
-                @Override
+                @override
                 public <T> T value(Class<T> clazz) {
                     if (clazz.equals(CorrectedMagneticField.class)) {
                         return clazz.cast(value);
@@ -316,7 +316,7 @@ class SensorFusionBoschImpl extends ModuleImplBase implements SensorFusionBosch 
                     return super.value(clazz);
                 }
 
-                @Override
+                @override
                 public Class<?>[] types() {
                     return new Class<?>[] {CorrectedMagneticField.class};
                 }
@@ -333,22 +333,22 @@ class SensorFusionBoschImpl extends ModuleImplBase implements SensorFusionBosch 
             this.mask = mask;
         }
 
-        @Override
+        @override
         public Task<Route> addRouteAsync(RouteBuilder builder) {
             return mwPrivate.queueRouteBuilder(builder, producerTag);
         }
 
-        @Override
+        @override
         public String name() {
             return producerTag;
         }
 
-        @Override
+        @override
         public void start() {
             dataEnableMask |= mask;
         }
 
-        @Override
+        @override
         public void stop() {
             dataEnableMask &= ~mask;
         }
@@ -372,7 +372,7 @@ class SensorFusionBoschImpl extends ModuleImplBase implements SensorFusionBosch 
         mwPrivate.tagProducer(LINEAR_ACC_PRODUCER, new AccelerationData(LINEAR_ACC));
     }
 
-    @Override
+    @override
     protected void init() {
         readRegisterTask = new TimedTask<>();
 
@@ -387,7 +387,7 @@ class SensorFusionBoschImpl extends ModuleImplBase implements SensorFusionBosch 
         }
     }
 
-    @Override
+    @override
     public ConfigEditor configure() {
         return new ConfigEditor() {
             private Mode newMode = Mode.SLEEP;
@@ -395,31 +395,31 @@ class SensorFusionBoschImpl extends ModuleImplBase implements SensorFusionBosch 
             private GyroRange newGyroRange = GyroRange.GR_2000DPS;
             private Object[] extraAcc = null, extraGyro = null;
 
-            @Override
+            @override
             public ConfigEditor mode(Mode mode) {
                 newMode = mode;
                 return this;
             }
 
-            @Override
+            @override
             public ConfigEditor accRange(AccRange range) {
                 newAccRange = range;
                 return this;
             }
 
-            @Override
+            @override
             public ConfigEditor gyroRange(GyroRange range) {
                 newGyroRange = range;
                 return this;
             }
 
-            @Override
+            @override
             public ConfigEditor accExtra(Object... settings) {
                 extraAcc = settings;
                 return this;
             }
 
-            @Override
+            @override
             public ConfigEditor gyroExtra(Object... settings) {
                 extraGyro = settings;
                 return this;
@@ -442,7 +442,7 @@ class SensorFusionBoschImpl extends ModuleImplBase implements SensorFusionBosch 
                 }
             }
 
-            @Override
+            @override
             public void commit() {
                 SensorFusionBoschImpl.this.mode = newMode;
                 mwPrivate.sendCommand(new byte[] {SENSOR_FUSION.id, MODE, (byte) newMode.ordinal(),
@@ -525,7 +525,7 @@ class SensorFusionBoschImpl extends ModuleImplBase implements SensorFusionBosch 
         };
     }
 
-    @Override
+    @override
     public AsyncDataProducer correctedAcceleration() {
         if (correctedAccProducer == null) {
             correctedAccProducer = new SensorFusionAsyncDataProducer(CORRECTED_ACC_PRODUCER, (byte) 0x01);
@@ -533,7 +533,7 @@ class SensorFusionBoschImpl extends ModuleImplBase implements SensorFusionBosch 
         return correctedAccProducer;
     }
 
-    @Override
+    @override
     public AsyncDataProducer correctedAngularVelocity() {
         if (correctedAngVelProducer == null) {
             correctedAngVelProducer = new SensorFusionAsyncDataProducer(CORRECTED_ROT_PRODUCER, (byte) 0x02);
@@ -541,7 +541,7 @@ class SensorFusionBoschImpl extends ModuleImplBase implements SensorFusionBosch 
         return correctedAngVelProducer;
     }
 
-    @Override
+    @override
     public AsyncDataProducer correctedMagneticField() {
         if (correctedMagProducer == null) {
             correctedMagProducer = new SensorFusionAsyncDataProducer(CORRECTED_MAG_PRODUCER, (byte) 0x04);
@@ -549,7 +549,7 @@ class SensorFusionBoschImpl extends ModuleImplBase implements SensorFusionBosch 
         return correctedMagProducer;
     }
 
-    @Override
+    @override
     public AsyncDataProducer quaternion() {
         if (quaterionProducer == null) {
             quaterionProducer = new SensorFusionAsyncDataProducer(QUATERNION_PRODUCER, (byte) 0x08);
@@ -557,7 +557,7 @@ class SensorFusionBoschImpl extends ModuleImplBase implements SensorFusionBosch 
         return quaterionProducer;
     }
 
-    @Override
+    @override
     public AsyncDataProducer eulerAngles() {
         if (eulerAnglesProducer == null) {
             eulerAnglesProducer = new SensorFusionAsyncDataProducer(EULER_ANGLES_PRODUCER, (byte) 0x10);
@@ -565,7 +565,7 @@ class SensorFusionBoschImpl extends ModuleImplBase implements SensorFusionBosch 
         return eulerAnglesProducer;
     }
 
-    @Override
+    @override
     public AsyncDataProducer gravity() {
         if (gravityProducer == null) {
             gravityProducer = new SensorFusionAsyncDataProducer(GRAVITY_PRODUCER, (byte) 0x20);
@@ -573,7 +573,7 @@ class SensorFusionBoschImpl extends ModuleImplBase implements SensorFusionBosch 
         return gravityProducer;
     }
 
-    @Override
+    @override
     public AsyncDataProducer linearAcceleration() {
         if (linearAccProducer == null) {
             linearAccProducer = new SensorFusionAsyncDataProducer(LINEAR_ACC_PRODUCER, (byte) 0x40);
@@ -581,7 +581,7 @@ class SensorFusionBoschImpl extends ModuleImplBase implements SensorFusionBosch 
         return linearAccProducer;
     }
 
-    @Override
+    @override
     public void start() {
         Accelerometer acc = (Accelerometer) mwPrivate.getModules().get(Accelerometer.class);
         GyroBmi160 gyro = (GyroBmi160) mwPrivate.getModules().get(GyroBmi160.class);
@@ -617,7 +617,7 @@ class SensorFusionBoschImpl extends ModuleImplBase implements SensorFusionBosch 
         mwPrivate.sendCommand(new byte[] {SENSOR_FUSION.id, ENABLE, 0x1});
     }
 
-    @Override
+    @override
     public void stop() {
         Accelerometer acc = (Accelerometer) mwPrivate.getModules().get(Accelerometer.class);
         GyroBmi160 gyro = (GyroBmi160) mwPrivate.getModules().get(GyroBmi160.class);
@@ -653,7 +653,7 @@ class SensorFusionBoschImpl extends ModuleImplBase implements SensorFusionBosch 
         }
     }
 
-    @Override
+    @override
     public Task<Void> pullConfigAsync() {
         return readRegisterTask.execute("Did not receive sensor fusion config within %dms", Constant.RESPONSE_TIMEOUT,
                 () -> mwPrivate.sendCommand(new byte[] {SENSOR_FUSION.id, Util.setRead(MODE)})
@@ -663,7 +663,7 @@ class SensorFusionBoschImpl extends ModuleImplBase implements SensorFusionBosch 
         });
     }
 
-    @Override
+    @override
     public Task<CalibrationState> readCalibrationStateAsync() {
         if (mwPrivate.lookupModuleInfo(SENSOR_FUSION).revision >= CALIBRATION_STATE_REV) {
             return readRegisterTask.execute("Did not receive sensor fusion calibration status within %dms", Constant.RESPONSE_TIMEOUT,
@@ -680,7 +680,7 @@ class SensorFusionBoschImpl extends ModuleImplBase implements SensorFusionBosch 
         return Task.forError(new UnsupportedOperationException("Minimum firmware v1.4.2 required to use this function"));
     }
 
-    @Override
+    @override
     public Task<CalibrationData> calibrate(CancellationToken ct, long pollingPeriod, CalibrationStateUpdateHandler updateHandler) {
         if (mwPrivate.lookupModuleInfo(SENSOR_FUSION).revision >= CALIBRATION_DATA_REV) {
             final Capture<Boolean> terminate = new Capture<>(false);
@@ -745,22 +745,22 @@ class SensorFusionBoschImpl extends ModuleImplBase implements SensorFusionBosch 
         return Task.forError(new UnsupportedOperationException("Minimum firmware v1.4.4 required to use this function"));
     }
 
-    @Override
+    @override
     public Task<CalibrationData> calibrate(CancellationToken ct, CalibrationStateUpdateHandler updateHandler) {
         return calibrate(ct, 1000, updateHandler);
     }
 
-    @Override
+    @override
     public Task<CalibrationData> calibrate(CancellationToken ct, long pollingPeriod) {
         return calibrate(ct, pollingPeriod, null);
     }
 
-    @Override
+    @override
     public Task<CalibrationData> calibrate(CancellationToken ct) {
         return calibrate(ct, 1000, null);
     }
 
-    @Override
+    @override
     public void writeCalibrationData(CalibrationData data) {
         if (mwPrivate.lookupModuleInfo(SENSOR_FUSION).revision >= CALIBRATION_STATE_REV) {
             mwPrivate.sendCommand(SENSOR_FUSION, ACC_CALIB_DATA, data.accelerometer);

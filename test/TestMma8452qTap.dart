@@ -110,7 +110,7 @@ public class TestMma8452qTap extends UnitTestBase {
         actual.set(new Tap[4]);
         mma8452qAcc.tap().addRouteAsync(source -> source.stream(new Subscriber() {
             int i = 0;
-            @Override
+            @override
             public void apply(Data data, Object... env) {
                 actual.get()[i] = data.value(Tap.class);
                 i++;

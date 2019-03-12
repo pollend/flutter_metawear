@@ -155,39 +155,39 @@ class AccelerometerMma8452qImpl extends ModuleImplBase implements AccelerometerM
             super(input, module, register, id, attributes);
         }
 
-        @Override
+        @override
         protected float scale(MetaWearBoardPrivate mwPrivate) {
             return 1000.f;
         }
 
-        @Override
+        @override
         public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
             return new Mma8452QCartesianFloatData(input, module, register, id, attributes);
         }
 
-        @Override
+        @override
         public DataTypeBase[] createSplits() {
             return new DataTypeBase[] {new Mma8452QSFloatData((byte) 0), new Mma8452QSFloatData((byte) 2), new Mma8452QSFloatData((byte) 4)};
         }
 
-        @Override
+        @override
         public Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, final byte[] data, final Calendar timestamp, DataPrivate.ClassToObject mapper) {
             ByteBuffer buffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN);
             final float scale= scale(mwPrivate);
             final Acceleration value= new Acceleration(buffer.getShort() / scale, buffer.getShort() / scale, buffer.getShort() / scale);
 
             return new DataPrivate(timestamp, data, mapper) {
-                @Override
+                @override
                 public float scale() {
                     return scale;
                 }
 
-                @Override
+                @override
                 public Class<?>[] types() {
                     return new Class<?>[] {Acceleration.class, float[].class};
                 }
 
-                @Override
+                @override
                 public <T> T value(Class<T> clazz) {
                     if (clazz.equals(Acceleration.class)) {
                         return clazz.cast(value);
@@ -210,7 +210,7 @@ class AccelerometerMma8452qImpl extends ModuleImplBase implements AccelerometerM
             super(input, module, register, id, attributes);
         }
 
-        @Override
+        @override
         public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
             return new Mma8452QSFloatData(input, module, register, id, attributes);
         }
@@ -226,24 +226,24 @@ class AccelerometerMma8452qImpl extends ModuleImplBase implements AccelerometerM
             super(input, module, register, id, attributes);
         }
 
-        @Override
+        @override
         public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
             return new Mma8452QOrientationData(input, module, register, id, attributes);
         }
 
-        @Override
+        @override
         public Number convertToFirmwareUnits(MetaWearBoardPrivate mwPrivate, Number value) {
             return value;
         }
 
-        @Override
+        @override
         public Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, byte[] data, Calendar timestamp, DataPrivate.ClassToObject mapper) {
             int offset = (data[0] & 0x06) >> 1;
             int index = 4 * (data[0] & 0x01) + ((offset == 2 || offset == 3) ? offset ^ 0x1 : offset);
             final SensorOrientation orientation = SensorOrientation.values()[index];
 
             return new DataPrivate(timestamp, data, mapper) {
-                @Override
+                @override
                 public <T> T value(Class<T> clazz) {
                     if (clazz.equals(SensorOrientation.class)) {
                         return clazz.cast(orientation);
@@ -251,7 +251,7 @@ class AccelerometerMma8452qImpl extends ModuleImplBase implements AccelerometerM
                     return super.value(clazz);
                 }
 
-                @Override
+                @override
                 public Class<?>[] types() {
                     return new Class<?>[] {SensorOrientation.class};
                 }
@@ -269,12 +269,12 @@ class AccelerometerMma8452qImpl extends ModuleImplBase implements AccelerometerM
             super(input, module, register, id, attributes);
         }
 
-        @Override
+        @override
         public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
             return new Mma8452QShakeData(input, module, register, id, attributes);
         }
 
-        @Override
+        @override
         public Number convertToFirmwareUnits(MetaWearBoardPrivate mwPrivate, Number value) {
             return value;
         }
@@ -287,7 +287,7 @@ class AccelerometerMma8452qImpl extends ModuleImplBase implements AccelerometerM
             byte mask= (byte) (1 << (2 * axis.ordinal()));
             return (value & mask) == mask ? Sign.NEGATIVE : Sign.POSITIVE;
         }
-        @Override
+        @override
         public Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, final byte[] data, Calendar timestamp, DataPrivate.ClassToObject mapper) {
             final Movement castedData = new Movement(
                     new boolean[] {exceedsThreshold(CartesianAxis.X, data[0]), exceedsThreshold(CartesianAxis.Y, data[0]), exceedsThreshold(CartesianAxis.Z, data[0])},
@@ -295,7 +295,7 @@ class AccelerometerMma8452qImpl extends ModuleImplBase implements AccelerometerM
             );
 
             return new DataPrivate(timestamp, data, mapper) {
-                @Override
+                @override
                 public <T> T value(Class<T> clazz) {
                     if (clazz.equals(Movement.class)) {
                         return clazz.cast(castedData);
@@ -303,7 +303,7 @@ class AccelerometerMma8452qImpl extends ModuleImplBase implements AccelerometerM
                     return super.value(clazz);
                 }
 
-                @Override
+                @override
                 public Class<?>[] types() {
                     return new Class<?>[] {Movement.class};
                 }
@@ -321,12 +321,12 @@ class AccelerometerMma8452qImpl extends ModuleImplBase implements AccelerometerM
             super(input, module, register, id, attributes);
         }
 
-        @Override
+        @override
         public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
             return new Mma8452QTapData(input, module, register, id, attributes);
         }
 
-        @Override
+        @override
         public Number convertToFirmwareUnits(MetaWearBoardPrivate mwPrivate, Number value) {
             return value;
         }
@@ -344,7 +344,7 @@ class AccelerometerMma8452qImpl extends ModuleImplBase implements AccelerometerM
             return (value & 0x8) == 0x8 ? TapType.DOUBLE : TapType.SINGLE;
         }
 
-        @Override
+        @override
         public Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, final byte[] data, Calendar timestamp, DataPrivate.ClassToObject mapper) {
             final Tap castedData = new Tap(
                     new boolean[] {active(CartesianAxis.X, data[0]), active(CartesianAxis.Y, data[0]), active(CartesianAxis.Z, data[0])},
@@ -352,7 +352,7 @@ class AccelerometerMma8452qImpl extends ModuleImplBase implements AccelerometerM
                     type(data[0])
             );
             return new DataPrivate(timestamp, data, mapper) {
-                @Override
+                @override
                 public <T> T value(Class<T> clazz) {
                     if (clazz.equals(Tap.class)) {
                         return clazz.cast(castedData);
@@ -360,7 +360,7 @@ class AccelerometerMma8452qImpl extends ModuleImplBase implements AccelerometerM
                     return super.value(clazz);
                 }
 
-                @Override
+                @override
                 public Class<?>[] types() {
                     return new Class<?>[] {Tap.class};
                 }
@@ -378,12 +378,12 @@ class AccelerometerMma8452qImpl extends ModuleImplBase implements AccelerometerM
             super(input, module, register, id, attributes);
         }
 
-        @Override
+        @override
         public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
             return new Mma8452QMovementData(input, module, register, id, attributes);
         }
 
-        @Override
+        @override
         public Number convertToFirmwareUnits(MetaWearBoardPrivate mwPrivate, Number value) {
             return value;
         }
@@ -398,7 +398,7 @@ class AccelerometerMma8452qImpl extends ModuleImplBase implements AccelerometerM
             return (value & mask) == mask ? Sign.NEGATIVE : Sign.POSITIVE;
         }
 
-        @Override
+        @override
         public Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, final byte[] data, Calendar timestamp, DataPrivate.ClassToObject mapper) {
             final Movement castedData = new Movement(
                     new boolean[] {exceedsThreshold(CartesianAxis.X, data[0]), exceedsThreshold(CartesianAxis.Y, data[0]), exceedsThreshold(CartesianAxis.Z, data[0])},
@@ -406,7 +406,7 @@ class AccelerometerMma8452qImpl extends ModuleImplBase implements AccelerometerM
             );
 
             return new DataPrivate(timestamp, data, mapper) {
-                @Override
+                @override
                 public <T> T value(Class<T> clazz) {
                     if (clazz.equals(Movement.class)) {
                         return clazz.cast(castedData);
@@ -414,7 +414,7 @@ class AccelerometerMma8452qImpl extends ModuleImplBase implements AccelerometerM
                     return super.value(clazz);
                 }
 
-                @Override
+                @override
                 public Class<?>[] types() {
                     return new Class<?>[] {Movement.class};
                 }
@@ -453,7 +453,7 @@ class AccelerometerMma8452qImpl extends ModuleImplBase implements AccelerometerM
         this.mwPrivate.tagProducer(ACCEL_PACKED_PRODUCER, new Mma8452QCartesianFloatData(PACKED_ACC_DATA, (byte) 3));
     }
 
-    @Override
+    @override
     protected void init() {
         pullConfigTask = new TimedTask<>();
 
@@ -472,7 +472,7 @@ class AccelerometerMma8452qImpl extends ModuleImplBase implements AccelerometerM
         return (dataSettings[1] & ~0x10) >> 4;
     }
 
-    @Override
+    @override
     public AccelerometerMma8452q.ConfigEditor configure() {
         return new AccelerometerMma8452q.ConfigEditor() {
             private OutputDataRate odr = OutputDataRate.ODR_100_HZ;
@@ -484,37 +484,37 @@ class AccelerometerMma8452qImpl extends ModuleImplBase implements AccelerometerM
             private int aslpTimeout = 0;
             private boolean pulseLpfEn = false;
 
-            @Override
+            @override
             public AccelerometerMma8452q.ConfigEditor odr(OutputDataRate odr) {
                 this.odr = odr;
                 return this;
             }
 
-            @Override
+            @override
             public AccelerometerMma8452q.ConfigEditor range(FullScaleRange fsr) {
                 this.fsr = fsr;
                 return this;
             }
 
-            @Override
+            @override
             public ConfigEditor enableHighPassFilter(float cutoff) {
                 hpfCutoff = cutoff;
                 return this;
             }
 
-            @Override
+            @override
             public ConfigEditor enableTapLowPassFilter() {
                 pulseLpfEn = true;
                 return this;
             }
 
-            @Override
+            @override
             public ConfigEditor oversampling(Oversampling osMode) {
                 this.osMode = osMode;
                 return this;
             }
 
-            @Override
+            @override
             public ConfigEditor enableAutoSleep(SleepModeRate rate, int timeout, Oversampling osMode) {
                 sleepRate = rate;
                 aslpTimeout = timeout;
@@ -522,12 +522,12 @@ class AccelerometerMma8452qImpl extends ModuleImplBase implements AccelerometerM
                 return this;
             }
 
-            @Override
+            @override
             public ConfigEditor enableAutoSleep() {
                 return enableAutoSleep(SleepModeRate.SMR_6_25_HZ, 20000, Oversampling.LOW_POWER);
             }
 
-            @Override
+            @override
             public AccelerometerMma8452q.ConfigEditor odr(float odr) {
                 float[] frequencies = OutputDataRate.frequencies();
                 int pos = Util.closestIndex(frequencies, odr);
@@ -535,7 +535,7 @@ class AccelerometerMma8452qImpl extends ModuleImplBase implements AccelerometerM
                 return odr(OutputDataRate.values()[pos]);
             }
 
-            @Override
+            @override
             public AccelerometerMma8452q.ConfigEditor range(float fsr) {
                 float[] ranges = FullScaleRange.ranges();
                 int pos = Util.closestIndex(ranges, fsr);
@@ -543,7 +543,7 @@ class AccelerometerMma8452qImpl extends ModuleImplBase implements AccelerometerM
                 return range(FullScaleRange.values()[pos]);
             }
 
-            @Override
+            @override
             public void commit() {
                 Arrays.fill(dataSettings, (byte) 0);
 
@@ -572,17 +572,17 @@ class AccelerometerMma8452qImpl extends ModuleImplBase implements AccelerometerM
         };
     }
 
-    @Override
+    @override
     public float getOdr() {
         return OutputDataRate.values()[odr()].frequency;
     }
 
-    @Override
+    @override
     public float getRange() {
         return FullScaleRange.values()[dataSettings[0] & ~0xfc].range;
     }
 
-    @Override
+    @override
     public Task<Void> pullConfigAsync() {
         return pullConfigTask.execute("Did not receive BMA255 acc config within %dms", Constant.RESPONSE_TIMEOUT,
                 () -> mwPrivate.sendCommand(new byte[] {ACCELEROMETER.id, Util.setRead(DATA_CONFIG)})
@@ -592,41 +592,41 @@ class AccelerometerMma8452qImpl extends ModuleImplBase implements AccelerometerM
         });
     }
 
-    @Override
+    @override
     public AccelerationDataProducer acceleration() {
         if (acceleration == null) {
             acceleration = new AccelerationDataProducer() {
-                @Override
+                @override
                 public String xAxisName() {
                     return ACCEL_X_AXIS_PRODUCER;
                 }
 
-                @Override
+                @override
                 public String yAxisName() {
                     return ACCEL_Y_AXIS_PRODUCER;
                 }
 
-                @Override
+                @override
                 public String zAxisName() {
                     return ACCEL_Z_AXIS_PRODUCER;
                 }
 
-                @Override
+                @override
                 public Task<Route> addRouteAsync(RouteBuilder builder) {
                     return mwPrivate.queueRouteBuilder(builder, ACCEL_PRODUCER);
                 }
 
-                @Override
+                @override
                 public String name() {
                     return ACCEL_PRODUCER;
                 }
 
-                @Override
+                @override
                 public void start() {
                     mwPrivate.sendCommand(new byte[]{ACCELEROMETER.id, DATA_ENABLE, 0x1});
                 }
 
-                @Override
+                @override
                 public void stop() {
                     mwPrivate.sendCommand(new byte[]{ACCELEROMETER.id, DATA_ENABLE, 0x0});
                 }
@@ -635,27 +635,27 @@ class AccelerometerMma8452qImpl extends ModuleImplBase implements AccelerometerM
         return (AccelerationDataProducer) acceleration;
     }
 
-    @Override
+    @override
     public AsyncDataProducer packedAcceleration() {
         if (mwPrivate.lookupModuleInfo(ACCELEROMETER).revision >= PACKED_ACC_REVISION) {
             if (packedAcceleration == null) {
                 packedAcceleration = new AsyncDataProducer() {
-                    @Override
+                    @override
                     public Task<Route> addRouteAsync(RouteBuilder builder) {
                         return mwPrivate.queueRouteBuilder(builder, ACCEL_PACKED_PRODUCER);
                     }
 
-                    @Override
+                    @override
                     public String name() {
                         return ACCEL_PACKED_PRODUCER;
                     }
 
-                    @Override
+                    @override
                     public void start() {
                         mwPrivate.sendCommand(new byte[]{ACCELEROMETER.id, DATA_ENABLE, 0x1});
                     }
 
-                    @Override
+                    @override
                     public void stop() {
                         mwPrivate.sendCommand(new byte[]{ACCELEROMETER.id, DATA_ENABLE, 0x0});
                     }
@@ -666,47 +666,47 @@ class AccelerometerMma8452qImpl extends ModuleImplBase implements AccelerometerM
         return null;
     }
 
-    @Override
+    @override
     public OrientationDataProducer orientation() {
         if (orientation == null) {
             orientation = new OrientationDataProducer() {
                 private int delay = 100;
 
-                @Override
+                @override
                 public OrientationConfigEditor configure() {
                     return new OrientationConfigEditor() {
                         private int newDelay;
-                        @Override
+                        @override
                         public OrientationConfigEditor delay(int delay) {
                             newDelay = delay;
                             return this;
                         }
 
-                        @Override
+                        @override
                         public void commit() {
                             delay = newDelay;
                         }
                     };
                 }
 
-                @Override
+                @override
                 public Task<Route> addRouteAsync(RouteBuilder builder) {
                     return mwPrivate.queueRouteBuilder(builder, ORIENTATION_PRODUCER);
                 }
 
-                @Override
+                @override
                 public String name() {
                     return ORIENTATION_PRODUCER;
                 }
 
-                @Override
+                @override
                 public void start() {
                     mwPrivate.sendCommand(ACCELEROMETER, ORIENTATION_CONFIG,
                             new byte[] {0x00, (byte) 0xc0, (byte) (delay / orientationSteps[pwMode()][odr()]), 0x44, (byte) 0x84});
                     mwPrivate.sendCommand(new byte[] {ACCELEROMETER.id, ORIENTATION_ENABLE, 0x1});
                 }
 
-                @Override
+                @override
                 public void stop() {
                     mwPrivate.sendCommand(new byte[] {ACCELEROMETER.id, ORIENTATION_ENABLE, 0x0});
                     mwPrivate.sendCommand(ACCELEROMETER, ORIENTATION_CONFIG,
@@ -717,36 +717,36 @@ class AccelerometerMma8452qImpl extends ModuleImplBase implements AccelerometerM
         return (OrientationDataProducer) orientation;
     }
 
-    @Override
+    @override
     public ShakeDataProducer shake() {
         if (shake == null) {
             shake = new ShakeDataProducer() {
-                @Override
+                @override
                 public ShakeConfigEditor configure() {
                     return new ShakeConfigEditor() {
                         private CartesianAxis newAxis = CartesianAxis.X;
                         private float threshold = 0.5f;
                         private int duration = 50;
 
-                        @Override
+                        @override
                         public ShakeConfigEditor axis(CartesianAxis axis) {
                             newAxis = axis;
                             return this;
                         }
 
-                        @Override
+                        @override
                         public ShakeConfigEditor threshold(float threshold) {
                             this.threshold = threshold;
                             return this;
                         }
 
-                        @Override
+                        @override
                         public ShakeConfigEditor duration(int duration) {
                             this.duration = duration;
                             return this;
                         }
 
-                        @Override
+                        @override
                         public void commit() {
                             byte[] shakeSettings = new byte[] {
                                     (byte) ((2 << newAxis.ordinal()) | 0x10),
@@ -759,22 +759,22 @@ class AccelerometerMma8452qImpl extends ModuleImplBase implements AccelerometerM
                     };
                 }
 
-                @Override
+                @override
                 public Task<Route> addRouteAsync(RouteBuilder builder) {
                     return mwPrivate.queueRouteBuilder(builder, SHAKE_PRODUCER);
                 }
 
-                @Override
+                @override
                 public String name() {
                     return SHAKE_PRODUCER;
                 }
 
-                @Override
+                @override
                 public void start() {
                     mwPrivate.sendCommand(new byte[] {ACCELEROMETER.id, SHAKE_ENABLE, 0x1});
                 }
 
-                @Override
+                @override
                 public void stop() {
                     mwPrivate.sendCommand(new byte[] {ACCELEROMETER.id, SHAKE_ENABLE, 0x0});
                 }
@@ -783,11 +783,11 @@ class AccelerometerMma8452qImpl extends ModuleImplBase implements AccelerometerM
         return (ShakeDataProducer) shake;
     }
 
-    @Override
+    @override
     public TapDataProducer tap() {
         if (tap == null) {
             tap = new TapDataProducer() {
-                @Override
+                @override
                 public TapConfigEditor configure() {
                     return new TapConfigEditor() {
                         private int latency = 200, window = 300, interval = 60;
@@ -795,49 +795,49 @@ class AccelerometerMma8452qImpl extends ModuleImplBase implements AccelerometerM
                         private float threshold = 2f;
                         private CartesianAxis axis = CartesianAxis.Z;
 
-                        @Override
+                        @override
                         public TapConfigEditor enableDoubleTap() {
                             types.add(TapType.DOUBLE);
                             return this;
                         }
 
-                        @Override
+                        @override
                         public TapConfigEditor enableSingleTap() {
                             types.add(TapType.SINGLE);
                             return this;
                         }
 
-                        @Override
+                        @override
                         public TapConfigEditor latency(int latency) {
                             this.latency = latency;
                             return this;
                         }
 
-                        @Override
+                        @override
                         public TapConfigEditor window(int window) {
                             this.window = window;
                             return this;
                         }
 
-                        @Override
+                        @override
                         public TapConfigEditor axis(CartesianAxis axis) {
                             this.axis = axis;
                             return this;
                         }
 
-                        @Override
+                        @override
                         public TapConfigEditor threshold(float threshold) {
                             this.threshold = threshold;
                             return this;
                         }
 
-                        @Override
+                        @override
                         public TapConfigEditor interval(int interval) {
                             this.interval = interval;
                             return this;
                         }
 
-                        @Override
+                        @override
                         public void commit() {
                             byte[] pulseSettings = new byte[] {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
@@ -873,22 +873,22 @@ class AccelerometerMma8452qImpl extends ModuleImplBase implements AccelerometerM
                     };
                 }
 
-                @Override
+                @override
                 public Task<Route> addRouteAsync(RouteBuilder builder) {
                     return mwPrivate.queueRouteBuilder(builder, TAP_PRODUCER);
                 }
 
-                @Override
+                @override
                 public String name() {
                     return TAP_PRODUCER;
                 }
 
-                @Override
+                @override
                 public void start() {
                     mwPrivate.sendCommand(new byte[] {ACCELEROMETER.id, PULSE_ENABLE, 0x1});
                 }
 
-                @Override
+                @override
                 public void stop() {
                     mwPrivate.sendCommand(new byte[] {ACCELEROMETER.id, PULSE_ENABLE, 0x0});
                 }
@@ -915,32 +915,32 @@ class AccelerometerMma8452qImpl extends ModuleImplBase implements AccelerometerM
             this.type = type;
         }
 
-        @Override
+        @override
         public MovementConfigEditor configure() {
             return new MovementConfigEditor() {
                 private float threshold = (type == MovementType.FREE_FALL ? 0.5f : 1.5f);
                 private int duration= 100;
                 private CartesianAxis[] axes= CartesianAxis.values();
 
-                @Override
+                @override
                 public MovementConfigEditor axes(CartesianAxis... axes) {
                     this.axes = axes;
                     return this;
                 }
 
-                @Override
+                @override
                 public MovementConfigEditor threshold(float threshold) {
                     this.threshold = threshold;
                     return this;
                 }
 
-                @Override
+                @override
                 public MovementConfigEditor duration(int duration) {
                     this.duration = duration;
                     return this;
                 }
 
-                @Override
+                @override
                 public void commit() {
                     byte[] motionSettings = new byte[] {(byte) 0x80, 0x00, 0x00, 0x00 };
                     if (type == MovementType.MOTION) {
@@ -960,27 +960,27 @@ class AccelerometerMma8452qImpl extends ModuleImplBase implements AccelerometerM
             };
         }
 
-        @Override
+        @override
         public Task<Route> addRouteAsync(RouteBuilder builder) {
             return mwPrivate.queueRouteBuilder(builder, MOVEMENT_PRODUCER);
         }
 
-        @Override
+        @override
         public String name() {
             return MOVEMENT_PRODUCER;
         }
 
-        @Override
+        @override
         public void start() {
             mwPrivate.sendCommand(new byte[] {ACCELEROMETER.id, MOVEMENT_ENABLE, 0x1});
         }
 
-        @Override
+        @override
         public void stop() {
             mwPrivate.sendCommand(new byte[] {ACCELEROMETER.id, MOVEMENT_ENABLE, 0x0});
         }
     }
-    @Override
+    @override
     public MovementDataProducer freeFall() {
         if (freeFall == null) {
             freeFall = new MovementDataProducerInner(MovementType.FREE_FALL);
@@ -988,7 +988,7 @@ class AccelerometerMma8452qImpl extends ModuleImplBase implements AccelerometerM
         return (MovementDataProducer) freeFall;
     }
 
-    @Override
+    @override
     public MovementDataProducer motion() {
         if (motion == null) {
             motion = new MovementDataProducerInner(MovementType.MOTION);
@@ -996,12 +996,12 @@ class AccelerometerMma8452qImpl extends ModuleImplBase implements AccelerometerM
         return (MovementDataProducer) motion;
     }
 
-    @Override
+    @override
     public void start() {
         mwPrivate.sendCommand(new byte[] {ACCELEROMETER.id, GLOBAL_ENABLE, 0x1});
     }
 
-    @Override
+    @override
     public void stop() {
         mwPrivate.sendCommand(new byte[] {ACCELEROMETER.id, GLOBAL_ENABLE, 0x0});
     }

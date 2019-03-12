@@ -52,14 +52,14 @@ class TimerImpl extends ModuleImplBase implements Timer {
             this.mwPrivate= mwPrivate;
         }
 
-        @Override
+        @override
         public void start() {
             if (active) {
                 mwPrivate.sendCommand(new byte[]{TIMER.id, TimerImpl.START, id});
             }
         }
 
-        @Override
+        @override
         public void stop() {
             if (active) {
                 mwPrivate.sendCommand(new byte[]{TIMER.id, TimerImpl.STOP, id});
@@ -82,17 +82,17 @@ class TimerImpl extends ModuleImplBase implements Timer {
             }
         }
 
-        @Override
+        @override
         public void remove() {
             remove(true);
         }
 
-        @Override
+        @override
         public byte id() {
             return id;
         }
 
-        @Override
+        @override
         public boolean isActive() {
             return active;
         }
@@ -105,7 +105,7 @@ class TimerImpl extends ModuleImplBase implements Timer {
         super(mwPrivate);
     }
 
-    @Override
+    @override
     public void restoreTransientVars(MetaWearBoardPrivate mwPrivate) {
         super.restoreTransientVars(mwPrivate);
 
@@ -114,13 +114,13 @@ class TimerImpl extends ModuleImplBase implements Timer {
         }
     }
 
-    @Override
+    @override
     protected void init() {
         createTimerTask = new TimedTask<>();
         this.mwPrivate.addResponseHandler(new Pair<>(TIMER.id, TIMER_ENTRY), response -> createTimerTask.setResult(response[2]));
     }
 
-    @Override
+    @override
     public void tearDown() {
         for(ScheduledTask it: activeTasks.values()) {
             ((ScheduledTaskInner) it).remove(false);
@@ -138,12 +138,12 @@ class TimerImpl extends ModuleImplBase implements Timer {
         ).onSuccessTask(task -> Task.forResult(new UintData(TIMER, TimerImpl.NOTIFY, task.getResult(), new DataAttributes(new byte[] {}, (byte) 0, (byte) 0, false))));
     }
 
-    @Override
+    @override
     public Task<ScheduledTask> scheduleAsync(int period, boolean delay, CodeBlock mwCode) {
         return scheduleAsync(period, (short) -1, delay, mwCode);
     }
 
-    @Override
+    @override
     public Task<ScheduledTask> scheduleAsync(int period, short repetitions, boolean delay, CodeBlock mwCode) {
         byte[] config= ByteBuffer.allocate(7).order(ByteOrder.LITTLE_ENDIAN)
                 .putInt(period)
@@ -154,7 +154,7 @@ class TimerImpl extends ModuleImplBase implements Timer {
         return mwPrivate.queueTaskManager(mwCode, config);
     }
 
-    @Override
+    @override
     public ScheduledTask lookupScheduledTask(byte id) {
         return activeTasks.get(id);
     }

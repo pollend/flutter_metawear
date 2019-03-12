@@ -24,24 +24,59 @@
 
 
 
-class Processor{
+import 'dart:typed_data';
 
-final DataTypeBase state;
-final EditorImplBase editor;
+import 'package:flutter_metawear/ForcedDataProducer.dart';
+import 'package:flutter_metawear/impl/DataProcessorConfig.dart';
+import 'package:flutter_metawear/impl/DataTypeBase.dart';
+import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
+import 'package:flutter_metawear/impl/ModuleImplBase.dart';
+import 'package:flutter_metawear/impl/ModuleType.dart';
+import 'package:flutter_metawear/impl/Util.dart';
+import 'dart:collection';
 
-Processor(DataTypeBase state, Editor editor) {
-this.editor= (EditorImplBase) editor;
-this.state= state;
+import 'package:flutter_metawear/impl/platform/TimedTask.dart';
+import 'package:flutter_metawear/module/DataProcessor.dart';
+import 'package:tuple/tuple.dart';
+
+class Processor {
+
+    final DataTypeBase state;
+    final EditorImplBase editor;
+
+    Processor(this.state, this.editor);
 }
+
+abstract class EditorImplBase implements Editor {
+    Uint8List config;
+    final DataTypeBase source;
+
+    DataProcessorConfig configObj;
+    MetaWearBoardPrivate mwPrivate;
+
+    EditorImplBase(this.configObj, this.source, this.mwPrivate): config = configObj.build();
+
+    void restoreTransientVars(MetaWearBoardPrivate mwPrivate) {
+        this.mwPrivate = mwPrivate;
+        configObj = DataProcessorConfig.from(mwPrivate.getFirmwareVersion(), mwPrivate.lookupModuleInfo(ModuleType.DATA_PROCESSOR).revision, config);
+    }
+}
+class NullEditor extends EditorImplBase {
+    NullEditor(DataProcessorConfig configObj, DataTypeBase source,
+        MetaWearBoardPrivate mwPrivate) : super(configObj, source, mwPrivate);
 }
 
-
+class ProcessorEntry {
+    int id, offset, length;
+    Uint8List source;
+    Uint8List config;
+}
 /**
  * Created by etsai on 9/5/16.
  */
 class DataProcessorImpl extends ModuleImplBase implements DataProcessor {
-    static String createUri(DataTypeBase dataType, DataProcessorImpl dataprocessor, Version firmware, byte revision) {
-        byte register = Util.clearRead(dataType.eventConfig[1]);
+    static String createUri(DataTypeBase dataType, DataProcessorImpl dataprocessor, Version firmware, intrevision) {
+        int register = Util.clearRead(dataType.eventConfig[1]);
         switch (register) {
             case NOTIFY:
             case STATE:
@@ -57,41 +92,6 @@ class DataProcessorImpl extends ModuleImplBase implements DataProcessor {
     static const int TIME_PASSTHROUGH_REVISION = 1, ENHANCED_STREAMING_REVISION = 2, HPF_REVISION = 2, EXPANDED_DELAY = 2, FUSE_REVISION = 3;
     static const int TYPE_ACCOUNTER = 0x11, TYPE_PACKER = 0x10;
 
-    static abstract class EditorImplBase implements Editor, Serializable {
-        private static final long serialVersionUID = 4723697652659135045L;
-
-        public byte[] config;
-        public final DataTypeBase source;
-
-        transient DataProcessorConfig configObj;
-        protected transient MetaWearBoardPrivate mwPrivate;
-
-        EditorImplBase(DataProcessorConfig configObj, DataTypeBase source, MetaWearBoardPrivate mwPrivate) {
-            this.configObj = configObj;
-            this.config= configObj.build();
-            this.source= source;
-            this.mwPrivate = mwPrivate;
-        }
-
-        void restoreTransientVars(MetaWearBoardPrivate mwPrivate) {
-            this.mwPrivate = mwPrivate;
-            configObj = DataProcessorConfig.from(mwPrivate.getFirmwareVersion(), mwPrivate.lookupModuleInfo(Constant.Module.DATA_PROCESSOR).revision, config);
-        }
-    }
-    static class NullEditor extends EditorImplBase {
-        private static final long serialVersionUID = -6221412334731005999L;
-
-        NullEditor(DataProcessorConfig configObj, DataTypeBase source, MetaWearBoardPrivate mwPrivate) {
-            super(configObj, source, mwPrivate);
-        }
-    }
-
-    static class ProcessorEntry {
-        byte id, offset, length;
-        byte[] source;
-        byte[] config;
-    }
-
     static const int ADD= 2,
         NOTIFY = 3,
         STATE = 4,
@@ -100,16 +100,14 @@ class DataProcessorImpl extends ModuleImplBase implements DataProcessor {
         NOTIFY_ENABLE = 7,
         REMOVE_ALL = 8;
 
-    final Map<Byte, Processor> activeProcessors= new HashMap<>();
-    final Map<String, Byte> nameToIdMapping = new HashMap<>();
+    final Map<int, Processor> activeProcessors= Map();
+    final Map<String, int> nameToIdMapping = Map();
 
-    private transient TimedTask<byte[]> pullProcessorConfigTask, createProcessorTask;
+    TimedTask<Uint8List> pullProcessorConfigTask, createProcessorTask;
 
-    DataProcessorImpl(MetaWearBoardPrivate mwPrivate) {
-        super(mwPrivate);
-    }
+    DataProcessorImpl(MetaWearBoardPrivate mwPrivate) : super(mwPrivate);
 
-    @Override
+    @override
     void restoreTransientVars(MetaWearBoardPrivate mwPrivate) {
         super.restoreTransientVars(mwPrivate);
 
@@ -118,31 +116,31 @@ class DataProcessorImpl extends ModuleImplBase implements DataProcessor {
         }
     }
 
-    protected void init() {PROCESS
+    void init() {
         pullProcessorConfigTask = new TimedTask<>();
         createProcessorTask = new TimedTask<>();
 
-        this.mwPrivate.addResponseHandler(new Pair<>(DATA_PROCESSOR.id, Util.setRead(ADD)), response -> pullProcessorConfigTask.setResult(response));
-        this.mwPrivate.addResponseHandler(new Pair<>(DATA_PROCESSOR.id, ADD), response -> createProcessorTask.setResult(response));
+        this.mwPrivate.addResponseHandler(Tuple2(DATA_PROCESSOR.id, Util.setRead(ADD)), (response) => pullProcessorConfigTask.setResult(response));
+        this.mwPrivate.addResponseHandler(Tuple2(DATA_PROCESSOR.id, ADD), (response) =>  createProcessorTask.setResult(response));
     }
 
-    void removeProcessor(boolean sync, byte id) {
+    void removeProcessor(bool sync, int id) {
         if (sync) {
             Processor target = activeProcessors.get(id);
-            mwPrivate.sendCommand(new byte[]{DATA_PROCESSOR.id, DataProcessorImpl.REMOVE, target.editor.source.eventConfig[2]});
+            mwPrivate.sendCommand(Uint8List.fromList([DATA_PROCESSOR.id, DataProcessorImpl.REMOVE, target.editor.source.eventConfig[2]]));
         }
 
         activeProcessors.remove(id);
     }
-    public void tearDown() {
+    void tearDown() {
         activeProcessors.clear();
         nameToIdMapping.clear();
-        mwPrivate.sendCommand(new byte[] {DATA_PROCESSOR.id, REMOVE_ALL});
+        mwPrivate.sendCommand(Uint8List.fromList([DATA_PROCESSOR.id, REMOVE_ALL]));
     }
 
-    Task<Queue<Byte>> queueDataProcessors(Queue<Processor> pendingProcessors) {
-        final Queue<Byte> ids = new LinkedList<>();
-        final Capture<Boolean> terminate = new Capture<>(false);
+    Future<Queue<int>> queueDataProcessors(Queue<Processor> pendingProcessors) {
+        final Queue<int> ids = Queue();
+        final Capture<bool> terminate = new Capture<>(false);
 
         return Task.forResult(null).continueWhile(() -> !terminate.get() && !pendingProcessors.isEmpty(), ignored -> {
             final Processor current= pendingProcessors.poll();
@@ -176,7 +174,7 @@ class DataProcessorImpl extends ModuleImplBase implements DataProcessor {
             });
         }).continueWithTask(task -> {
             if (task.isFaulted()) {
-                for(byte it: ids) {
+                for(int it in  ids) {
                     removeProcessor(true, it);
                 }
                 return Task.forError(task.getError());
@@ -185,29 +183,29 @@ class DataProcessorImpl extends ModuleImplBase implements DataProcessor {
         });
     }
 
-    @Override
-    public <T extends Editor> T edit(String name, Class<T> editorClass) {
-        return editorClass.cast(activeProcessors.get(nameToIdMapping.get(name)).editor);
+    @override
+    T edit<T extends Editor> (String name) {
+        return activeProcessors[nameToIdMapping[name]].editor as T;
     }
 
-    @Override
-    public ForcedDataProducer state(final String name) {
+    @override
+    ForcedDataProducer state(final String name) {
         try {
             DataTypeBase state = activeProcessors.get(nameToIdMapping.get(name)).state;
 
             if (state != null) {
                 ForcedDataProducer stateProducer = new ForcedDataProducer() {
-                    @Override
+                    @override
                     public Task<Route> addRouteAsync(RouteBuilder builder) {
                         return mwPrivate.queueRouteBuilder(builder, name());
                     }
 
-                    @Override
+                    @override
                     public String name() {
                         return String.format(Locale.US, "%s_state", name);
                     }
 
-                    @Override
+                    @override
                     public void read() {
                         mwPrivate.lookupProducer(name()).read(mwPrivate);
                     }
@@ -222,20 +220,20 @@ class DataProcessorImpl extends ModuleImplBase implements DataProcessor {
     }
 
     void assignNameToId(Map<String, Processor> taggedProcessors) {
-        for(Map.Entry<String, Processor> it: taggedProcessors.entrySet()) {
-            nameToIdMapping.put(it.getKey(), it.getValue().editor.source.eventConfig[2]);
-        }
+        taggedProcessors.forEach((String key, Processor value) => {
+            nameToIdMapping[key] =  value.editor.source.eventConfig[2]
+        });
     }
 
-    Processor lookupProcessor(byte id) {
-        return activeProcessors.get(id);
+    Processor lookupProcessor(int id) {
+        return activeProcessors[id];
     }
 
-    void addProcessor(byte id, DataTypeBase state, DataTypeBase source, DataProcessorConfig config) {
-        activeProcessors.put(id, new Processor(state, new NullEditor(config, source, mwPrivate)));
+    void addProcessor(int id, DataTypeBase state, DataTypeBase source, DataProcessorConfig config) {
+        activeProcessors[id] = Processor(state, new NullEditor(config, source, mwPrivate));
     }
 
-    Task<Deque<ProcessorEntry>> pullChainAsync(byte id) {
+    Future<Queue<ProcessorEntry>> pullChainAsync(int id) {
         final Capture<Boolean> terminate = new Capture<>(false);
         final Deque<ProcessorEntry> result = new LinkedList<>();
         final Capture<Byte> nextId = new Capture<>(id);

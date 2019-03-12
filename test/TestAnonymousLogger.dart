@@ -139,7 +139,7 @@ public class TestAnonymousLogger {
             final float actual[] = new float[2];
             result[0].subscribe(new Subscriber() {
                 int i = 0;
-                @Override
+                @override
                 public void apply(Data data, Object... env) {
                     actual[i++] = data.value(Float.class);
                 }
@@ -225,7 +225,7 @@ public class TestAnonymousLogger {
             final float actual[] = new float[expected.length];
             task.getResult()[0].subscribe(new Subscriber() {
                 int i = 0;
-                @Override
+                @override
                 public void apply(Data data, Object... env) {
                     actual[i++] = data.value(Float.class);
                 }
@@ -530,7 +530,7 @@ public class TestAnonymousLogger {
             final Acceleration[] actualAcc = new Acceleration[2];
             task.getResult()[0].subscribe(new Subscriber() {
                 int i = 0;
-                @Override
+                @override
                 public void apply(Data data, Object... env) {
                     Data[] values = data.value(Data[].class);
                     actualAcc[i] = values[0].value(Acceleration.class);

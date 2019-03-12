@@ -47,7 +47,7 @@ import static org.junit.Assert.assertArrayEquals;
  */
 
 public class TestGyroYLogData extends TestLogDataBase {
-    @Override
+    @override
     protected String logDataFilename() {
         return "bmi160_gyro_yaxis_dl";
     }

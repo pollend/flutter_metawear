@@ -113,7 +113,7 @@ public class TestAccelerometerBoschOrientation extends UnitTestBase {
         actual.set(new SensorOrientation[8]);
         boschAcc.orientation().addRouteAsync(source -> source.stream(new Subscriber() {
             int i = 0;
-            @Override
+            @override
             public void apply(Data data, Object... env) {
                 actual.get()[i] = data.value(SensorOrientation.class);
                 i++;

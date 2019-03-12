@@ -43,7 +43,7 @@ import static org.junit.Assert.assertArrayEquals;
  * Created by etsai on 9/3/16.
  */
 public class TestLoggingData extends TestLogDataBase {
-    @Override
+    @override
     protected String logDataFilename() {
         return "bmi160_log_dl";
     }
