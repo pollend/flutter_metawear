@@ -23,36 +23,67 @@
  */
 
 
+import 'dart:typed_data';
+
+import 'package:flutter_metawear/impl/DataAttributes.dart';
 import 'package:flutter_metawear/impl/DataTypeBase.dart';
+import 'package:flutter_metawear/impl/ModuleType.dart';
+import 'package:flutter_metawear/impl/DataPrivate.dart';
+
+class _DataPrivate extends DataPrivate{
+    @override
+    List<Type> types() {
+        return [Uint8List];
+    }
+
+    @override
+     double scale() {
+        return ByteArrayData.this.scale(mwPrivate);
+    }
+
+    @override
+    public <T> T value(Class<T> clazz) {
+        if (clazz.equals(byte[].class)) {
+            return clazz.cast(data);
+        }
+        return super.value(clazz);
+    }
+}
 
 /**
  * Created by etsai on 9/21/16.
  */
 class ByteArrayData extends DataTypeBase {
-    ByteArrayData(Module module, byte register, byte id, DataAttributes attributes) {
-        super(module, register, id, attributes);
-    }
+    ByteArrayData(ModuleType module, int register, DataAttributes attributes) : super(module, register, attributes, ()=>{});
 
-    ByteArrayData(DataTypeBase input, Module module, byte register, DataAttributes attributes) {
-        super(input, module, register, attributes);
-    }
 
-    ByteArrayData(DataTypeBase input, Module module, byte register, byte id, DataAttributes attributes) {
-        super(input, module, register, id, attributes);
-    }
+
+//    ByteArrayData(ModuleType module, int register, DataAttributes attributes,{int id, DataTypeBase input}):
+
+//    ByteArrayData(Module module, byte register, byte id, DataAttributes attributes) {
+//        super(module, register, id, attributes);
+//    }
+//
+//    ByteArrayData(DataTypeBase input, Module module, byte register, DataAttributes attributes) {
+//        super(input, module, register, attributes);
+//    }
+//
+//    ByteArrayData(DataTypeBase input, Module module, byte register, byte id, DataAttributes attributes) {
+//        super(input, module, register, id, attributes);
+//    }
 
     @override
-    public DataTypeBase copy(DataTypeBase input, Module module, byte register, byte id, DataAttributes attributes) {
+    DataTypeBase copy(DataTypeBase input, ModuleType module, byte register, byte id, DataAttributes attributes) {
         return new ByteArrayData(input, module, register, id, attributes);
     }
 
     @override
-    public Number convertToFirmwareUnits(MetaWearBoardPrivate mwPrivate, Number value) {
+    num convertToFirmwareUnits(MetaWearBoardPrivate mwPrivate, Number value) {
         return value;
     }
 
     @override
-    public Data createMessage(boolean logData, final MetaWearBoardPrivate mwPrivate, final byte[] data, final Calendar timestamp, DataPrivate.ClassToObject mapper) {
+    Data createMessage(boolean logData, final MetaWearBoardPrivate mwPrivate, final byte[] data, final Calendar timestamp, DataPrivate.ClassToObject mapper) {
         return new DataPrivate(timestamp, data, mapper) {
             @override
             public Class<?>[] types() {

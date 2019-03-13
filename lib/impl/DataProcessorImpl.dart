@@ -27,6 +27,8 @@
 import 'dart:typed_data';
 
 import 'package:flutter_metawear/ForcedDataProducer.dart';
+import 'package:flutter_metawear/Route.dart';
+import 'package:flutter_metawear/builder/RouteBuilder.dart';
 import 'package:flutter_metawear/impl/DataProcessorConfig.dart';
 import 'package:flutter_metawear/impl/DataTypeBase.dart';
 import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
@@ -37,6 +39,7 @@ import 'dart:collection';
 
 import 'package:flutter_metawear/impl/platform/TimedTask.dart';
 import 'package:flutter_metawear/module/DataProcessor.dart';
+import 'package:sprintf/sprintf.dart';
 import 'package:tuple/tuple.dart';
 
 class Processor {
@@ -45,6 +48,28 @@ class Processor {
     final EditorImplBase editor;
 
     Processor(this.state, this.editor);
+}
+
+class _ForcedDataProducer extends ForcedDataProducer {
+    final MetaWearBoardPrivate mwPrivate;
+
+    _ForcedDataProducer(this.mwPrivate);
+
+    @override
+    Future<Route> addRouteAsync(RouteBuilder builder) {
+        return mwPrivate.queueRouteBuilder(builder, name());
+    }
+
+    @override
+    String name() {
+        return sprintf(
+            "%s_state", name); //String.format(Locale.US, "%s_state", name);
+    }
+
+    @override
+    void read() {
+        mwPrivate.lookupProducer(name()).read(mwPrivate);
+    }
 }
 
 abstract class EditorImplBase implements Editor {

@@ -23,22 +23,28 @@
  */
 
 
+import 'dart:typed_data';
+
+import 'package:flutter_metawear/Data.dart';
+import 'package:flutter_metawear/impl/DataAttributes.dart';
 import 'package:flutter_metawear/impl/DataPrivate.dart';
 import 'package:flutter_metawear/impl/DataTypeBase.dart';
 import 'package:flutter_metawear/impl/ModuleType.dart';
-
-
-class _DataPrivate extends DataPrivate{
-  _DataPrivate(timestamp, byte) : super(timestamp, byte);
-
-}
-
+import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
+import 'package:flutter_metawear/impl/DataProcessorConfig.dart';
+import 'package:flutter_metawear/impl/Util.dart';
+import 'package:flutter_metawear/impl/DataProcessorImpl.dart';
+import 'package:tuple/tuple.dart';
+import 'package:flutter_metawear/builder/filter/DifferentialOutput.dart';
+import 'dart:math';
 /**
  * Created by etsai on 9/4/16.
  */
 class UintData extends DataTypeBase {
+  UintData(ModuleType module, int register, DataAttributes attributes,{int id, DataTypeBase input}) : super(module, register, attributes, ()=>{},id:id,input:input);
 
-    UintData.Module(ModuleType module,int register) : super(null, null, 0, null, null)
+
+//    UintData.Module(ModuleType module,int register) : super(null, null, 0, null, null)
 
 //    UintData(Constant.Module module, byte register, byte id, DataAttributes attributes) {
 //        super(module, register, id, attributes);
@@ -57,17 +63,16 @@ class UintData extends DataTypeBase {
 //    }
 
     @override
-    DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
-        return new UintData(input, module, register, id, attributes);
+    DataTypeBase copy(DataTypeBase input, ModuleType module, int register, int id, DataAttributes attributes) {
+        return new UintData(module, register, attributes,input:input,id:id);
     }
 
     @override
-    public Number convertToFirmwareUnits(MetaWearBoardPrivate mwPrivate, Number value) {
+    num convertToFirmwareUnits(MetaWearBoardPrivate mwPrivate, num value) {
         return value;
     }
-
     @override
-    public Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, final byte[] data, final Calendar timestamp, DataPrivate.ClassToObject mapper) {
+    Data createMessage(bool logData, MetaWearBoardPrivate mwPrivate, Uint8List data, Data timestamp, ClassToObject mapper) {
         final ByteBuffer buffer = Util.bytesToUIntBuffer(logData, data, attributes);
 
         return new DataPrivate(timestamp, data, mapper) {
@@ -98,52 +103,55 @@ class UintData extends DataTypeBase {
         };
     }
 
+
     @override
-    Pair<? extends DataTypeBase, ? extends DataTypeBase> dataProcessorTransform(DataProcessorConfig config, DataProcessorImpl dpModule) {
+    Tuple2<DataTypeBase, DataTypeBase> dataProcessorTransform(DataProcessorConfig config, DataProcessorImpl dpModule){
         switch(config.id) {
-            case DataProcessorConfig.Maths.ID: {
-                DataProcessorConfig.Maths casted = (DataProcessorConfig.Maths) config;
+            case Maths.ID: {
+                Maths casted = config as Maths;
                 DataTypeBase processor;
                 switch(casted.op) {
-                    case ADD: {
-                        DataAttributes newAttrs= attributes.dataProcessorCopySize((byte) 4);
-                        processor = casted.rhs < 0 ? new IntData(this, DATA_PROCESSOR, DataProcessorImpl.NOTIFY, newAttrs) :
+                    case Operation.ADD: {
+                        DataAttributes newAttrs= attributes.dataProcessorCopySize(4);
+                        processor = casted.rhs < 0 ? new IntData(this, ModuleType.DATA_PROCESSOR, DataProcessorImpl.NOTIFY, newAttrs) :
                                 dataProcessorCopy(this, newAttrs);
                         break;
                     }
-                    case MULTIPLY: {
-                        DataAttributes newAttrs= attributes.dataProcessorCopySize(Math.abs(casted.rhs) < 1 ? attributes.sizes[0] : 4);
-                        processor = casted.rhs < 0 ? new IntData(this, DATA_PROCESSOR, DataProcessorImpl.NOTIFY, newAttrs) :
+                    case Operation.MULTIPLY: {
+                        DataAttributes newAttrs= attributes.dataProcessorCopySize(casted.rhs.abs() < 1 ? attributes.sizes[0] : 4);
+                        processor = casted.rhs < 0 ? new IntData(this, ModuleType.DATA_PROCESSOR, DataProcessorImpl.NOTIFY, newAttrs) :
                                 dataProcessorCopy(this, newAttrs);
                         break;
                     }
-                    case DIVIDE: {
-                        DataAttributes newAttrs = attributes.dataProcessorCopySize(Math.abs(casted.rhs) < 1 ? 4 : attributes.sizes[0]);
-                        processor = casted.rhs < 0 ? new IntData(this, DATA_PROCESSOR, DataProcessorImpl.NOTIFY, newAttrs) :
+                    case Operation.DIVIDE: {
+                        DataAttributes newAttrs = attributes.dataProcessorCopySize(casted.rhs.abs() < 1 ? 4 : attributes.sizes[0]);
+                        processor = casted.rhs < 0 ? new IntData(this, ModuleType.DATA_PROCESSOR, DataProcessorImpl.NOTIFY, newAttrs) :
                                 dataProcessorCopy(this, newAttrs);
                         break;
                     }
-                    case SUBTRACT:
+                    case Operation.SUBTRACT:
                         processor = new IntData(this, DATA_PROCESSOR, DataProcessorImpl.NOTIFY, attributes.dataProcessorCopySigned(true));
                         break;
-                    case ABS_VALUE:
+                    case Operation.ABS_VALUE:
                         processor = dataProcessorCopy(this, attributes.dataProcessorCopySigned(false));
                         break;
                     default:
                         processor = null;
                 }
                 if (processor != null) {
-                    return new Pair<>(processor, null);
+                    return new Tuple2(processor, null);
                 }
                 break;
             }
-            case DataProcessorConfig.Differential.ID: {
-                DataProcessorConfig.Differential casted = (DataProcessorConfig.Differential) config;
+            case Differential.ID: {
+                Differential casted =  config as Differential;
                 if (casted.mode == DifferentialOutput.DIFFERENCE) {
-                    return new Pair<>(new IntData(this, DATA_PROCESSOR, DataProcessorImpl.NOTIFY, attributes.dataProcessorCopySigned(true)), null);
+                    return Tuple2(new IntData(this, DATA_PROCESSOR, DataProcessorImpl.NOTIFY, attributes.dataProcessorCopySigned(true)), null);
                 }
             }
         }
         return super.dataProcessorTransform(config, dpModule);
     }
+
+
 }

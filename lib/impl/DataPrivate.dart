@@ -31,7 +31,7 @@ import 'package:flutter_metawear/impl/Util.dart';
 import 'package:sprintf/sprintf.dart';
 
 abstract class ClassToObject {
-    Object apply(Type clazz);
+    T apply<T>();
 }
 
 
@@ -63,13 +63,13 @@ abstract class DataPrivate implements Data {
   Uint8List bytes() => _dataBytes;
 
   @override
-  dynamic value(Type clazz) {
+  T value<T>() {
     throw CastError();
   }
 
-  dynamic extra(Type clazz) {
+  T extra<T>() {
     Object value;
-    if (_mapper == null || (value = _mapper.apply(clazz)) == null) {
+    if (_mapper == null || (value = _mapper.apply<T>()) == null) {
       throw CastError();
     }
     return value;

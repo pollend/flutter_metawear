@@ -37,6 +37,7 @@ class _PatternEditor extends PatternEditor {
     _PatternEditor(Color color, this.mwPrivate) {
         command.setAll(0, Uint8List.fromList(
             [ModuleType.LED.id, LedImpl.CONFIG, color.index, 0x2]));
+
     }
 
     @override

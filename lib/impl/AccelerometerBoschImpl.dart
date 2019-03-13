@@ -23,6 +23,294 @@
  */
 
 
+class BoschAccCartesianFloatData extends FloatVectorData {
+    BoschAccCartesianFloatData() {
+        this(DATA_INTERRUPT, (byte) 1);
+    }
+
+    public BoschAccCartesianFloatData(byte register, byte copies) {
+        super(ACCELEROMETER, register, new DataAttributes(new byte[] {2, 2, 2}, copies, (byte) 0, true));
+    }
+
+    public BoschAccCartesianFloatData(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
+        super(input, module, register, id, attributes);
+    }
+
+    @override
+    public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
+        return new BoschAccCartesianFloatData(input, module, register, id, attributes);
+    }
+
+    @override
+    public DataTypeBase[] createSplits() {
+        return new DataTypeBase[] {new BoschAccSFloatData((byte) 0), new BoschAccSFloatData((byte) 2), new BoschAccSFloatData((byte) 4)};
+        }
+
+    @override
+    protected float scale(MetaWearBoardPrivate mwPrivate) {
+        return ((AccelerometerBoschImpl) mwPrivate.getModules().get(AccelerometerBosch.class)).getAccDataScale();
+    }
+
+    @override
+    public Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, final byte[] data, final Calendar timestamp, DataPrivate.ClassToObject mapper) {
+    ByteBuffer buffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN);
+    short[] unscaled = new short[]{buffer.getShort(), buffer.getShort(), buffer.getShort()};
+    final float scale= scale(mwPrivate);
+    final Acceleration value= new Acceleration(unscaled[0] / scale, unscaled[1] / scale, unscaled[2] / scale);
+
+    return new DataPrivate(timestamp, data, mapper) {
+    @override
+    public float scale() {
+    return scale;
+    }
+
+    @override
+    public Class<?>[] types() {
+    return new Class<?>[] {Acceleration.class, float[].class};
+    }
+
+    @override
+    public <T> T value(Class<T> clazz) {
+    if (clazz.equals(Acceleration.class)) {
+    return clazz.cast(value);
+    } else if (clazz.equals(float[].class)) {
+    return clazz.cast(new float[] {value.x(), value.y(), value.z()});
+    }
+    return super.value(clazz);
+    }
+    };
+    }
+}
+class BoschAccSFloatData extends SFloatData {
+    private static final long serialVersionUID = 7931910535343574126L;
+
+    BoschAccSFloatData(byte offset) {
+        super(ACCELEROMETER, DATA_INTERRUPT, new DataAttributes(new byte[] {2}, (byte) 1, offset, true));
+    }
+
+    BoschAccSFloatData(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
+        super(input, module, register, id, attributes);
+    }
+
+    @override
+    protected float scale(MetaWearBoardPrivate mwPrivate) {
+        return ((AccelerometerBoschImpl) mwPrivate.getModules().get(AccelerometerBosch.class)).getAccDataScale();
+    }
+
+    @override
+    public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
+        return new BoschAccSFloatData(input, module, register, id, attributes);
+    }
+}
+class BoschFlatData extends DataTypeBase {
+    private static final long serialVersionUID = 7754881668078978202L;
+
+    BoschFlatData() {
+        super(ACCELEROMETER, FLAT_INTERRUPT, new DataAttributes(new byte[] {1}, (byte) 1, (byte) 0, false));
+    }
+
+    BoschFlatData(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
+        super(input, module, register, id, attributes);
+    }
+
+    @override
+    public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
+        return new BoschFlatData(input, module, register, id, attributes);
+    }
+
+    @override
+    public Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, byte[] data, Calendar timestamp, DataPrivate.ClassToObject mapper) {
+    int mask = mwPrivate.lookupModuleInfo(ACCELEROMETER).revision >= FLAT_REVISION ? 0x4 : 0x2;
+    final boolean isFlat = (data[0] & mask) == mask;
+
+    return new DataPrivate(timestamp, data, mapper) {
+    @override
+    public <T> T value(Class<T> clazz) {
+    if (clazz.equals(Boolean.class)) {
+    return clazz.cast(isFlat);
+    }
+    return super.value(clazz);
+    }
+
+    @override
+    public Class<?>[] types() {
+    return new Class<?>[] {Boolean.class};
+    }
+    };
+    }
+}
+class BoschOrientationData extends DataTypeBase {
+    private static final long serialVersionUID = -3067060296134186104L;
+
+    BoschOrientationData() {
+        super(ACCELEROMETER, ORIENT_INTERRUPT, new DataAttributes(new byte[] {1}, (byte) 1, (byte) 0, false));
+    }
+
+    BoschOrientationData(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
+        super(input, module, register, id, attributes);
+    }
+
+    @override
+    public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
+        return new BoschOrientationData(input, module, register, id, attributes);
+    }
+
+    @override
+    public Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, byte[] data, Calendar timestamp, DataPrivate.ClassToObject mapper) {
+    final SensorOrientation orientation = SensorOrientation.values()[((data[0] & 0x6) >> 1) + 4 * ((data[0] & 0x8) >> 3)];
+
+    return new DataPrivate(timestamp, data, mapper) {
+    @override
+    public <T> T value(Class<T> clazz) {
+    if (clazz.equals(SensorOrientation.class)) {
+    return clazz.cast(orientation);
+    }
+    return super.value(clazz);
+    }
+
+    @override
+    public Class<?>[] types() {
+    return new Class<?>[] {SensorOrientation.class};
+    }
+    };
+    }
+}
+class BoschLowHighData extends DataTypeBase {
+
+    BoschLowHighData() {
+        super(ACCELEROMETER, LOW_HIGH_G_INTERRUPT, new DataAttributes(new byte[] {1}, (byte) 1, (byte) 0, false));
+    }
+
+    BoschLowHighData(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
+        super(input, module, register, id, attributes);
+    }
+
+    @override
+    public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
+        return new BoschLowHighData(input, module, register, id, attributes);
+    }
+
+    private boolean highG(CartesianAxis axis, byte value) {
+        byte mask= (byte) (0x1 << axis.ordinal());
+        return (value & mask) == mask;
+    }
+
+    @override
+    public Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, final byte[] data, Calendar timestamp, DataPrivate.ClassToObject mapper) {
+    final byte highFirst = (byte) ((data[0] & 0x1c) >> 2);
+    final LowHighResponse castedData = new LowHighResponse(
+    (data[0] & 0x1) == 0x1,
+    (data[0] & 0x2) == 0x2,
+    highG(CartesianAxis.X, highFirst),
+    highG(CartesianAxis.Y, highFirst),
+    highG(CartesianAxis.Z, highFirst),
+    (data[0] & 0x20) == 0x20 ? Sign.NEGATIVE : Sign.POSITIVE);
+
+    return new DataPrivate(timestamp, data, mapper) {
+    @override
+    public <T> T value(Class<T> clazz) {
+    if (clazz.equals(LowHighResponse.class)) {
+    return clazz.cast(castedData);
+    }
+    return super.value(clazz);
+    }
+
+    @override
+    public Class<?>[] types() {
+    return new Class<?>[] {LowHighResponse.class};
+    }
+    };
+    }
+}
+class BoschMotionData extends DataTypeBase {
+    private static final long serialVersionUID = 5170523637959567052L;
+
+    BoschMotionData() {
+        super(ACCELEROMETER, MOTION_INTERRUPT, new DataAttributes(new byte[] {1}, (byte) 1, (byte) 0, false));
+    }
+
+    BoschMotionData(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
+        super(input, module, register, id, attributes);
+    }
+
+    @override
+    public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
+        return new BoschMotionData(input, module, register, id, attributes);
+    }
+
+    private boolean detected(CartesianAxis axis, byte value) {
+        byte mask= (byte) (0x1 << (axis.ordinal() + 3));
+        return (value & mask) == mask;
+    }
+
+    @override
+    public Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, final byte[] data, Calendar timestamp, DataPrivate.ClassToObject mapper) {
+    final AnyMotion castedData = new AnyMotion(
+    (data[0] & 0x40) == 0x40 ? Sign.NEGATIVE : Sign.POSITIVE,
+    detected(CartesianAxis.X, data[0]),
+    detected(CartesianAxis.Y, data[0]),
+    detected(CartesianAxis.Z, data[0])
+    );
+
+    return new DataPrivate(timestamp, data, mapper) {
+    @override
+    public <T> T value(Class<T> clazz) {
+    if (clazz.equals(AnyMotion.class)) {
+    return clazz.cast(castedData);
+    }
+    return super.value(clazz);
+    }
+
+    @override
+    public Class<?>[] types() {
+    return new Class<?>[] {AnyMotion.class};
+    }
+    };
+    }
+}
+class BoschTapData extends DataTypeBase {
+    private static final long serialVersionUID = 7541750644119353713L;
+
+    BoschTapData() {
+        super(ACCELEROMETER, TAP_INTERRUPT, new DataAttributes(new byte[] {1}, (byte) 1, (byte) 0, false));
+    }
+
+    BoschTapData(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
+        super(input, module, register, id, attributes);
+    }
+
+    @override
+    public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
+        return new BoschTapData(input, module, register, id, attributes);
+    }
+
+    @override
+    public Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, final byte[] data, Calendar timestamp, DataPrivate.ClassToObject mapper) {
+    TapType type = null;
+    if ((data[0] & 0x1) == 0x1) {
+    type = TapType.DOUBLE;
+    } else if ((data[0] & 0x2) == 0x2) {
+    type = TapType.SINGLE;
+    }
+
+    final Tap castedData = new Tap(type, (data[0] & 0x20) == 0x20 ? Sign.NEGATIVE : Sign.POSITIVE);
+    return new DataPrivate(timestamp, data, mapper) {
+    @override
+    public <T> T value(Class<T> clazz) {
+    if (clazz.equals(Tap.class)) {
+    return clazz.cast(castedData);
+    }
+    return super.value(clazz);
+    }
+
+    @override
+    public Class<?>[] types() {
+    return new Class<?>[] {Tap.class};
+    }
+    };
+    }
+}
+
 /**
  * Created by etsai on 9/1/16.
  */
@@ -75,295 +363,6 @@ abstract class AccelerometerBoschImpl extends ModuleImplBase implements Accelero
             TAP_PRODUCER= "com.mbientlab.metawear.impl.AccelerometerBoschImpl.TAP_PRODUCER";
     static const double ORIENT_HYS_G_PER_STEP= 0.0625, THETA_STEP= (44.8/63.0);
 
-    private static class BoschAccCartesianFloatData extends FloatVectorData {
-        private static final long serialVersionUID = -758164941443260674L;
-
-        public BoschAccCartesianFloatData() {
-            this(DATA_INTERRUPT, (byte) 1);
-        }
-
-        public BoschAccCartesianFloatData(byte register, byte copies) {
-            super(ACCELEROMETER, register, new DataAttributes(new byte[] {2, 2, 2}, copies, (byte) 0, true));
-        }
-
-        public BoschAccCartesianFloatData(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
-            super(input, module, register, id, attributes);
-        }
-
-        @override
-        public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
-            return new BoschAccCartesianFloatData(input, module, register, id, attributes);
-        }
-
-        @override
-        public DataTypeBase[] createSplits() {
-            return new DataTypeBase[] {new BoschAccSFloatData((byte) 0), new BoschAccSFloatData((byte) 2), new BoschAccSFloatData((byte) 4)};
-        }
-
-        @override
-        protected float scale(MetaWearBoardPrivate mwPrivate) {
-            return ((AccelerometerBoschImpl) mwPrivate.getModules().get(AccelerometerBosch.class)).getAccDataScale();
-        }
-
-        @override
-        public Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, final byte[] data, final Calendar timestamp, DataPrivate.ClassToObject mapper) {
-            ByteBuffer buffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN);
-            short[] unscaled = new short[]{buffer.getShort(), buffer.getShort(), buffer.getShort()};
-            final float scale= scale(mwPrivate);
-            final Acceleration value= new Acceleration(unscaled[0] / scale, unscaled[1] / scale, unscaled[2] / scale);
-
-            return new DataPrivate(timestamp, data, mapper) {
-                @override
-                public float scale() {
-                    return scale;
-                }
-
-                @override
-                public Class<?>[] types() {
-                    return new Class<?>[] {Acceleration.class, float[].class};
-                }
-
-                @override
-                public <T> T value(Class<T> clazz) {
-                    if (clazz.equals(Acceleration.class)) {
-                        return clazz.cast(value);
-                    } else if (clazz.equals(float[].class)) {
-                        return clazz.cast(new float[] {value.x(), value.y(), value.z()});
-                    }
-                    return super.value(clazz);
-                }
-            };
-        }
-    }
-    private static class BoschAccSFloatData extends SFloatData {
-        private static final long serialVersionUID = 7931910535343574126L;
-
-        BoschAccSFloatData(byte offset) {
-            super(ACCELEROMETER, DATA_INTERRUPT, new DataAttributes(new byte[] {2}, (byte) 1, offset, true));
-        }
-
-        BoschAccSFloatData(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
-            super(input, module, register, id, attributes);
-        }
-
-        @override
-        protected float scale(MetaWearBoardPrivate mwPrivate) {
-            return ((AccelerometerBoschImpl) mwPrivate.getModules().get(AccelerometerBosch.class)).getAccDataScale();
-        }
-
-        @override
-        public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
-            return new BoschAccSFloatData(input, module, register, id, attributes);
-        }
-    }
-    private static class BoschFlatData extends DataTypeBase {
-        private static final long serialVersionUID = 7754881668078978202L;
-
-        BoschFlatData() {
-            super(ACCELEROMETER, FLAT_INTERRUPT, new DataAttributes(new byte[] {1}, (byte) 1, (byte) 0, false));
-        }
-
-        BoschFlatData(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
-            super(input, module, register, id, attributes);
-        }
-
-        @override
-        public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
-            return new BoschFlatData(input, module, register, id, attributes);
-        }
-
-        @override
-        public Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, byte[] data, Calendar timestamp, DataPrivate.ClassToObject mapper) {
-            int mask = mwPrivate.lookupModuleInfo(ACCELEROMETER).revision >= FLAT_REVISION ? 0x4 : 0x2;
-            final boolean isFlat = (data[0] & mask) == mask;
-
-            return new DataPrivate(timestamp, data, mapper) {
-                @override
-                public <T> T value(Class<T> clazz) {
-                    if (clazz.equals(Boolean.class)) {
-                        return clazz.cast(isFlat);
-                    }
-                    return super.value(clazz);
-                }
-
-                @override
-                public Class<?>[] types() {
-                    return new Class<?>[] {Boolean.class};
-                }
-            };
-        }
-    }
-    private static class BoschOrientationData extends DataTypeBase {
-        private static final long serialVersionUID = -3067060296134186104L;
-
-        BoschOrientationData() {
-            super(ACCELEROMETER, ORIENT_INTERRUPT, new DataAttributes(new byte[] {1}, (byte) 1, (byte) 0, false));
-        }
-
-        BoschOrientationData(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
-            super(input, module, register, id, attributes);
-        }
-
-        @override
-        public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
-            return new BoschOrientationData(input, module, register, id, attributes);
-        }
-
-        @override
-        public Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, byte[] data, Calendar timestamp, DataPrivate.ClassToObject mapper) {
-            final SensorOrientation orientation = SensorOrientation.values()[((data[0] & 0x6) >> 1) + 4 * ((data[0] & 0x8) >> 3)];
-
-            return new DataPrivate(timestamp, data, mapper) {
-                @override
-                public <T> T value(Class<T> clazz) {
-                    if (clazz.equals(SensorOrientation.class)) {
-                        return clazz.cast(orientation);
-                    }
-                    return super.value(clazz);
-                }
-
-                @override
-                public Class<?>[] types() {
-                    return new Class<?>[] {SensorOrientation.class};
-                }
-            };
-        }
-    }
-    private static class BoschLowHighData extends DataTypeBase {
-
-        BoschLowHighData() {
-            super(ACCELEROMETER, LOW_HIGH_G_INTERRUPT, new DataAttributes(new byte[] {1}, (byte) 1, (byte) 0, false));
-        }
-
-        BoschLowHighData(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
-            super(input, module, register, id, attributes);
-        }
-
-        @override
-        public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
-            return new BoschLowHighData(input, module, register, id, attributes);
-        }
-
-        private boolean highG(CartesianAxis axis, byte value) {
-            byte mask= (byte) (0x1 << axis.ordinal());
-            return (value & mask) == mask;
-        }
-
-        @override
-        public Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, final byte[] data, Calendar timestamp, DataPrivate.ClassToObject mapper) {
-            final byte highFirst = (byte) ((data[0] & 0x1c) >> 2);
-            final LowHighResponse castedData = new LowHighResponse(
-                    (data[0] & 0x1) == 0x1,
-                    (data[0] & 0x2) == 0x2,
-                    highG(CartesianAxis.X, highFirst),
-                    highG(CartesianAxis.Y, highFirst),
-                    highG(CartesianAxis.Z, highFirst),
-                    (data[0] & 0x20) == 0x20 ? Sign.NEGATIVE : Sign.POSITIVE);
-
-            return new DataPrivate(timestamp, data, mapper) {
-                @override
-                public <T> T value(Class<T> clazz) {
-                    if (clazz.equals(LowHighResponse.class)) {
-                        return clazz.cast(castedData);
-                    }
-                    return super.value(clazz);
-                }
-
-                @override
-                public Class<?>[] types() {
-                    return new Class<?>[] {LowHighResponse.class};
-                }
-            };
-        }
-    }
-    private static class BoschMotionData extends DataTypeBase {
-        private static final long serialVersionUID = 5170523637959567052L;
-
-        BoschMotionData() {
-            super(ACCELEROMETER, MOTION_INTERRUPT, new DataAttributes(new byte[] {1}, (byte) 1, (byte) 0, false));
-        }
-
-        BoschMotionData(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
-            super(input, module, register, id, attributes);
-        }
-
-        @override
-        public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
-            return new BoschMotionData(input, module, register, id, attributes);
-        }
-
-        private boolean detected(CartesianAxis axis, byte value) {
-            byte mask= (byte) (0x1 << (axis.ordinal() + 3));
-            return (value & mask) == mask;
-        }
-
-        @override
-        public Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, final byte[] data, Calendar timestamp, DataPrivate.ClassToObject mapper) {
-            final AnyMotion castedData = new AnyMotion(
-                    (data[0] & 0x40) == 0x40 ? Sign.NEGATIVE : Sign.POSITIVE,
-                    detected(CartesianAxis.X, data[0]),
-                    detected(CartesianAxis.Y, data[0]),
-                    detected(CartesianAxis.Z, data[0])
-            );
-
-            return new DataPrivate(timestamp, data, mapper) {
-                @override
-                public <T> T value(Class<T> clazz) {
-                    if (clazz.equals(AnyMotion.class)) {
-                        return clazz.cast(castedData);
-                    }
-                    return super.value(clazz);
-                }
-
-                @override
-                public Class<?>[] types() {
-                    return new Class<?>[] {AnyMotion.class};
-                }
-            };
-        }
-    }
-    private static class BoschTapData extends DataTypeBase {
-        private static final long serialVersionUID = 7541750644119353713L;
-
-        BoschTapData() {
-            super(ACCELEROMETER, TAP_INTERRUPT, new DataAttributes(new byte[] {1}, (byte) 1, (byte) 0, false));
-        }
-
-        BoschTapData(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
-            super(input, module, register, id, attributes);
-        }
-
-        @override
-        public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
-            return new BoschTapData(input, module, register, id, attributes);
-        }
-
-        @override
-        public Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, final byte[] data, Calendar timestamp, DataPrivate.ClassToObject mapper) {
-            TapType type = null;
-            if ((data[0] & 0x1) == 0x1) {
-                type = TapType.DOUBLE;
-            } else if ((data[0] & 0x2) == 0x2) {
-                type = TapType.SINGLE;
-            }
-
-            final Tap castedData = new Tap(type, (data[0] & 0x20) == 0x20 ? Sign.NEGATIVE : Sign.POSITIVE);
-            return new DataPrivate(timestamp, data, mapper) {
-                @override
-                public <T> T value(Class<T> clazz) {
-                    if (clazz.equals(Tap.class)) {
-                        return clazz.cast(castedData);
-                    }
-                    return super.value(clazz);
-                }
-
-                @override
-                public Class<?>[] types() {
-                    return new Class<?>[] {Tap.class};
-                }
-            };
-        }
-    }
 
     abstract class BoschFlatDataProducer implements FlatDataProducer {
         @override

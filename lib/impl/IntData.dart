@@ -23,6 +23,33 @@
  */
 
 
+import 'dart:typed_data';
+
+import 'package:flutter_metawear/Data.dart';
+import 'package:flutter_metawear/impl/DataTypeBase.dart';
+import 'package:flutter_metawear/impl/DataPrivate.dart';
+import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
+import 'package:flutter_metawear/impl/Util.dart';
+
+class _DataPrivate extends DataPrivate{
+
+  Uint8List _data;
+  _DataPrivate(this._data,DateTime timestamp, Uint8List dataBytes, ClassToObject mapper) : super(timestamp, dataBytes, mapper);
+
+  @override
+  List<Type> types() {
+    return [bool,int];
+  }
+
+  @override
+  T value<T>() {
+      if(T is bool || T is int){
+          return _data[0] as T;
+      }
+      return super.value<T>();
+  }
+
+}
 
 /**
  * Created by etsai on 9/5/16.
@@ -38,42 +65,43 @@ class IntData extends DataTypeBase {
     }
 
     @override
-    public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
+    DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
         return new IntData(input, module, register, id, attributes);
     }
 
     @override
-    public Number convertToFirmwareUnits(MetaWearBoardPrivate mwPrivate, Number value) {
+     num convertToFirmwareUnits(MetaWearBoardPrivate mwPrivate, Number value) {
         return value;
     }
 
     @override
-    public Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, final byte[] data, final Calendar timestamp, DataPrivate.ClassToObject mapper) {
-        final ByteBuffer buffer = Util.bytesToSIntBuffer(logData, data, attributes);
+    Data createMessage(bool logData, MetaWearBoardPrivate mwPrivate, Uint8List data, DateTime timestamp, ClassToObject mapper) {
+        final Uint8List buffer = Util.bytesToSIntBuffer(logData, data, attributes);
 
-        return new DataPrivate(timestamp, data, mapper) {
-            @override
-            public Class<?>[] types() {
-                return new Class<?>[] {Integer.class, Short.class, Byte.class, Boolean.class};
-            }
-
-            @override
-            public <T> T value(Class<T> clazz) {
-                if (clazz == Boolean.class) {
-                    return clazz.cast(buffer.get(0) != 0);
-                }
-                if (clazz == Integer.class) {
-                    return clazz.cast(buffer.getInt(0));
-                }
-                if (clazz == Short.class) {
-                    return clazz.cast(buffer.getShort(0));
-                }
-                if (clazz == Byte.class) {
-                    return clazz.cast(buffer.get(0));
-                }
-                return super.value(clazz);
-            }
-        };
+        return _DataPrivate(buffer,timestamp,data,mapper);
+//        return new DataPrivate(timestamp, data, mapper) {
+//            @override
+//            public Class<?>[] types() {
+//                return new Class<?>[] {Integer.class, Short.class, Byte.class, Boolean.class};
+//            }
+//
+//            @override
+//            public <T> T value(Class<T> clazz) {
+//                if (clazz == Boolean.class) {
+//                    return clazz.cast(buffer.get(0) != 0);
+//                }
+//                if (clazz == Integer.class) {
+//                    return clazz.cast(buffer.getInt(0));
+//                }
+//                if (clazz == Short.class) {
+//                    return clazz.cast(buffer.getShort(0));
+//                }
+//                if (clazz == Byte.class) {
+//                    return clazz.cast(buffer.get(0));
+//                }
+//                return super.value(clazz);
+//            }
+//        };
     }
 
     @override

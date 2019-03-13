@@ -66,7 +66,7 @@ abstract class Data {
      * @return Data value as the specified type
      * @throws ClassCastException if the data cannot be casted to desired type
      */
-    dynamic value(Type clazz);
+    T value<T>();
     /**
      * Extra information attached to this data sample
      * @param clazz     Class type to convert the value to
@@ -74,5 +74,5 @@ abstract class Data {
      * @return Extra data casted as the specified type
      * @throws ClassCastException if the data cannot be casted to the desired type
      */
-    dynamic extra(Type clazz);
+    T extra<T>();
 }
