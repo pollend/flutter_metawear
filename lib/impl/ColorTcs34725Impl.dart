@@ -23,6 +23,130 @@
  */
 
 
+import 'package:flutter_metawear/Data.dart';
+import 'package:flutter_metawear/impl/DataPrivate.dart';
+import 'package:flutter_metawear/impl/DataProcessorConfig.dart';
+import 'package:flutter_metawear/impl/DataProcessorImpl.dart';
+import 'package:flutter_metawear/impl/DataTypeBase.dart';
+import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
+import 'package:flutter_metawear/impl/ModuleImplBase.dart';
+import 'package:flutter_metawear/impl/ModuleType.dart';
+import 'package:flutter_metawear/impl/UintData.dart';
+import 'package:flutter_metawear/impl/Util.dart';
+import 'package:flutter_metawear/module/ColorTcs34725.dart';
+import 'package:flutter_metawear/impl/DataAttributes.dart';
+import 'dart:typed_data';
+
+class _DataPrivate extends DataPrivate {
+    final ColorAdc colorAdc;
+
+    _DataPrivate(this.colorAdc, DateTime timestamp, Uint8List dataBytes,
+        ClassToObject mapper) : super(timestamp, dataBytes, mapper);
+
+    @override
+    List<Type> types() {
+        return [ColorAdc];
+    }
+
+    @override
+    T value<T>() {
+        if (T is ColorAdc)
+            return colorAdc as T;
+        return value<T>();
+    }
+}
+
+class ColorAdcData extends DataTypeBase {
+    ColorAdcData.Default() : super(
+        ModuleType.COLOR_DETECTOR, Util.setSilentRead(ColorTcs34725Impl.ADC),
+        new DataAttributes(Uint8List.fromList([2, 2, 2, 2]), 1, 0, false));
+
+
+    ColorAdcData(DataTypeBase input, ModuleType module, int register, int id,
+        DataAttributes attributes)
+        : super(module, register, attributes, input: input, id: id);
+
+    @override
+    DataTypeBase copy(DataTypeBase input, ModuleType module, int register,
+        int id, DataAttributes attributes) {
+        return new ColorAdcData(input, module, register, id, attributes);
+    }
+
+    @override
+    Data createMessage(bool logData, MetaWearBoardPrivate mwPrivate,
+        Uint8List data, DateTime timestamp, ClassToObject mapper) {
+        ByteData byteData = ByteData.view(data.buffer);
+
+        final ColorAdc wrapper = new ColorAdc(
+            byteData.getInt16(0, Endian.little) & 0xffff,
+            byteData.getInt16(2, Endian.little) & 0xffff,
+            byteData.getInt16(4, Endian.little) & 0xffff,
+            byteData.getInt16(6, Endian.little) & 0xffff
+        );
+
+        return _DataPrivate(wrapper, timestamp, data, mapper);
+    }
+
+    @override
+    List<DataTypeBase> createSplits() {
+        return [
+            ColorTcs34725Impl.createAdcUintDataProducer(0),
+            ColorTcs34725Impl.createAdcUintDataProducer(2),
+            ColorTcs34725Impl.createAdcUintDataProducer(4),
+            ColorTcs34725Impl.createAdcUintDataProducer(6)
+        ];
+    }
+
+    @override
+    Tuple2<DataTypeBase, DataTypeBase> dataProcessorTransform(
+        DataProcessorConfig config, DataProcessorImpl dpModule) {
+        switch (config.id) {
+            case Combiner.ID:
+                {
+                    DataAttributes attributes = new DataAttributes(
+                        new byte[] {this.attributes.sizes[0]}, (byte) 1, (byte)
+                        0,
+                        false);
+                    return new Pair<>(new UintData(
+                        this, DATA_PROCESSOR, DataProcessorImpl.NOTIFY,
+                        attributes), null);
+                }
+        }
+
+        return super.dataProcessorTransform(config, dpModule);
+    }
+
+}
+
+class _ConfigEditor extends ConfigEditor{
+    static const int aTime =  0xff;
+    Gain gain = Gain.TCS34725_1X;
+    int illuminate= 0;
+
+    @override
+    ConfigEditor integrationTime(float time) {
+        aTime= (byte) (256.f - time / 2.4f);
+        return this;
+    }
+
+    @override
+    ConfigEditor gain(Gain gain) {
+        this.gain= gain;
+        return this;
+    }
+
+    @override
+    ConfigEditor enableIlluminatorLed() {
+        illuminate= 1;
+        return this;
+    }
+
+    @override
+    void commit() {
+        mwPrivate.sendCommand(new byte[] {COLOR_DETECTOR.id, MODE, aTime, (byte) gain.ordinal(), illuminate});
+    }
+}
+
 /**
  * Created by etsai on 9/19/16.
  */
@@ -43,79 +167,13 @@ class ColorTcs34725Impl extends ModuleImplBase implements ColorTcs34725 {
             ADC_BLUE_PRODUCER= "com.mbientlab.metawear.impl.ColorTcs34725Impl.ADC_BLUE_PRODUCER";
     static const int ADC = 1, MODE = 2;
 
-    private static UintData createAdcUintDataProducer(byte offset) {
-        return new UintData(COLOR_DETECTOR, Util.setSilentRead(ADC), new DataAttributes(new byte[] {2}, (byte) 1, offset, true));
-    }
-    static class ColorAdcData extends DataTypeBase {
-        private static final long serialVersionUID = 3597945676319055134L;
-
-        ColorAdcData() {
-            super(COLOR_DETECTOR, Util.setSilentRead(ADC), new DataAttributes(new byte[] {2, 2, 2, 2}, (byte) 1, (byte) 0, false));
-        }
-
-        ColorAdcData(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
-            super(input, module, register, id, attributes);
-        }
-
-        @override
-        public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
-            return new ColorAdcData(input, module, register, id, attributes);
-        }
-
-        @override
-        public Number convertToFirmwareUnits(MetaWearBoardPrivate mwPrivate, Number value) {
-            return value;
-        }
-
-        @override
-        public Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, final byte[] data, final Calendar timestamp, DataPrivate.ClassToObject mapper) {
-            ByteBuffer buffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN);
-            final ColorAdc wrapper= new ColorAdc(
-                    buffer.getShort() & 0xffff,
-                    buffer.getShort() & 0xffff,
-                    buffer.getShort() & 0xffff,
-                    buffer.getShort() & 0xffff
-            );
-
-            return new DataPrivate(timestamp, data, mapper) {
-                @override
-                public Class<?>[] types() {
-                    return new Class<?>[] {ColorAdc.class};
-                }
-
-                @override
-                public <T> T value(Class<T> clazz) {
-                    if (clazz == ColorAdc.class) {
-                        return clazz.cast(wrapper);
-                    }
-                    return super.value(clazz);
-                }
-            };
-        }
-
-        @override
-        public DataTypeBase[] createSplits() {
-            return new DataTypeBase[] {createAdcUintDataProducer((byte) 0), createAdcUintDataProducer((byte) 2),
-                    createAdcUintDataProducer((byte) 4), createAdcUintDataProducer((byte) 6)};
-        }
-
-        @override
-        Pair<? extends DataTypeBase, ? extends DataTypeBase> dataProcessorTransform(DataProcessorConfig config, DataProcessorImpl dpModule) {
-            switch(config.id) {
-                case DataProcessorConfig.Combiner.ID: {
-                    DataAttributes attributes= new DataAttributes(new byte[] {this.attributes.sizes[0]}, (byte) 1, (byte) 0, false);
-                    return new Pair<>(new UintData(this, DATA_PROCESSOR, DataProcessorImpl.NOTIFY, attributes), null);
-                }
-            }
-
-            return super.dataProcessorTransform(config, dpModule);
-        }
+    static UintData createAdcUintDataProducer(int offset) {
+        return new UintData(ModuleType.COLOR_DETECTOR, Util.setSilentRead(ADC), DataAttributes(Uint8List.fromList([2]), 1, offset, true));
     }
 
     private transient ColorAdcDataProducer adcProducer;
 
-    ColorTcs34725Impl(MetaWearBoardPrivate mwPrivate) {
-        super(mwPrivate);
+    ColorTcs34725Impl(MetaWearBoardPrivate mwPrivate): super(mwPrivate){
 
         DataTypeBase adcProducer = new ColorAdcData();
         this.mwPrivate.tagProducer(ADC_PRODUCER, adcProducer);
@@ -158,7 +216,7 @@ class ColorTcs34725Impl extends ModuleImplBase implements ColorTcs34725 {
     }
 
     @override
-    public ColorAdcDataProducer adc() {
+    ColorAdcDataProducer adc() {
         if (adcProducer == null) {
             adcProducer = new ColorAdcDataProducer() {
                 @override

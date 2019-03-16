@@ -37,6 +37,27 @@ import 'package:flutter_metawear/impl/DataProcessorImpl.dart';
 import 'package:tuple/tuple.dart';
 import 'package:flutter_metawear/builder/filter/DifferentialOutput.dart';
 import 'dart:math';
+
+class _DataPrivate extends DataPrivate{
+
+    Uint8List _data;
+    _DataPrivate(this._data,DateTime timestamp, Uint8List dataBytes, ClassToObject mapper) : super(timestamp, dataBytes, mapper);
+
+    @override
+    List<Type> types() {
+        return [bool,int];
+    }
+
+    @override
+    T value<T>() {
+        if(T is bool || T is int){
+            return _data[0] as T;
+        }
+        return super.value<T>();
+    }
+
+}
+
 /**
  * Created by etsai on 9/4/16.
  */
@@ -72,36 +93,39 @@ class UintData extends DataTypeBase {
         return value;
     }
     @override
-    Data createMessage(bool logData, MetaWearBoardPrivate mwPrivate, Uint8List data, Data timestamp, ClassToObject mapper) {
-        final ByteBuffer buffer = Util.bytesToUIntBuffer(logData, data, attributes);
-
-        return new DataPrivate(timestamp, data, mapper) {
-            @override
-            public Class<?>[] types() {
-                return new Class<?>[] {Long.class, Integer.class, Short.class, Byte.class, Boolean.class};
-            }
-
-            @override
-            public <T> T value(Class<T> clazz) {
-                if (clazz == Boolean.class) {
-                    return clazz.cast(buffer.get(0) != 0);
-                }
-                if (clazz == Long.class) {
-                    return clazz.cast(buffer.getLong(0));
-                }
-                if (clazz == Integer.class) {
-                    return clazz.cast(buffer.getInt(0));
-                }
-                if (clazz == Short.class) {
-                    return clazz.cast(buffer.getShort(0));
-                }
-                if (clazz == Byte.class) {
-                    return clazz.cast(buffer.get(0));
-                }
-                return super.value(clazz);
-            }
-        };
+    Data createMessage(bool logData, MetaWearBoardPrivate mwPrivate, Uint8List data, DateTime timestamp, ClassToObject mapper) {
+        final Uint8List buffer = Util.bytesToUIntBuffer(logData, data, attributes);
+        return _DataPrivate(buffer,timestamp,data,mapper);
+//
+//        return new DataPrivate(timestamp, data, mapper) {
+//            @override
+//            public Class<?>[] types() {
+//                return new Class<?>[] {Long.class, Integer.class, Short.class, Byte.class, Boolean.class};
+//            }
+//
+//            @override
+//            public <T> T value(Class<T> clazz) {
+//                if (clazz == Boolean.class) {
+//                    return clazz.cast(buffer.get(0) != 0);
+//                }
+//                if (clazz == Long.class) {
+//                    return clazz.cast(buffer.getLong(0));
+//                }
+//                if (clazz == Integer.class) {
+//                    return clazz.cast(buffer.getInt(0));
+//                }
+//                if (clazz == Short.class) {
+//                    return clazz.cast(buffer.getShort(0));
+//                }
+//                if (clazz == Byte.class) {
+//                    return clazz.cast(buffer.get(0));
+//                }
+//                return super.value(clazz);
+//            }
+//        };
     }
+
+
 
 
     @override
@@ -152,6 +176,7 @@ class UintData extends DataTypeBase {
         }
         return super.dataProcessorTransform(config, dpModule);
     }
+
 
 
 }

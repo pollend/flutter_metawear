@@ -23,100 +23,130 @@
  */
 
 
+import 'dart:typed_data';
+
+import 'package:flutter_metawear/Data.dart';
+import 'package:flutter_metawear/impl/DataAttributes.dart';
+import 'package:flutter_metawear/impl/DataPrivate.dart';
+import 'package:flutter_metawear/impl/DataProcessorConfig.dart';
+import 'package:flutter_metawear/impl/DataProcessorImpl.dart';
 import 'package:flutter_metawear/impl/DataTypeBase.dart';
+import 'package:flutter_metawear/impl/ModuleType.dart';
+import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
+import 'package:flutter_metawear/builder/filter/DifferentialOutput.dart';
+import 'package:flutter_metawear/impl/Util.dart';
+
+import 'package:tuple/tuple.dart';
+
+class _DataPrivate extends DataPrivate {
+    final double scaled;
+    final MetaWearBoardPrivate mwPrivate;
+    final UFloatData uFloatData;
+
+    _DataPrivate(this.uFloatData, this.scaled, this.mwPrivate,
+        DateTime timestamp, Uint8List dataBytes, ClassToObject mapper)
+        : super(timestamp, dataBytes, mapper);
+
+
+    @override
+    double scale() {
+        return uFloatData.scale(mwPrivate);
+    }
+
+    @override
+    List<Type> types() {
+        return [double];
+    }
+
+    @override
+    T value<T>() {
+        if (T is double) {
+            return scaled as T;
+        }
+        return super.value<T>();
+    }
+
+}
 
 /**
  * Created by etsai on 9/5/16.
  */
 class UFloatData extends DataTypeBase {
-    UFloatData(Constant.Module module, byte register, byte id, DataAttributes attributes) {
-        super(module, register, id, attributes);
-    }
+    UFloatData(ModuleType module, int register, DataAttributes attributes,{int id, DataTypeBase input}) : super(module, register, attributes,id:id,input:input);
 
-    UFloatData(Constant.Module module, byte register, DataAttributes attributes) {
-        super(module, register, attributes);
-    }
-
-    UFloatData(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
-        super(input, module, register, id, attributes);
-    }
-
-    UFloatData(DataTypeBase input, Constant.Module module, byte register, DataAttributes attributes) {
-        super(input, module, register, attributes);
-    }
+//
+//    UFloatData(Constant.Module module, byte register, byte id, DataAttributes attributes) {
+//        super(module, register, id, attributes);
+//    }
+//
+//    UFloatData(Constant.Module module, byte register, DataAttributes attributes) {
+//        super(module, register, attributes);
+//    }
+//
+//    UFloatData(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
+//        super(input, module, register, id, attributes);
+//    }
+//
+//    UFloatData(DataTypeBase input, Constant.Module module, byte register, DataAttributes attributes) {
+//        super(input, module, register, attributes);
+//    }
 
     @override
-    DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
+    DataTypeBase copy(DataTypeBase input, ModuleType module, int register, int id, DataAttributes attributes) {
         if (input == null) {
             if (this.input == null) {
-                throw new NullPointerException("SFloatData cannot have null input variable");
+                throw NullThrownError();
+//                throw new NullPointerException("SFloatData cannot have null input variable");
             }
             return this.input.copy(null, module, register, id, attributes);
         }
 
-        return new UFloatData(input, module, register, id, attributes);
+        return new UFloatData(
+            module, register, attributes, id: id, input: input);
     }
 
     @override
     num convertToFirmwareUnits(MetaWearBoardPrivate mwPrivate, num value) {
-        return value.floatValue() * scale(mwPrivate);
+        return value.toDouble() * scale(mwPrivate);
     }
 
     @override
-    Data createMessage(bool logData, final MetaWearBoardPrivate mwPrivate, final byte[] data, final Calendar timestamp, DataPrivate.ClassToObject mapper) {
-        final ByteBuffer buffer = Util.bytesToUIntBuffer(logData, data, attributes);
-        final float scaled= buffer.getLong(0) / scale(mwPrivate);
+    Data createMessage(bool logData, MetaWearBoardPrivate mwPrivate, Uint8List data, DateTime timestamp, ClassToObject mapper) {
+        Uint8List buffer = Util.bytesToUIntBuffer(logData, data, attributes);
+        double scaled = ByteData.view(buffer.buffer).getUint64(0,Endian.little)/scale(mwPrivate);
 
-        return new DataPrivate(timestamp, data, mapper) {
-            @override
-            public float scale() {
-                return UFloatData.this.scale(mwPrivate);
-            }
-
-            @override
-            public Class<?>[] types() {
-                return new Class<?>[] {Float.class};
-            }
-
-            @override
-            public <T> T value(Class<T> clazz) {
-                if (clazz.equals(Float.class)) {
-                    return clazz.cast(scaled);
-                }
-                return super.value(clazz);
-            }
-        };
+        return _DataPrivate(this,scaled,mwPrivate,timestamp,data,mapper);
     }
 
     @override
     Tuple2<DataTypeBase, DataTypeBase> dataProcessorTransform(DataProcessorConfig config, DataProcessorImpl dpModule) {
         switch(config.id) {
-            case DataProcessorConfig.Maths.ID: {
-                DataProcessorConfig.Maths casted = (DataProcessorConfig.Maths) config;
+            case Maths.ID: {
+                Maths casted = config as Maths;
                 DataTypeBase processor;
                 switch(casted.op) {
-                    case ADD: {
-                        DataAttributes newAttrs= attributes.dataProcessorCopySize((byte) 4);
-                        processor = casted.rhs < 0 ? new SFloatData(this, DATA_PROCESSOR, DataProcessorImpl.NOTIFY, newAttrs) :
+                    case Operation.ADD: {
+                        DataAttributes newAttrs= attributes.dataProcessorCopySize(4);
+                        processor = casted.rhs < 0 ? new SFloatData(this, ModuleType.DATA_PROCESSOR, DataProcessorImpl.NOTIFY, newAttrs) :
                                 dataProcessorCopy(this, newAttrs);
                         break;
                     }
-                    case MULTIPLY: {
-                        DataAttributes newAttrs= attributes.dataProcessorCopySize(Math.abs(casted.rhs) < 1 ? attributes.sizes[0] : 4);
-                        processor = casted.rhs < 0 ? new SFloatData(this, DATA_PROCESSOR, DataProcessorImpl.NOTIFY, newAttrs) :
+                    case Operation.MULTIPLY: {
+                        DataAttributes newAttrs= attributes.dataProcessorCopySize(casted.rhs.abs() < 1 ? attributes.sizes[0] : 4);
+                        processor = casted.rhs < 0 ? new SFloatData(this, ModuleType.DATA_PROCESSOR, DataProcessorImpl.NOTIFY, newAttrs) :
                                 dataProcessorCopy(this, newAttrs);
                         break;
                     }
-                    case DIVIDE: {
-                        DataAttributes newAttrs = attributes.dataProcessorCopySize(Math.abs(casted.rhs) < 1 ? 4 : attributes.sizes[0]);
-                        processor = casted.rhs < 0 ? new SFloatData(this, DATA_PROCESSOR, DataProcessorImpl.NOTIFY, newAttrs) :
+                    case Operation.DIVIDE: {
+                        DataAttributes newAttrs = attributes.dataProcessorCopySize(casted.rhs.abs() < 1 ? 4 : attributes.sizes[0]);
+                        processor = casted.rhs < 0 ? new SFloatData(this, ModuleType.DATA_PROCESSOR, DataProcessorImpl.NOTIFY, newAttrs) :
                                 dataProcessorCopy(this, newAttrs);
                         break;
                     }
-                    case SUBTRACT:
-                        processor = new SFloatData(this, DATA_PROCESSOR, DataProcessorImpl.NOTIFY, attributes.dataProcessorCopySigned(true));
+                    case Operation.SUBTRACT:
+                        processor = new SFloatData(this, ModuleType.DATA_PROCESSOR, DataProcessorImpl.NOTIFY, attributes.dataProcessorCopySigned(true));
                         break;
-                    case ABS_VALUE:
+                    case Operation.ABS_VALUE:
                         processor = dataProcessorCopy(this, attributes.dataProcessorCopySigned(false));
                         break;
                     default:
@@ -125,17 +155,19 @@ class UFloatData extends DataTypeBase {
                 }
 
                 if (processor != null) {
-                    return new Pair<>(processor, null);
+                    return Tuple2(processor, null);
                 }
                 break;
             }
-            case DataProcessorConfig.Differential.ID: {
-                DataProcessorConfig.Differential casted = (DataProcessorConfig.Differential) config;
+            case Differential.ID: {
+                Differential casted =  config as Differential;
                 if (casted.mode == DifferentialOutput.DIFFERENCE) {
-                    return new Pair<>(new SFloatData(this, DATA_PROCESSOR, DataProcessorImpl.NOTIFY, attributes.dataProcessorCopySigned(true)), null);
+                    return Tuple2(new SFloatData(this, DATA_PROCESSOR, DataProcessorImpl.NOTIFY, attributes.dataProcessorCopySigned(true)), null);
                 }
             }
         }
         return super.dataProcessorTransform(config, dpModule);
     }
+
+
 }

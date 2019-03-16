@@ -24,20 +24,26 @@
 
 import 'dart:typed_data';
 
+import 'package:flutter_metawear/Data.dart';
 import 'package:flutter_metawear/DataToken.dart';
+import 'package:flutter_metawear/impl/DataProcessorConfig.dart';
+import 'package:flutter_metawear/impl/DataProcessorImpl.dart';
 import 'package:flutter_metawear/impl/DataTypeBase.dart';
 import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
+import 'package:flutter_metawear/impl/Util.dart';
 import 'ModuleType.dart';
 import 'DataAttributes.dart';
 import 'DataTypeBase.dart';
 import 'package:tuple/tuple.dart';
 import 'DataPrivate.dart';
-class _DataPrivate extends DataPrivate{
+class _DataPrivate extends DataPrivate {
     final MetaWearBoardPrivate mwPrivate;
     final SFloatData sFloatData;
     final double scaled;
 
-    _DataPrivate(DateTime timestamp, Uint8List dataBytes, ClassToObject mapper, this.mwPrivate,this.sFloatData,this.scaled) : super(timestamp, dataBytes, mapper);
+    _DataPrivate(this.mwPrivate, this.sFloatData, this.scaled,
+        DateTime timestamp, Uint8List dataBytes, ClassToObject mapper)
+        : super(timestamp, dataBytes, mapper);
 
 
     @override
@@ -47,11 +53,11 @@ class _DataPrivate extends DataPrivate{
     List<Type> types() => [double];
 
     @override
-    dynamic value(Type clazz) {
-        if (clazz == double) {
-            return scaled;
+    T value<T>() {
+        if (T is double) {
+            return scaled as T;
         }
-        return super.value(clazz);
+        return super.value<T>();
     }
 }
 
@@ -61,67 +67,54 @@ class _DataPrivate extends DataPrivate{
  */
 class SFloatData extends DataTypeBase {
 
-    SFloatData(ModuleType module, int register, DataAttributes attributes, Function split,{int id, DataTypeBase input}): super(module,register,attributes,split,id:id,input:input);
+    SFloatData(ModuleType module, int register, DataAttributes attributes,{int id, DataTypeBase input}): super(module,register,attributes,() => {},id:id,input:input);
 
 
     @override
-    DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
+    DataTypeBase copy(DataTypeBase input, ModuleType module, int register, int id, DataAttributes attributes) {
         if (input == null) {
             if (this.input == null) {
-                throw new NullPointerException("SFloatData cannot have null input variable");
+//                throw new NullPointerException("SFloatData cannot have null input variable");
+                throw NullThrownError();
             }
             return this.input.copy(null, module, register, id, attributes);
         }
 
-        return new SFloatData(input, module, register, id, attributes);
+        return SFloatData(
+            module, register, attributes, input: input, id: id);
     }
 
     @override
-    num convertToFirmwareUnits(MetaWearBoardPrivate mwPrivate, Number value) {
-        return value.floatValue() * scale(mwPrivate);
+    num convertToFirmwareUnits(MetaWearBoardPrivate mwPrivate, num value) {
+        return value.toDouble() * scale(mwPrivate);
     }
 
+
     @override
-    Data createMessage(boolean logData, final MetaWearBoardPrivate mwPrivate, final byte[] data, final Calendar timestamp, DataPrivate.ClassToObject mapper) {
-        final ByteBuffer buffer = Util.bytesToSIntBuffer(logData, data, attributes);
-        final float scaled= buffer.getInt(0) / scale(mwPrivate);
+    Data createMessage(bool logData, MetaWearBoardPrivate mwPrivate, Uint8List data, DateTime timestamp, ClassToObject mapper) {
+        final Uint8List buffer = Util.bytesToSIntBuffer(logData, data, attributes);
+        final double scaled= buffer[0] / scale(mwPrivate);
+        return _DataPrivate(mwPrivate,this,scaled,timestamp,data,mapper);
 
-        return new DataPrivate(timestamp, data, mapper) {
-            @override
-            public float scale() {
-                return SFloatData.this.scale(mwPrivate);
-            }
-
-            @override
-            public Class<?>[] types() {
-                return new Class<?>[] {Float.class};
-            }
-
-            @override
-            public <T> T value(Class<T> clazz) {
-                if (clazz.equals(Float.class)) {
-                    return clazz.cast(scaled);
-                }
-                return super.value(clazz);
-            }
-        };
     }
 
     @override
     Tuple2<DataTypeBase,DataTypeBase> dataProcessorTransform(DataProcessorConfig config, DataProcessorImpl dpModule) {
         switch(config.id) {
-            case DataProcessorConfig.Maths.ID: {
-                DataProcessorConfig.Maths casted = (DataProcessorConfig.Maths) config;
+            case Maths.ID: {
+                Maths casted =  config as Maths;
                 switch(casted.op) {
-                    case ABS_VALUE: {
+                    case Operation.ABS_VALUE: {
                         DataAttributes copy= attributes.dataProcessorCopySigned(false);
-                        return new Pair<>(new UFloatData(this, DATA_PROCESSOR, DataProcessorImpl.NOTIFY, copy), null);
+                        return Tuple2(new UFloatData(this, DATA_PROCESSOR, DataProcessorImpl.NOTIFY, copy), null);
                     }
+                    default:
                 }
                 break;
             }
         }
         return super.dataProcessorTransform(config, dpModule);
     }
+
 
 }

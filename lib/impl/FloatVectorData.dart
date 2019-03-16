@@ -23,30 +23,44 @@
  */
 
 
+import 'package:flutter_metawear/impl/DataAttributes.dart';
+import 'package:flutter_metawear/impl/DataProcessorConfig.dart';
+import 'package:flutter_metawear/impl/DataProcessorImpl.dart';
+import 'package:flutter_metawear/impl/DataTypeBase.dart';
+import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
+import 'package:flutter_metawear/impl/ModuleType.dart';
+
+import 'package:tuple/tuple.dart';
+import 'dart:typed_data';
+
+
 /**
  * Created by etsai on 9/4/16.
  */
 abstract class FloatVectorData extends DataTypeBase {
 
-    FloatVectorData(Constant.Module module, byte register, DataAttributes attributes) {
-        super(module, register, attributes);
-    }
+//    FloatVectorData(Constant.Module module, byte register, DataAttributes attributes) {
+//        super(module, register, attributes);
+//    }
+//
+//    FloatVectorData(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
+//        super(input, module, register, id, attributes);
+//    }
 
-    FloatVectorData(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
-        super(input, module, register, id, attributes);
-    }
+    FloatVectorData(ModuleType module, int register, DataAttributes attributes,{int id, DataTypeBase input}) : super(module, register, attributes, ()=>{},id:id,input:input);
+
 
     @override
-    public Number convertToFirmwareUnits(MetaWearBoardPrivate mwPrivate, Number value) {
+    num convertToFirmwareUnits(MetaWearBoardPrivate mwPrivate, num value) {
         return value.floatValue() * scale(mwPrivate);
     }
 
     @override
-    Pair<? extends DataTypeBase, ? extends DataTypeBase> dataProcessorTransform(DataProcessorConfig config, DataProcessorImpl dpModule) {
+    Tuple2<DataTypeBase,DataTypeBase> dataProcessorTransform(DataProcessorConfig config, DataProcessorImpl dpModule) {
         switch(config.id) {
-            case DataProcessorConfig.Combiner.ID: {
-                DataAttributes attributes= new DataAttributes(new byte[] {this.attributes.sizes[0]}, (byte) 1, (byte) 0, false);
-                return new Pair<>(new UFloatData(this, DATA_PROCESSOR, DataProcessorImpl.NOTIFY, attributes), null);
+            case Combiner.ID: {
+                DataAttributes attributes= new DataAttributes(Uint8List.fromList([this.attributes.sizes[0]]), 1, 0, false);
+                return Tuple2(new UFloatData(ModuleType.DATA_PROCESSOR, DataProcessorImpl.NOTIFY, attributes,input:this), null);
             }
         }
 

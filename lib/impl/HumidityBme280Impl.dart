@@ -22,29 +22,62 @@
  * hello@mbientlab.com.
  */
 
+import 'dart:typed_data';
+
 import 'package:flutter_metawear/ForcedDataProducer.dart';
+import 'package:flutter_metawear/Route.dart';
+import 'package:flutter_metawear/builder/RouteBuilder.dart';
+import 'package:flutter_metawear/impl/DataAttributes.dart';
+import 'package:flutter_metawear/impl/DataTypeBase.dart';
+import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
 import 'package:flutter_metawear/impl/ModuleImplBase.dart';
 import 'package:flutter_metawear/impl/UFloatData.dart';
 import 'package:flutter_metawear/module/HumidityBme280.dart';
-
+import 'package:flutter_metawear/impl/ModuleType.dart';
+import 'package:flutter_metawear/impl/Util.dart';
 
 class HumidityBme280SFloatData extends UFloatData {
-    HumidityBme280SFloatData() {
-        super(HUMIDITY, Util.setSilentRead(VALUE), new DataAttributes(new byte[] {4}, (byte) 1, (byte) 0, false));
-    }
+    HumidityBme280SFloatData.Default() : super(
+        ModuleType.HUMIDITY, Util.setSilentRead(HumidityBme280Impl.VALUE),
+        new DataAttributes(Uint8List.fromList([4]), 1, 0, false));
 
-    HumidityBme280SFloatData(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
-        super(input, module, register, id, attributes);
+    HumidityBme280SFloatData(DataTypeBase input, ModuleType module,
+        int register, int id, DataAttributes attributes)
+        : super(module, register, attributes, input: input, id: id);
+
+
+    @override
+    DataTypeBase copy(DataTypeBase input, ModuleType module, int register,
+        int id, DataAttributes attributes) {
+        return new HumidityBme280SFloatData(
+            input, module, register, id, attributes);
     }
 
     @override
-    public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
-        return new HumidityBme280SFloatData(input, module, register, id, attributes);
+    double scale(MetaWearBoardPrivate mwPrivate) {
+        return 1024.0;
+    }
+}
+
+class _ForcedDataProducer extends ForcedDataProducer {
+
+    final MetaWearBoardPrivate mwPrivate;
+
+    _ForcedDataProducer(this.mwPrivate);
+
+    void read() {
+        mwPrivate.lookupProducer(HumidityBme280Impl.PRODUCER).read(mwPrivate);
     }
 
     @override
-    protected float scale(MetaWearBoardPrivate mwPrivate) {
-        return 1024.f;
+    Future<Route> addRouteAsync(RouteBuilder builder) {
+        return mwPrivate.queueRouteBuilder(
+            builder, HumidityBme280Impl.PRODUCER);
+    }
+
+    @override
+    String name() {
+        return HumidityBme280Impl.PRODUCER;
     }
 }
 
@@ -67,36 +100,20 @@ class HumidityBme280Impl extends ModuleImplBase implements HumidityBme280 {
 
     ForcedDataProducer humidityProducer;
 
-    HumidityBme280Impl(MetaWearBoardPrivate mwPrivate) {
-        super(mwPrivate);
+    HumidityBme280Impl(MetaWearBoardPrivate mwPrivate): super(mwPrivate){
 
-        mwPrivate.tagProducer(PRODUCER, new HumidityBme280SFloatData());
+        mwPrivate.tagProducer(PRODUCER, new HumidityBme280SFloatData.Default());
     }
 
     @override
-    public void setOversampling(OversamplingMode mode) {
-        mwPrivate.sendCommand(new byte[] {HUMIDITY.id, MODE, (byte) (mode.ordinal() + 1)});
+    void setOversampling(OversamplingMode mode) {
+        mwPrivate.sendCommand(Uint8List.fromList([ModuleType.HUMIDITY.id, HumidityBme280Impl.MODE, (mode.index + 1)]));
     }
 
     @override
-    public ForcedDataProducer value() {
+    ForcedDataProducer value() {
         if (humidityProducer == null) {
-            humidityProducer = new ForcedDataProducer() {
-                @override
-                public void read() {
-                    mwPrivate.lookupProducer(PRODUCER).read(mwPrivate);
-                }
-
-                @override
-                public Task<Route> addRouteAsync(RouteBuilder builder) {
-                    return mwPrivate.queueRouteBuilder(builder, PRODUCER);
-                }
-
-                @override
-                public String name() {
-                    return PRODUCER;
-                }
-            };
+            humidityProducer = _ForcedDataProducer(mwPrivate);
         }
         return humidityProducer;
     }

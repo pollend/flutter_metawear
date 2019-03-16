@@ -22,24 +22,6 @@
  * hello@mbientlab.com.
  */
 
-package com.mbientlab.metawear;
-
-import com.mbientlab.metawear.module.Accelerometer;
-import com.mbientlab.metawear.module.AccelerometerBmi160;
-import com.mbientlab.metawear.module.IBeacon;
-import com.mbientlab.metawear.module.IBeacon.Configuration;
-import com.mbientlab.metawear.module.Switch;
-
-import org.junit.Before;
-import org.junit.Test;
-
-import java.util.UUID;
-
-import bolts.Task;
-
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-
 /**
  * Created by etsai on 10/18/16.
  */

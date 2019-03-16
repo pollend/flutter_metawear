@@ -26,10 +26,17 @@
 import 'dart:typed_data';
 
 import 'package:flutter_metawear/Data.dart';
+import 'package:flutter_metawear/impl/DataAttributes.dart';
+import 'package:flutter_metawear/impl/DataProcessorConfig.dart';
+import 'package:flutter_metawear/impl/DataProcessorImpl.dart';
 import 'package:flutter_metawear/impl/DataTypeBase.dart';
 import 'package:flutter_metawear/impl/DataPrivate.dart';
 import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
+import 'package:flutter_metawear/impl/ModuleType.dart';
+import 'package:flutter_metawear/impl/UintData.dart';
 import 'package:flutter_metawear/impl/Util.dart';
+
+import 'package:tuple/tuple.dart';
 
 class _DataPrivate extends DataPrivate{
 
@@ -56,66 +63,52 @@ class _DataPrivate extends DataPrivate{
  */
 class IntData extends DataTypeBase {
 
-    private IntData(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
-        super(input, module, register, id, attributes);
-    }
+  IntData._(DataTypeBase input, ModuleType module, int register, int id,
+      DataAttributes attributes)
+      : super(module, register, attributes, () => {}, id: id);
 
-    IntData(DataTypeBase input, Constant.Module module, byte register, DataAttributes attributes) {
-        super(input, module, register, attributes);
-    }
+  IntData(DataTypeBase input, ModuleType module, int register,
+      DataAttributes attributes)
+      : super(module, register, attributes, () => {}, input: input);
 
-    @override
-    DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
-        return new IntData(input, module, register, id, attributes);
-    }
 
-    @override
-     num convertToFirmwareUnits(MetaWearBoardPrivate mwPrivate, Number value) {
-        return value;
-    }
+  @override
+  DataTypeBase copy(DataTypeBase input, ModuleType module, int register, int id,
+      DataAttributes attributes) {
+    return IntData._(input, module, register, id, attributes);
+  }
 
-    @override
-    Data createMessage(bool logData, MetaWearBoardPrivate mwPrivate, Uint8List data, DateTime timestamp, ClassToObject mapper) {
-        final Uint8List buffer = Util.bytesToSIntBuffer(logData, data, attributes);
+  @override
+  num convertToFirmwareUnits(MetaWearBoardPrivate mwPrivate, num value) {
+    return value;
+  }
 
-        return _DataPrivate(buffer,timestamp,data,mapper);
-//        return new DataPrivate(timestamp, data, mapper) {
-//            @override
-//            public Class<?>[] types() {
-//                return new Class<?>[] {Integer.class, Short.class, Byte.class, Boolean.class};
-//            }
-//
-//            @override
-//            public <T> T value(Class<T> clazz) {
-//                if (clazz == Boolean.class) {
-//                    return clazz.cast(buffer.get(0) != 0);
-//                }
-//                if (clazz == Integer.class) {
-//                    return clazz.cast(buffer.getInt(0));
-//                }
-//                if (clazz == Short.class) {
-//                    return clazz.cast(buffer.getShort(0));
-//                }
-//                if (clazz == Byte.class) {
-//                    return clazz.cast(buffer.get(0));
-//                }
-//                return super.value(clazz);
-//            }
-//        };
-    }
+  @override
+  Data createMessage(bool logData, MetaWearBoardPrivate mwPrivate,
+      Uint8List data, DateTime timestamp, ClassToObject mapper) {
+    final Uint8List buffer = Util.bytesToSIntBuffer(logData, data, attributes);
 
-    @override
-    Pair<? extends DataTypeBase, ? extends DataTypeBase> dataProcessorTransform(DataProcessorConfig config, DataProcessorImpl dpModule) {
-        switch(config.id) {
-            case DataProcessorConfig.Maths.ID: {
-                DataProcessorConfig.Maths casted = (DataProcessorConfig.Maths) config;
-                switch(casted.op) {
-                    case ABS_VALUE:
-                        return new Pair<>(new UintData(this, DATA_PROCESSOR, DataProcessorImpl.NOTIFY, attributes.dataProcessorCopySigned(false)), null);
-                }
-                break;
-            }
+    return _DataPrivate(buffer, timestamp, data, mapper);
+  }
+
+  @override
+  Tuple2<DataTypeBase, DataTypeBase> dataProcessorTransform(
+      DataProcessorConfig config, DataProcessorImpl dpModule) {
+    switch (config.id) {
+      case Maths.ID:
+        {
+          Maths casted = config as Maths;
+          switch (casted.op) {
+            case Operation.ABS_VALUE:
+              return Tuple2(new UintData(
+                  ModuleType.DATA_PROCESSOR, DataProcessorImpl.NOTIFY,
+                  attributes.dataProcessorCopySigned(false), input: this),
+                  null);
+            default:
+          }
+          break;
         }
-        return super.dataProcessorTransform(config, dpModule);
     }
+    return super.dataProcessorTransform(config, dpModule);
+  }
 }

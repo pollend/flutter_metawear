@@ -22,175 +22,244 @@
  * hello@mbientlab.com.
  */
 
+import 'dart:async';
+
+import 'package:flutter_blue/flutter_blue.dart';
+import 'package:flutter_metawear/DataToken.dart';
+import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
+import 'package:flutter_metawear/impl/ModuleImplBase.dart';
+import 'package:flutter_metawear/impl/ModuleType.dart';
+import 'package:flutter_metawear/impl/Util.dart';
+
+import 'package:flutter_metawear/module/IBeacon.dart';
+import 'package:tuple/tuple.dart';
+
+import 'dart:typed_data';
+
+class _ConfigEditor extends ConfigEditor{
+  Guid newUuid= null;
+  int newMajor= null, newMinor= null, newPeriod = null;
+  int newRxPower= null, newTxPower= null;
+  DataToken majorToken = null, newMinorDataToken = null;
+  final MetaWearBoardPrivate mwPrivate;
+
+  _ConfigEditor(this.mwPrivate);
+
+  @override
+  void commit() {
+    if (newUuid != null) {
+      mwPrivate.sendCommandForModule(
+          ModuleType.IBEACON, IBeaconImpl.AD_UUID, newUuid.toByteArray());
+    }
+
+    if (newMajor != null) {
+      Uint8List result = Uint8List(2);
+      ByteData.view(result.buffer).setInt16(0, newMajor, Endian.little);
+      mwPrivate.sendCommandForModule(
+          ModuleType.IBEACON, IBeaconImpl.MAJOR, result);
+    } else if (majorToken != null) {
+      Uint8List result = Uint8List(4);
+      ByteData data = ByteData.view(result.buffer);
+      data.setInt8(0, ModuleType.IBEACON.id);
+      data.setInt16(1, IBeaconImpl.MAJOR);
+      data.setInt16(2, 0, Endian.little);
+
+      mwPrivate.sendCommand(result, WithDataToken(majorToken, 0));
+    }
+
+    if (newMinor != null) {
+      Uint8List result = Uint8List(2);
+      ByteData.view(result.buffer).setInt16(0, newMinor, Endian.little);
+      mwPrivate.sendCommandForModule(
+          ModuleType.IBEACON, IBeaconImpl.MINOR, result);
+    } else if (newMinorDataToken != null) {
+      Uint8List result = Uint8List(4);
+      ByteData data = ByteData.view(result.buffer);
+      data.setInt8(0, ModuleType.IBEACON.id);
+      data.setInt16(1, IBeaconImpl.MINOR);
+      data.setInt16(2, 0, Endian.little);
+
+      this.mwPrivate.sendCommand(result, WithDataToken(newMinorDataToken, 0));
+    }
+
+    if (newRxPower != null) {
+      mwPrivate.sendCommand(Uint8List.fromList(
+          [ModuleType.IBEACON.id, IBeaconImpl.RX, newRxPower]));
+    }
+
+    if (newTxPower != null) {
+      mwPrivate.sendCommand(Uint8List.fromList(
+          [ModuleType.IBEACON.id, IBeaconImpl.TX, newTxPower]));
+    }
+
+    if (newPeriod != null) {
+      Uint8List result = Uint8List(2);
+      ByteData.view(result.buffer).setInt16(0, newPeriod, Endian.little);
+
+      mwPrivate.sendCommandForModule(
+          ModuleType.IBEACON, IBeaconImpl.PERIOD, result);
+    }
+  }
+
+  @override
+  ConfigEditor major(int major) {
+    // TODO: implement major
+    return null;
+  }
+
+  @override
+  ConfigEditor majorAsToken(DataToken major) {
+    this.majorToken = major;
+    return this;
+  }
+
+  @override
+  ConfigEditor minor(int minor) {
+    this.newMinor = minor;
+    return this;
+  }
+
+  @override
+  ConfigEditor minorAsToken(DataToken minor) {
+    this.newMinorDataToken = minor;
+    return this;
+  }
+
+  @override
+  ConfigEditor period(int period) {
+    this.newPeriod = period;
+    return this;
+  }
+
+  @override
+  ConfigEditor rxPower(int power) {
+    this.newRxPower= power;
+    return this;
+  }
+
+  @override
+  ConfigEditor txPower(int power) {
+    this.newTxPower = power;
+    return this;
+  }
+
+  @override
+  ConfigEditor uuid(Guid adUuid) {
+    this.newUuid = adUuid;
+    return this;
+  }
+
+}
 /**
  * Created by etsai on 9/18/16.
  */
 class IBeaconImpl extends ModuleImplBase implements IBeacon {
-    static const ENABLE = 0x1, AD_UUID = 0x2, MAJOR = 0x3, MINOR = 0x4,
-        RX = 0x5, TX = 0x6, PERIOD = 0x7;
+  static const ENABLE = 0x1,
+      AD_UUID = 0x2,
+      MAJOR = 0x3,
+      MINOR = 0x4,
+      RX = 0x5,
+      TX = 0x6,
+      PERIOD = 0x7;
 
-    private transient TimedTask<byte[]> readConfigTask;
+  final StreamController<Uint8List> _streamController = StreamController<Uint8List>();
 
-    IBeaconImpl(MetaWearBoardPrivate mwPrivate) {
-        super(mwPrivate);
+  IBeaconImpl(MetaWearBoardPrivate mwPrivate) : super(mwPrivate);
+
+  @override
+  void init() {
+    for (int id in Uint8List.fromList(
+        [AD_UUID, MAJOR, MINOR, RX, TX, PERIOD])) {
+      this.mwPrivate.addResponseHandler(Tuple2(ModuleType.IBEACON.id, Util.setRead(id)), (Uint8List response) => {
+        _streamController.add(response)
+      });
     }
+  }
 
-    @override
-    protected void init() {
-        readConfigTask = new TimedTask<>();
+  @override
+  ConfigEditor configure() {
+    return _ConfigEditor(mwPrivate);
+  }
 
-        for(byte id: new byte[] {AD_UUID, MAJOR, MINOR, RX, TX, PERIOD}) {
-            this.mwPrivate.addResponseHandler(new Pair<>(IBEACON.id, Util.setRead(id)), response -> readConfigTask.setResult(response));
-        }
-    }
+  @override
+  void enable() {
+    mwPrivate.sendCommand(
+        Uint8List.fromList([ModuleType.IBEACON.id, ENABLE, 1]));
+  }
 
-    @override
-    public ConfigEditor configure() {
-        return new ConfigEditor() {
-            private UUID newUuid= null;
-            private Short newMajor= null, newMinor= null, newPeriod = null;
-            private Byte newRxPower= null, newTxPower= null;
-            private DataToken majorToken = null, newMinorDataToken = null;
+  @override
+  void disable() {
+    mwPrivate.sendCommand(
+        Uint8List.fromList([ModuleType.IBEACON.id, ENABLE, 0]));
+  }
 
-            @override
-            public ConfigEditor uuid(UUID adUuid) {
-                newUuid = adUuid;
-                return this;
-            }
+  @override
+  Future<Configuration> readConfigAsync() async {
+    Guid ad = Guid.empty();
+    int major = null,
+        minor = null;
+    int rxPower = null,
+        txPower = null;
+    int period = null;
+    TimeoutException exception;
 
-            @override
-            public ConfigEditor major(short major) {
-                newMajor = major;
-                return this;
-            }
+    Stream<Uint8List> stream = _streamController.stream.timeout(
+        ModuleType.RESPONSE_TIMEOUT);
+    StreamIterator<Uint8List> iterator = StreamIterator(stream);
 
-            @override
-            public ConfigEditor major(DataToken major) {
-                majorToken = major;
-                return this;
-            }
+    mwPrivate.sendCommand(Uint8List.fromList(
+        [ModuleType.IBEACON.id, Util.setRead(AD_UUID)])); //request uuid
+    exception = TimeoutException(
+        "Did not receive ibeacon UUID", ModuleType.RESPONSE_TIMEOUT);
+    if (await iterator.moveNext().catchError((e) => throw exception,
+        test: (e) => e is TimeoutException) == false)
+      throw exception;
+    ad.toByteArray().setAll(0, iterator.current.skip(2));
 
-            @override
-            public ConfigEditor minor(short minor) {
-                newMinor = minor;
-                return this;
-            }
+    mwPrivate.sendCommand(Uint8List.fromList(
+        [ModuleType.IBEACON.id, Util.setRead(MAJOR)])); //request major
+    exception = TimeoutException(
+        "Did not receive iBeacon major value", ModuleType.RESPONSE_TIMEOUT);
+    if (await iterator.moveNext().catchError((e) => throw exception,
+        test: (e) => e is TimeoutException) == false)
+      throw exception;
+    major = ByteData.view(iterator.current.buffer).getInt16(2);
 
-            @override
-            public ConfigEditor minor(DataToken minor) {
-                newMinorDataToken = minor;
-                return this;
-            }
+    mwPrivate.sendCommand(Uint8List.fromList(
+        [ModuleType.IBEACON.id, Util.setRead(MINOR)])); //request Minor
+    exception = TimeoutException(
+        "Did not receive iBeacon minor value", ModuleType.RESPONSE_TIMEOUT);
+    if (await iterator.moveNext().catchError((e) => throw exception,
+        test: (e) => e is TimeoutException) == false)
+      throw exception;
+    minor = ByteData.view(iterator.current.buffer).getInt16(2);
 
-            @override
-            public ConfigEditor rxPower(byte power) {
-                newRxPower = power;
-                return this;
-            }
+    mwPrivate.sendCommand(Uint8List.fromList(
+        [ModuleType.IBEACON.id, Util.setRead(RX)])); //request Rx
+    exception = TimeoutException(
+        "Did not receive iBeacon rx value", ModuleType.RESPONSE_TIMEOUT);
+    if (await iterator.moveNext().catchError((e) => throw exception,
+        test: (e) => e is TimeoutException) == false)
+      throw exception;
+    rxPower = iterator.current[2];
 
-            @override
-            public ConfigEditor txPower(byte power) {
-                newTxPower = power;
-                return this;
-            }
+    mwPrivate.sendCommand(Uint8List.fromList(
+        [ModuleType.IBEACON.id, Util.setRead(TX)])); //request Tx
+    exception = TimeoutException(
+        "Did not receive iBeacon tx value", ModuleType.RESPONSE_TIMEOUT);
+    if (await iterator.moveNext().catchError((e) => throw exception,
+        test: (e) => e is TimeoutException) == false)
+      throw exception;
+    txPower = iterator.current[2];
 
-            @override
-            public ConfigEditor period(short period) {
-                newPeriod = period;
-                return this;
-            }
-
-            @override
-            public void commit() {
-                if (newUuid != null) {
-                    byte[] uuidBytes = ByteBuffer.allocate(16)
-                            .order(ByteOrder.LITTLE_ENDIAN)
-                            .putLong(newUuid.getLeastSignificantBits())
-                            .putLong(newUuid.getMostSignificantBits())
-                            .array();
-                    IBeaconImpl.this.mwPrivate.sendCommand(IBEACON, AD_UUID, uuidBytes);
-                }
-
-                if (newMajor != null) {
-                    IBeaconImpl.this.mwPrivate.sendCommand(IBEACON, MAJOR,
-                            ByteBuffer.allocate(2).order(ByteOrder.LITTLE_ENDIAN).putShort(newMajor).array());
-                } else if (majorToken != null) {
-                    ByteBuffer buffer= ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN)
-                            .put(IBEACON.id)
-                            .put(MAJOR)
-                            .putShort((short) 0);
-                    IBeaconImpl.this.mwPrivate.sendCommand(buffer.array(), 0, majorToken);
-                }
-
-                if (newMinor != null) {
-                    IBeaconImpl.this.mwPrivate.sendCommand(IBEACON, MINOR,
-                            ByteBuffer.allocate(2).order(ByteOrder.LITTLE_ENDIAN).putShort(newMinor).array());
-                } else if (newMinorDataToken != null) {
-                    ByteBuffer buffer= ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN)
-                            .put(IBEACON.id)
-                            .put(MINOR)
-                            .putShort((short) 0);
-                    IBeaconImpl.this.mwPrivate.sendCommand(buffer.array(), 0, newMinorDataToken);
-                }
-
-                if (newRxPower != null) {
-                    IBeaconImpl.this.mwPrivate.sendCommand(new byte[] {IBEACON.id, RX, newRxPower});
-                }
-
-                if (newTxPower != null) {
-                    IBeaconImpl.this.mwPrivate.sendCommand(new byte[] {IBEACON.id, TX, newTxPower});
-                }
-
-                if (newPeriod != null) {
-                    IBeaconImpl.this.mwPrivate.sendCommand(IBEACON, PERIOD,
-                            ByteBuffer.allocate(2).order(ByteOrder.LITTLE_ENDIAN).putShort(newPeriod).array());
-                }
-            }
-        };
-    }
-
-    @override
-    public void enable() {
-        mwPrivate.sendCommand(new byte[] {IBEACON.id, ENABLE, (byte) 1});
-    }
-
-    @override
-    public void disable() {
-        mwPrivate.sendCommand(new byte[] {IBEACON.id, ENABLE, (byte) 0});
-    }
-
-    @override
-    public Task<Configuration> readConfigAsync() {
-        final Capture<UUID> ad = new Capture<>();
-        final Capture<Short> major = new Capture<>(), minor = new Capture<>();
-        final Capture<Byte> rxPower = new Capture<>(), txPower = new Capture<>();
-
-        return readConfigTask.execute("Did not receive ibeacon ad UUID within %dms", Constant.RESPONSE_TIMEOUT,
-                () -> mwPrivate.sendCommand(new byte[] {IBEACON.id, Util.setRead(AD_UUID)})
-        ).onSuccessTask(task -> {
-            ad.set(new UUID(ByteBuffer.wrap(task.getResult(), 10, 8).order(ByteOrder.LITTLE_ENDIAN).getLong(),
-                    ByteBuffer.wrap(task.getResult(), 2, 8).order(ByteOrder.LITTLE_ENDIAN).getLong()));
-            return readConfigTask.execute("Did not receive iBeacon major value within %dms",  Constant.RESPONSE_TIMEOUT,
-                    () -> mwPrivate.sendCommand(new byte[] {IBEACON.id, Util.setRead(MAJOR)}));
-        }).onSuccessTask(task -> {
-            major.set(ByteBuffer.wrap(task.getResult(), 2, 2).order(ByteOrder.LITTLE_ENDIAN).getShort());
-            return readConfigTask.execute("Did not receive iBeacon minor value within %dms",  Constant.RESPONSE_TIMEOUT,
-                    () -> mwPrivate.sendCommand(new byte[] {IBEACON.id, Util.setRead(MINOR)}));
-        }).onSuccessTask(task -> {
-            minor.set(ByteBuffer.wrap(task.getResult(), 2, 2).order(ByteOrder.LITTLE_ENDIAN).getShort());
-            return readConfigTask.execute("Did not receive iBeacon rx value within %dms",  Constant.RESPONSE_TIMEOUT,
-                    () -> mwPrivate.sendCommand(new byte[] {IBEACON.id, Util.setRead(RX)}));
-        }).onSuccessTask(task -> {
-            rxPower.set(task.getResult()[2]);
-            return readConfigTask.execute("Did not receive iBeacon tx value within %dms",  Constant.RESPONSE_TIMEOUT,
-                    () -> mwPrivate.sendCommand(new byte[] {IBEACON.id, Util.setRead(TX)}));
-        }).onSuccessTask(task -> {
-            txPower.set(task.getResult()[2]);
-            return readConfigTask.execute("Did not receive iBeacon period value within %dms",  Constant.RESPONSE_TIMEOUT,
-                    () -> mwPrivate.sendCommand(new byte[] {IBEACON.id, Util.setRead(PERIOD)}));
-        }).onSuccessTask(task -> {
-            short period = ByteBuffer.wrap(task.getResult(), 2, 2).order(ByteOrder.LITTLE_ENDIAN).getShort();
-            return Task.forResult(new Configuration(ad.get(), major.get(), minor.get(), period, rxPower.get(), txPower.get()));
-        });
-    }
+    mwPrivate.sendCommand(Uint8List.fromList(
+        [ModuleType.IBEACON.id, Util.setRead(PERIOD)])); //request Period
+    exception = TimeoutException(
+        "Did not receive iBeacon period value", ModuleType.RESPONSE_TIMEOUT);
+    if (await iterator.moveNext().catchError((e) => throw exception,
+        test: (e) => e is TimeoutException) == false)
+      throw exception;
+    period = ByteData.view(iterator.current.buffer).getInt16(2);
+    return Configuration(ad, major, minor, period, rxPower, txPower);
+  }
 }

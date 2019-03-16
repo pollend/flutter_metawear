@@ -24,7 +24,7 @@
 
 
 class ModuleType {
-    static final int RESPONSE_TIMEOUT = 1000;
+    static const Duration RESPONSE_TIMEOUT = Duration(seconds: 1);
     static final int COMMAND_LENGTH = 18,
         MAX_BTLE_LENGTH = COMMAND_LENGTH + 2;
 

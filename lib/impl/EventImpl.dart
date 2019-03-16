@@ -22,34 +22,40 @@
  * hello@mbientlab.com.
  */
 
+import 'package:flutter_metawear/MetaWearBoard.dart';
+import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
+import 'package:flutter_metawear/impl/ModuleImplBase.dart';
+import 'package:flutter_metawear/impl/ModuleType.dart';
+
+
+import 'package:tuple/tuple.dart';
+import 'dart:typed_data';
 /**
  * Created by etsai on 10/26/16.
  */
 class EventImpl extends ModuleImplBase implements Module {
     static const int ENTRY = 2, CMD_PARAMETERS = 3, REMOVE = 4, REMOVE_ALL = 5;
 
-    transient Tuple3<Byte, Byte, Byte> feedbackParams= null;
+    Tuple3<int, int, int> feedbackParams= null;
     DataTypeBase activeDataType = null;
 
     ListQueue<byte[]> recordedCommands;
     TimedTask<byte[]> createEventTask;
 
-    EventImpl(MetaWearBoardPrivate mwPrivate) {
-        super(mwPrivate);
-    }
+    EventImpl(MetaWearBoardPrivate mwPrivate):super(mwPrivate);
 
     void init() {
         createEventTask = new TimedTask<>();
-        mwPrivate.addResponseHandler(new Pair<>(EVENT.id, ENTRY), response -> createEventTask.setResult(response));
+        mwPrivate.addResponseHandler(Tuple2(ModuleType.EVENT.id, ENTRY), response -> createEventTask.setResult(response));
     }
 
     @override
     void tearDown() {
-        mwPrivate.sendCommand(new byte[] {EVENT.id, EventImpl.REMOVE_ALL});
+        mwPrivate.sendCommand(Uint8List.fromList([ModuleType.EVENT.id, EventImpl.REMOVE_ALL]));
     }
 
-    void removeEventCommand(byte id) {
-        mwPrivate.sendCommand(new byte[]{EVENT.id, EventImpl.REMOVE, id});
+    void removeEventCommand(int id) {
+        mwPrivate.sendCommand(Uint8List.fromList([ModuleType.EVENT.id, EventImpl.REMOVE, id]));
     }
 
     Future<List<int>> queueEvents(final Queue<Pair<? extends DataTypeBase, ? extends CodeBlock>> eventCodeBlocks) {
@@ -93,7 +99,7 @@ class EventImpl extends ModuleImplBase implements Module {
         });
     }
 
-    void convertToEventCommand(byte[] command) {
+    void convertToEventCommand(Uint8List command) {
         byte[] commandEntry= new byte[] {EVENT.id, EventImpl.ENTRY,
                 activeDataType.eventConfig[0], activeDataType.eventConfig[1], activeDataType.eventConfig[2],
                 command[0], command[1], (byte) (command.length - 2)};

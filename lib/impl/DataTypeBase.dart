@@ -67,19 +67,21 @@ import 'package:flutter_metawear/builder/filter/DifferentialOutput.dart';
 import 'package:flutter_metawear/builder/filter/ThresholdOutput.dart';
 import 'dart:math';
 
-class _DataTypeBase extends DataTypeBase{
-    _DataTypeBase.raw(Uint8List config, int offset, int length) : super.raw(config, offset, length);
+class _DataTypeBase extends DataTypeBase {
+    _DataTypeBase.raw(Uint8List config, int offset, int length)
+        : super.raw(config, offset, length);
 
-  @override
-  DataTypeBase copy(DataTypeBase input, ModuleType module, int register, int id, DataAttributes attributes) {
-      throw UnsupportedError("Unsupported DataTypeBase");
-  }
+    @override
+    DataTypeBase copy(DataTypeBase input, ModuleType module, int register,
+        int id, DataAttributes attributes) {
+        throw UnsupportedError("Unsupported DataTypeBase");
+    }
 
-  @override
-  Data createMessage(bool logData, MetaWearBoardPrivate mwPrivate, Uint8List data, Data timestamp, ClassToObject mapper) {
-      throw UnsupportedError("Unsupported DataTypeBase");
-  }
-
+    @override
+    Data createMessage(bool logData, MetaWearBoardPrivate mwPrivate,
+        Uint8List data, DateTime timestamp, ClassToObject mapper) {
+        throw UnsupportedError("Unsupported DataTypeBase");
+    }
 }
 
 /**
@@ -164,7 +166,7 @@ abstract class DataTypeBase implements DataToken {
     final Uint8List eventConfig;
     final DataAttributes attributes;
     final DataTypeBase input;
-    final List<DataTypeBase> split;
+    List<DataTypeBase> split;
 
     DataTypeBase.raw(Uint8List config, int offset, int length):
             eventConfig = config,
@@ -172,12 +174,12 @@ abstract class DataTypeBase implements DataToken {
             split = null,
             attributes = DataAttributes(Uint8List.fromList([length]),1,offset,false);
 
-    DataTypeBase(ModuleType module, int register, DataAttributes attributes, Function split,{int id, DataTypeBase input}):
+    DataTypeBase(ModuleType module, int register, DataAttributes attributes, {int id, DataTypeBase input}):
             this.eventConfig = Uint8List.fromList([module.id,register,id == null ? NO_DATA_ID: id]),
             this.attributes = attributes,
-            this.input = input,
-            this.split = split();
-
+            this.input = input {
+        this.split = createSplits();
+    }
 
 
     Tuple3<int, int, int> eventConfigAsTuple() {
