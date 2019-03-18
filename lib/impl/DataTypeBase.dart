@@ -33,6 +33,7 @@ import 'package:flutter_metawear/impl/DataProcessorConfig.dart';
 import 'package:flutter_metawear/impl/DataProcessorImpl.dart';
 import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
 import 'package:flutter_metawear/impl/ModuleType.dart';
+import 'package:flutter_metawear/impl/UintData.dart';
 import 'package:flutter_metawear/impl/Util.dart';
 import 'package:flutter_metawear/module/AccelerometerMma8452q.dart';
 import 'package:tuple/tuple.dart';
@@ -56,6 +57,8 @@ import 'package:flutter_metawear/impl/AccelerometerBmi160Impl.dart';
 import 'package:flutter_metawear/impl/AccelerometerBoschImpl.dart';
 
 import 'package:flutter_metawear/impl/DataProcessorConfig.dart';
+import 'package:flutter_metawear/impl/ByteArrayData.dart';
+import 'IntData.dart';
 
 import 'package:flutter_metawear/module/DataProcessor.dart';
 import 'package:flutter_metawear/module/Accelerometer.dart';
@@ -235,8 +238,8 @@ abstract class DataTypeBase implements DataToken {
         switch (config.id) {
             case Buffer.ID:
                 return Tuple2(
-                    UintData(this, ModuleType.DATA_PROCESSOR, DataProcessorImpl.NOTIFY,
-                        new DataAttributes(Uint8List(0), 0, 0, false)),
+                    UintData(ModuleType.DATA_PROCESSOR, DataProcessorImpl.NOTIFY,
+                        new DataAttributes(Uint8List(0), 0, 0, false),input: this),
                     dataProcessorStateCopy(this, this.attributes)
                 );
             case Accumulator.ID:
@@ -248,11 +251,10 @@ abstract class DataTypeBase implements DataToken {
 
                     return Tuple2(
                         casted.counter ? new UintData(
-                            this, ModuleType.DATA_PROCESSOR, DataProcessorImpl.NOTIFY,
-                            attributes) : dataProcessorCopy(this, attributes),
-                        casted.counter ? new UintData(null, DATA_PROCESSOR,
-                            Util.setSilentRead(DataProcessorImpl.STATE),
-                            DataTypeBase.NO_DATA_ID, attributes) :
+                            ModuleType.DATA_PROCESSOR, DataProcessorImpl.NOTIFY,
+                            attributes,input: this) : dataProcessorCopy(this, attributes),
+                        casted.counter ? new UintData(ModuleType.DATA_PROCESSOR,
+                            Util.setSilentRead(DataProcessorImpl.STATE),attributes,id: DataTypeBase.NO_DATA_ID,input: null) :
                         dataProcessorStateCopy(this, attributes)
                     );
                 }
@@ -266,9 +268,7 @@ abstract class DataTypeBase implements DataToken {
                     dataProcessorCopy(
                         this, this.attributes.dataProcessorCopy()),
                     new UintData(ModuleType.DATA_PROCESSOR,
-                        Util.setSilentRead(DataProcessorImpl.STATE),
-                        DataTypeBase.NO_DATA_ID, new DataAttributes(
-                            new byte[] {2}, (byte) 1, (byte) 0, false))
+                        Util.setSilentRead(DataProcessorImpl.STATE), new DataAttributes(Uint8List.fromList([2]), 1, 0, false),id: DataTypeBase.NO_DATA_ID)
                 );
             case Maths.ID:
                 {
@@ -307,35 +307,31 @@ abstract class DataTypeBase implements DataToken {
                             }
                         case Operation.EXPONENT:
                             {
-                                processor = new ByteArrayData(
-                                    this, ModuleType.DATA_PROCESSOR,
-                                    DataProcessorImpl.NOTIFY,
-                                    attributes.dataProcessorCopySize((byte) 4));
+                                processor = ByteArrayData(ModuleType.DATA_PROCESSOR, DataProcessorImpl.NOTIFY, attributes.dataProcessorCopySize( 4),input:this);
                                 break;
                             }
                         case Operation.LEFT_SHIFT:
                             {
                                 processor = new ByteArrayData(
-                                    this, ModuleType.DATA_PROCESSOR,
+                                     ModuleType.DATA_PROCESSOR,
                                     DataProcessorImpl.NOTIFY,
                                     attributes.dataProcessorCopySize(
-                                        Math.min(attributes.sizes[0] + (
-                                        casted.rhs / 8), 4)));
+                                        min(attributes.sizes[0] + (casted.rhs / 8).round(), 4)),input: this);
         break;
         }
         case Operation.RIGHT_SHIFT: {
-        processor = new ByteArrayData(this, ModuleType.DATA_PROCESSOR, DataProcessorImpl.NOTIFY,
-        attributes.dataProcessorCopySize((byte) Math.max(attributes.sizes[0] - (casted.rhs / 8), 1)));
+        processor = new ByteArrayData(ModuleType.DATA_PROCESSOR, DataProcessorImpl.NOTIFY,
+        attributes.dataProcessorCopySize(max(attributes.sizes[0] - (casted.rhs / 8).round(), 1)),input: this);
         break;
         }
         case Operation.SQRT: {
-        processor = new ByteArrayData(this, ModuleType.DATA_PROCESSOR, DataProcessorImpl.NOTIFY, attributes.dataProcessorCopySigned(false));
+        processor = new ByteArrayData(ModuleType.DATA_PROCESSOR, DataProcessorImpl.NOTIFY, attributes.dataProcessorCopySigned(false),input: this);
         break;
         }
         case Operation.CONSTANT:
-        DataAttributes attributes = new DataAttributes(new byte[] {4}, (byte) 1, (byte) 0, casted.rhs >= 0);
+        DataAttributes attributes = new DataAttributes(Uint8List.fromList([4]), 1, 0, casted.rhs >= 0);
         processor = attributes.signed ? new IntData(this, ModuleType.DATA_PROCESSOR, DataProcessorImpl.NOTIFY, attributes) :
-        new UintData(this, ModuleType.DATA_PROCESSOR, DataProcessorImpl.NOTIFY, attributes);
+        new UintData(ModuleType.DATA_PROCESSOR, DataProcessorImpl.NOTIFY, attributes,input: this);
         break;
         }
         if (processor != null) {
@@ -348,7 +344,7 @@ abstract class DataTypeBase implements DataToken {
         DataTypeBase processor;
         switch(casted.mode) {
         case PulseOutput.WIDTH:
-        processor = new UintData(this, ModuleType.DATA_PROCESSOR, DataProcessorImpl.NOTIFY, new DataAttributes(new byte[] {2}, (byte) 1, (byte) 0, false));
+        processor = new UintData(ModuleType.DATA_PROCESSOR, DataProcessorImpl.NOTIFY, new DataAttributes(Uint8List.fromList([2]), 1, 0, false),input: this);
         break;
         case PulseOutput.AREA:
         processor = dataProcessorCopy(this, attributes.dataProcessorCopySize((byte) 4));

@@ -46,7 +46,7 @@ class ArrayData extends DataTypeBase {
     }
 
     @override
-    public Number convertToFirmwareUnits(MetaWearBoardPrivate mwPrivate, Number value) {
+     num convertToFirmwareUnits(MetaWearBoardPrivate mwPrivate, Number value) {
         return value;
     }
 

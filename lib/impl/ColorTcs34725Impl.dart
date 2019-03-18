@@ -97,6 +97,8 @@ class ColorAdcData extends DataTypeBase {
         ];
     }
 
+
+
     @override
     Tuple2<DataTypeBase, DataTypeBase> dataProcessorTransform(
         DataProcessorConfig config, DataProcessorImpl dpModule) {
@@ -120,18 +122,18 @@ class ColorAdcData extends DataTypeBase {
 
 class _ConfigEditor extends ConfigEditor{
     static const int aTime =  0xff;
-    Gain gain = Gain.TCS34725_1X;
+    Gain _gain = Gain.TCS34725_1X;
     int illuminate= 0;
 
     @override
-    ConfigEditor integrationTime(float time) {
-        aTime= (byte) (256.f - time / 2.4f);
+    ConfigEditor integrationTime(double time) {
+        aTime =  (256 - time / 2.4);
         return this;
     }
 
     @override
     ConfigEditor gain(Gain gain) {
-        this.gain= gain;
+        this._gain = gain;
         return this;
     }
 
@@ -143,7 +145,7 @@ class _ConfigEditor extends ConfigEditor{
 
     @override
     void commit() {
-        mwPrivate.sendCommand(new byte[] {COLOR_DETECTOR.id, MODE, aTime, (byte) gain.ordinal(), illuminate});
+        mwPrivate.sendCommand(new byte[] {ModuleType.COLOR_DETECTOR.id, ColorTcs34725Impl.MODE, aTime, _gain.index, illuminate});
     }
 }
 

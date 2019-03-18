@@ -62,7 +62,7 @@ class _DataPrivate extends DataPrivate{
  * Created by etsai on 9/4/16.
  */
 class UintData extends DataTypeBase {
-  UintData(ModuleType module, int register, DataAttributes attributes,{int id, DataTypeBase input}) : super(module, register, attributes, ()=>{},id:id,input:input);
+  UintData(ModuleType module, int register, DataAttributes attributes,{int id, DataTypeBase input}) : super(module, register, attributes,id:id,input:input);
 
 
 //    UintData.Module(ModuleType module,int register) : super(null, null, 0, null, null)
