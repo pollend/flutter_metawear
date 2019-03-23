@@ -22,6 +22,28 @@
  * hello@mbientlab.com.
  */
 
+private static class Bmm150SFloatData extends SFloatData {
+  private static final long serialVersionUID = 3109599023484783057L;
+
+  Bmm150SFloatData(byte offset) {
+    super(MAGNETOMETER, MAG_DATA, new DataAttributes(new byte[] {2}, (byte) 1, offset, true));
+  }
+
+  Bmm150SFloatData(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
+    super(input, module, register, id, attributes);
+  }
+
+  @override
+  protected float scale(MetaWearBoardPrivate mwPrivate) {
+    return 16000000.f;
+  }
+
+  @override
+  DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
+    return new Bmm150SFloatData(input, module, register, id, attributes);
+  }
+}
+
 /**
  * Created by etsai on 9/20/16.
  */
@@ -68,17 +90,17 @@ class MagnetometerBmm150Impl extends ModuleImplBase implements MagnetometerBmm15
         }
 
         @override
-        public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
+        DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
             return new Bmm150CartesianFloatData(input, module, register, id, attributes);
         }
 
         @override
-        public DataTypeBase[] createSplits() {
+        DataTypeBase[] createSplits() {
             return new DataTypeBase[] {new Bmm150SFloatData((byte) 0), new Bmm150SFloatData((byte) 2), new Bmm150SFloatData((byte) 4)};
         }
 
         @override
-        public Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, final byte[] data, final Calendar timestamp, DataPrivate.ClassToObject mapper) {
+        Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, final byte[] data, final Calendar timestamp, DataPrivate.ClassToObject mapper) {
             ByteBuffer buffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN);
             short[] unscaled = new short[]{buffer.getShort(), buffer.getShort(), buffer.getShort()};
             final float scale= scale(mwPrivate);
@@ -86,17 +108,17 @@ class MagnetometerBmm150Impl extends ModuleImplBase implements MagnetometerBmm15
 
             return new DataPrivate(timestamp, data, mapper) {
                 @override
-                public float scale() {
+                float scale() {
                     return scale;
                 }
 
                 @override
-                public Class<?>[] types() {
+                Class<?>[] types() {
                     return new Class<?>[] {MagneticField.class, float[].class};
                 }
 
                 @override
-                public <T> T value(Class<T> clazz) {
+                <T> T value(Class<T> clazz) {
                     if (clazz == MagneticField.class) {
                         return clazz.cast(value);
                     } else if (clazz.equals(float[].class)) {
@@ -105,27 +127,6 @@ class MagnetometerBmm150Impl extends ModuleImplBase implements MagnetometerBmm15
                     return super.value(clazz);
                 }
             };
-        }
-    }
-    private static class Bmm150SFloatData extends SFloatData {
-        private static final long serialVersionUID = 3109599023484783057L;
-
-        Bmm150SFloatData(byte offset) {
-            super(MAGNETOMETER, MAG_DATA, new DataAttributes(new byte[] {2}, (byte) 1, offset, true));
-        }
-
-        Bmm150SFloatData(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
-            super(input, module, register, id, attributes);
-        }
-
-        @override
-        protected float scale(MetaWearBoardPrivate mwPrivate) {
-            return 16000000.f;
-        }
-
-        @override
-        public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
-            return new Bmm150SFloatData(input, module, register, id, attributes);
         }
     }
 
@@ -143,41 +144,41 @@ class MagnetometerBmm150Impl extends ModuleImplBase implements MagnetometerBmm15
     }
 
     @override
-    public MagneticFieldDataProducer magneticField() {
+    MagneticFieldDataProducer magneticField() {
         if (bfield == null) {
             bfield = new MagneticFieldDataProducer() {
                 @override
-                public String xAxisName() {
+                String xAxisName() {
                     return BFIELD_X_AXIS_PRODUCER;
                 }
 
                 @override
-                public String yAxisName() {
+                String yAxisName() {
                     return BFIELD_Y_AXIS_PRODUCER;
                 }
 
                 @override
-                public String zAxisName() {
+                String zAxisName() {
                     return BFIELD_Z_AXIS_PRODUCER;
                 }
 
                 @override
-                public Task<Route> addRouteAsync(RouteBuilder builder) {
+                Task<Route> addRouteAsync(RouteBuilder builder) {
                     return mwPrivate.queueRouteBuilder(builder, BFIELD_PRODUCER);
                 }
 
                 @override
-                public String name() {
+                String name() {
                     return BFIELD_PRODUCER;
                 }
 
                 @override
-                public void stop() {
+                void stop() {
                     mwPrivate.sendCommand(new byte[]{MAGNETOMETER.id, DATA_INTERRUPT_ENABLE, 0, 1});
                 }
 
                 @override
-                public void start() {
+                void start() {
                     mwPrivate.sendCommand(new byte[]{MAGNETOMETER.id, DATA_INTERRUPT_ENABLE, 1, 0});
                 }
             };
@@ -186,27 +187,27 @@ class MagnetometerBmm150Impl extends ModuleImplBase implements MagnetometerBmm15
     }
 
     @override
-    public AsyncDataProducer packedMagneticField() {
+    AsyncDataProducer packedMagneticField() {
         if (mwPrivate.lookupModuleInfo(MAGNETOMETER).revision >= PACKED_BFIELD_REVISION) {
             if (packedBfield == null) {
                 packedBfield = new AsyncDataProducer() {
                     @override
-                    public Task<Route> addRouteAsync(RouteBuilder builder) {
+                    Task<Route> addRouteAsync(RouteBuilder builder) {
                         return mwPrivate.queueRouteBuilder(builder, BFIELD_PACKED_PRODUCER);
                     }
 
                     @override
-                    public String name() {
+                    String name() {
                         return BFIELD_PACKED_PRODUCER;
                     }
 
                     @override
-                    public void stop() {
+                    void stop() {
                         mwPrivate.sendCommand(new byte[]{MAGNETOMETER.id, DATA_INTERRUPT_ENABLE, 0, 1});
                     }
 
                     @override
-                    public void start() {
+                    void start() {
                         mwPrivate.sendCommand(new byte[]{MAGNETOMETER.id, DATA_INTERRUPT_ENABLE, 1, 0});
                     }
                 };
@@ -217,31 +218,31 @@ class MagnetometerBmm150Impl extends ModuleImplBase implements MagnetometerBmm15
     }
 
     @override
-    public ConfigEditor configure() {
+    ConfigEditor configure() {
         return new ConfigEditor() {
             private short xyReps = 9, zReps = 15;
             private OutputDataRate odr = OutputDataRate.ODR_10_HZ;
 
             @override
-            public ConfigEditor xyReps(short reps) {
+            ConfigEditor xyReps(short reps) {
                 xyReps = reps;
                 return this;
             }
 
             @override
-            public ConfigEditor zReps(short reps) {
+            ConfigEditor zReps(short reps) {
                 zReps = reps;
                 return this;
             }
 
             @override
-            public ConfigEditor outputDataRate(OutputDataRate odr) {
+            ConfigEditor outputDataRate(OutputDataRate odr) {
                 this.odr = odr;
                 return this;
             }
 
             @override
-            public void commit() {
+            void commit() {
                 if (mwPrivate.lookupModuleInfo(MAGNETOMETER).revision >= SUSPEND_REVISION) {
                     stop();
                 }
@@ -252,7 +253,7 @@ class MagnetometerBmm150Impl extends ModuleImplBase implements MagnetometerBmm15
     }
 
     @override
-    public void usePreset(Preset preset) {
+    void usePreset(Preset preset) {
         switch (preset) {
             case LOW_POWER:
                 configure()
@@ -287,17 +288,17 @@ class MagnetometerBmm150Impl extends ModuleImplBase implements MagnetometerBmm15
 
 
     @override
-    public void start() {
+    void start() {
         mwPrivate.sendCommand(new byte[] {MAGNETOMETER.id, POWER_MODE, 1});
     }
 
     @override
-    public void stop() {
+    void stop() {
         mwPrivate.sendCommand(new byte[] {MAGNETOMETER.id, POWER_MODE, 0});
     }
 
     @override
-    public void suspend() {
+    void suspend() {
         if (mwPrivate.lookupModuleInfo(MAGNETOMETER).revision >= SUSPEND_REVISION) {
             mwPrivate.sendCommand(new byte[] {MAGNETOMETER.id, POWER_MODE, 2});
         }

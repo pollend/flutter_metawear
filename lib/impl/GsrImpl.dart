@@ -28,13 +28,16 @@ import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
 import 'package:flutter_metawear/impl/ModuleImplBase.dart';
 import 'package:flutter_metawear/module/Gsr.dart';
 import 'package:flutter_metawear/ForcedDataProducer.dart';
+import 'package:flutter_metawear/impl/ModuleType.dart';
+import 'package:flutter_metawear/impl/UintData.dart';
+
 
 class Channel implements ForcedDataProducer{
     final int id;
     MetaWearBoardPrivate mwPrivate;
 
     Channel(this.id,this.mwPrivate) {
-        mwPrivate.tagProducer(name(), new UintData(GSR, Util.setSilentRead(CONDUCTANCE), id, new DataAttributes(new byte[] {4}, (byte) 1, (byte) 0, false)));
+        mwPrivate.tagProducer(name(), new UintData(ModuleType.GSR, Util.setSilentRead(CONDUCTANCE), id, new DataAttributes(new byte[] {4}, (byte) 1, (byte) 0, false)));
     }
 
     void restoreTransientVariables(MetaWearBoardPrivate mwPrivate) {

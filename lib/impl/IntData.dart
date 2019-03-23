@@ -65,11 +65,10 @@ class IntData extends DataTypeBase {
 
   IntData._(DataTypeBase input, ModuleType module, int register, int id,
       DataAttributes attributes)
-      : super(module, register, attributes, () => {}, id: id);
+      : super(module, register, attributes, id: id);
 
-  IntData(DataTypeBase input, ModuleType module, int register,
-      DataAttributes attributes)
-      : super(module, register, attributes, () => {}, input: input);
+  IntData(DataTypeBase input, ModuleType module, int register, DataAttributes attributes)
+      : super(module, register, attributes, input: input);
 
 
   @override

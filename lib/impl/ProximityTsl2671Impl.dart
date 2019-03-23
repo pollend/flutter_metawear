@@ -23,13 +23,83 @@
  */
 
 import 'package:flutter_metawear/ForcedDataProducer.dart';
+import 'package:flutter_metawear/Route.dart';
+import 'package:flutter_metawear/builder/RouteBuilder.dart';
+import 'package:flutter_metawear/impl/DataAttributes.dart';
 import 'package:flutter_metawear/impl/DataTypeBase.dart';
 import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
 import 'package:flutter_metawear/impl/ModuleImplBase.dart';
 import 'package:flutter_metawear/impl/UintData.dart';
 import 'package:flutter_metawear/impl/Util.dart';
 import 'package:flutter_metawear/module/ProximityTsl2671.dart';
+import 'package:flutter_metawear/impl/ModuleType.dart';
+import 'dart:typed_data';
 
+class _ConfigEditor extends ConfigEditor {
+    ReceiverDiode diode = ReceiverDiode.CHANNEL_1;
+    TransmitterDriveCurrent driveCurrent = TransmitterDriveCurrent.CURRENT_25MA;
+    int nPulses = 1;
+    int pTime = 0xff;
+    final MetaWearBoardPrivate _metaWearBoardPrivate;
+
+    _ConfigEditor(this._metaWearBoardPrivate);
+
+    @override
+    ConfigEditor integrationTime(double time) {
+        pTime = (256.0 - time / 2.72).floor();
+        return this;
+    }
+
+    @override
+    ConfigEditor pulseCount(int nPulses) {
+        this.nPulses = nPulses;
+        return this;
+    }
+
+    @override
+    ConfigEditor receiverDiode(ReceiverDiode diode) {
+        this.diode = diode;
+        return this;
+    }
+
+    @override
+    ConfigEditor transmitterDriveCurrent(TransmitterDriveCurrent current) {
+        this.driveCurrent = current;
+        return this;
+    }
+
+    @override
+    void commit() {
+        Uint8List config = Uint8List.fromList([
+            pTime,
+            nPulses,
+            (((diode.index + 1) << 4) | (driveCurrent.index << 6))
+        ]);
+        _metaWearBoardPrivate.sendCommandForModule(
+            ModuleType.PROXIMITY, ProximityTsl2671Impl.MODE, config);
+    }
+}
+
+class _ForcedDataProducer extends ForcedDataProducer{
+    final MetaWearBoardPrivate _metaWearBoardPrivate;
+
+  _ForcedDataProducer(this._metaWearBoardPrivate);
+
+    @override
+    void read() {
+        _metaWearBoardPrivate.lookupProducer(ProximityTsl2671Impl.PRODUCER).read(_metaWearBoardPrivate);
+    }
+
+    @override
+    Future<Route> addRouteAsync(RouteBuilder builder){
+        return _metaWearBoardPrivate.queueRouteBuilder(builder, ProximityTsl2671Impl.PRODUCER);
+    }
+
+    @override
+    String name() {
+        return ProximityTsl2671Impl.PRODUCER;
+    }
+}
 /**
  * Created by etsai on 9/19/16.
  */
@@ -43,74 +113,27 @@ class ProximityTsl2671Impl extends ModuleImplBase implements ProximityTsl2671 {
         }
     }
 
-    static const String PRODUCER= "com.mbientlab.metawear.impl.ProximityTsl2671Impl.PRODUCER";
-    static const int ADC= 1, MODE= 2;
+    static const String PRODUCER = "com.mbientlab.metawear.impl.ProximityTsl2671Impl.PRODUCER";
+    static const int ADC = 1,
+        MODE = 2;
 
     ForcedDataProducer proximityProducer;
 
-    ProximityTsl2671Impl(MetaWearBoardPrivate mwPrivate) : super(mwPrivate){
-        mwPrivate.tagProducer(PRODUCER, new UintData(PROXIMITY, Util.setSilentRead(ADC), new DataAttributes(new byte[] {2}, (byte) 1, (byte) 0, false)));
+    ProximityTsl2671Impl(MetaWearBoardPrivate mwPrivate) : super(mwPrivate) {
+        mwPrivate.tagProducer(PRODUCER, new UintData(
+            ModuleType.PROXIMITY, Util.setSilentRead(ADC),
+            new DataAttributes(Uint8List.fromList([2]), 1, 0, false)));
     }
 
     @override
-    public ConfigEditor configure() {
-        return new ConfigEditor() {
-            private ReceiverDiode diode= ReceiverDiode.CHANNEL_1;
-            private TransmitterDriveCurrent driveCurrent= TransmitterDriveCurrent.CURRENT_25MA;
-            private byte nPulses= 1;
-            private byte pTime= (byte) 0xff;
-
-            @override
-            public ConfigEditor integrationTime(float time) {
-                pTime= (byte) (256.f - time / 2.72f);
-                return this;
-            }
-
-            @override
-            public ConfigEditor pulseCount(byte nPulses) {
-                this.nPulses= nPulses;
-                return this;
-            }
-
-            @override
-            public ConfigEditor receiverDiode(ReceiverDiode diode) {
-                this.diode= diode;
-                return this;
-            }
-
-            @override
-            public ConfigEditor transmitterDriveCurrent(TransmitterDriveCurrent current) {
-                this.driveCurrent= current;
-                return this;
-            }
-
-            @override
-            public void commit() {
-                byte[] config= new byte[] {pTime, nPulses, (byte) (((diode.ordinal() + 1) << 4) | (driveCurrent.ordinal() << 6))};
-                mwPrivate.sendCommand(PROXIMITY, MODE, config);
-            }
-        };
+    ConfigEditor configure() {
+        return _ConfigEditor(mwPrivate);
     }
 
     @override
-    public ForcedDataProducer adc() {
+    ForcedDataProducer adc() {
         if (proximityProducer == null) {
-            proximityProducer = new ForcedDataProducer() {
-                @override
-                public void read() {
-                    mwPrivate.lookupProducer(PRODUCER).read(mwPrivate);
-                }
-
-                @override
-                public Task<Route> addRouteAsync(RouteBuilder builder) {
-                    return mwPrivate.queueRouteBuilder(builder, PRODUCER);
-                }
-
-                @override
-                public String name() {
-                    return PRODUCER;
-                }
-            };
+            proximityProducer = _ForcedDataProducer(mwPrivate);
         }
         return proximityProducer;
     }

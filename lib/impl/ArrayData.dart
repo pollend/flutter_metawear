@@ -22,79 +22,100 @@
  *   hello@mbientlab.com.
  */
 
-import 'package:flutter_metawear/impl/ModuleType.dart';
+import 'dart:typed_data';
+
+import 'package:flutter_metawear/Data.dart';
+import 'package:flutter_metawear/impl/DataAttributes.dart';
+import 'package:flutter_metawear/impl/DataPrivate.dart';
+import 'package:flutter_metawear/impl/DataProcessorConfig.dart';
+import 'package:flutter_metawear/impl/DataProcessorImpl.dart';
 import 'package:flutter_metawear/impl/DataTypeBase.dart';
+import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
+import 'package:flutter_metawear/impl/ModuleType.dart';
+import 'package:flutter_metawear/module/DataProcessor.dart';
+
+class _DataPrivate extends DataPrivate {
+    final ArrayData _arrayData;
+    final MetaWearBoardPrivate _mwPrivate;
+    final List<Data> _unwrappedData;
+
+    _DataPrivate(this._unwrappedData, this._mwPrivate, this._arrayData,
+        DateTime timestamp, Uint8List dataBytes, ClassToObject mapper)
+        : super(timestamp, dataBytes, mapper);
+
+    @override
+    List<Type> types() {
+        return [List];
+    }
+
+    @override
+    double scale() {
+        // TODO: implement scale
+        return _arrayData.scale(_mwPrivate);
+    }
+
+    @override
+    T value<T>() {
+        if (T is List<Data>) {
+            return _unwrappedData as T;
+        }
+        return super.value<T>();
+    }
+
+}
 
 class ArrayData extends DataTypeBase {
-//    private static final long serialVersionUID = 4427138245810712009L;
+    ArrayData(ModuleType module, int register, DataAttributes attributes,
+        {int id, DataTypeBase input})
+        :super(module, register, attributes, id: id, input: input);
 
-    ArrayData(Constant.Module module, byte register, byte id, DataAttributes attributes) {
-        super(module, register, id, attributes);
-    }
-
-    ArrayData(DataTypeBase input, Constant.Module module, byte register, DataAttributes attributes) {
-        super(input, module, register, attributes);
-    }
-
-    ArrayData(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
-        super(input, module, register, id, attributes);
+    @override
+    DataTypeBase copy(DataTypeBase input, ModuleType module, int register,
+        int id, DataAttributes attributes) {
+        return new ArrayData(
+            module, register, attributes, input: input, id: id);
     }
 
     @override
-    public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
-        return new ArrayData(input, module, register, id, attributes);
-    }
-
-    @override
-    public Number convertToFirmwareUnits(MetaWearBoardPrivate mwPrivate, Number value) {
+    num convertToFirmwareUnits(MetaWearBoardPrivate mwPrivate, num value) {
         return value;
     }
 
     @override
-    public Data createMessage(boolean logData, final MetaWearBoardPrivate mwPrivate, final byte[] data, final Calendar timestamp, DataPrivate.ClassToObject mapper) {
-        DataProcessorImpl dpModules = (DataProcessorImpl) mwPrivate.getModules().get(DataProcessor.class);
-        DataProcessorImpl.Processor fuser = dpModules.activeProcessors.get(eventConfig[2]);
+    Data createMessage(bool logData, MetaWearBoardPrivate mwPrivate,
+        Uint8List data, DateTime timestamp, ClassToObject mapper) {
+        DataProcessorImpl dpModules = mwPrivate.getModules()[DataProcessor];
+        Processor fuser = dpModules.activeProcessors[eventConfig[2]];
 
-        while(!(fuser.editor.configObj instanceof DataProcessorConfig.Fuser)) {
-            fuser = dpModules.activeProcessors.get(fuser.editor.source.input.eventConfig[2]);
+        while (!(fuser.editor.configObj is Fuser)) {
+            fuser = dpModules.activeProcessors[fuser.editor.source.input
+                .eventConfig[2]];
         }
 
-        DataTypeBase source = fuser.editor.source.input == null ? fuser.editor.source : fuser.editor.source.input;
+        DataTypeBase source = fuser.editor.source.input == null ? fuser.editor
+            .source : fuser.editor.source.input;
         int offset = 0;
-        final Data[] unwrappedData = new Data[fuser.editor.config.length + 1];
-        unwrappedData[0] = source.createMessage(logData, mwPrivate, data, timestamp, mapper);
-        offset+= source.attributes.length();
+        final List<Data> unwrappedData = List<Data>(
+            fuser.editor.config.length + 1);
+        unwrappedData[0] =
+            source.createMessage(logData, mwPrivate, data, timestamp, mapper);
+        offset += source.attributes.length();
 
-        for(int i = 2; i < fuser.editor.config.length; i++) {
-            DataProcessorImpl.Processor value = dpModules.activeProcessors.get(fuser.editor.config[i]);
+        for (int i = 2; i < fuser.editor.config.length; i++) {
+            Processor value = dpModules.activeProcessors[fuser.editor
+                .config[i]];
             // buffer state holds the actual data type
-            byte[] portion = new byte[value.state.attributes.length()];
+            Uint8List portion = Uint8List(value.state.attributes.length());
 
-            System.arraycopy(data, offset, portion, 0, portion.length);
-            unwrappedData[i - 1] = value.state.createMessage(logData, mwPrivate, portion, timestamp, mapper);
+            portion.setAll(0, data.skip(offset));
+            unwrappedData[i - 1] = value.state.createMessage(
+                logData, mwPrivate, portion, timestamp, mapper);
 
-            offset+= value.state.attributes.length();
+            offset += value.state.attributes.length();
             i++;
         }
 
-        return new DataPrivate(timestamp, data, mapper) {
-            @override
-            public Class<?>[] types() {
-                return new Class<?>[] { Data[].class };
-            }
-
-            @override
-            public float scale() {
-                return ArrayData.this.scale(mwPrivate);
-            }
-
-            @override
-            public <T> T value(Class<T> clazz) {
-                if (clazz.equals(Data[].class)) {
-                    return clazz.cast(unwrappedData);
-                }
-                return super.value(clazz);
-            }
-        };
+        return _DataPrivate(
+            unwrappedData, mwPrivate, this, timestamp, data, mapper);
     }
 }

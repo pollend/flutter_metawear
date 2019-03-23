@@ -26,7 +26,6 @@ import 'dart:typed_data';
 
 import 'package:flutter_metawear/Subscriber.dart';
 import 'package:flutter_metawear/builder/RouteComponent.dart';
-import 'package:flutter_metawear/builder/RouteComponent.dart';
 import 'package:flutter_metawear/builder/RouteMulticast.dart';
 import 'package:flutter_metawear/impl/DataProcessorImpl.dart';
 import 'package:flutter_metawear/impl/DataTypeBase.dart';
@@ -36,57 +35,57 @@ import 'dart:collection';
 import 'MetaWearBoardPrivate.dart';
 import 'dart:core';
 import 'package:tuple/tuple.dart';
-
+import 'package:flutter_metawear/module/DataProcessor.dart';
+import 'package:flutter_metawear/impl/DataProcessorConfig.dart';
+import 'package:flutter_metawear/impl//ModuleType.dart';
 
 enum BranchElement {
     MULTICAST,
     SPLIT
 }
 
-class CounterEditorInner extends EditorImplBase implements DataProcessor.CounterEditor {
+class CounterEditorInner extends EditorImplBase implements CounterEditor {
 
-    CounterEditorInner(DataProcessorConfig configObj, DataTypeBase source, MetaWearBoardPrivate mwPrivate) {
-        super(configObj, source, mwPrivate);
-    }
+    CounterEditorInner(DataProcessorConfig configObj, DataTypeBase source, MetaWearBoardPrivate mwPrivate):super(configObj,source,mwPrivate);
 
     @override
     void reset() {
-        mwPrivate.sendCommand(new byte[]{DATA_PROCESSOR.id, DataProcessorImpl.STATE, source.eventConfig[2],
-        0x00, 0x00, 0x00, 0x00});
+        mwPrivate.sendCommand(Uint8List.fromList([ModuleType.DATA_PROCESSOR.id, DataProcessorImpl.STATE, source.eventConfig[2],
+        0x00, 0x00, 0x00, 0x00]));
     }
 
     @override
     void set(int value) {
-        ByteBuffer buffer = ByteBuffer.allocate(7).order(ByteOrder.LITTLE_ENDIAN)
-            .put(DATA_PROCESSOR.id)
-            .put(DataProcessorImpl.STATE)
-            .put(source.eventConfig[2])
-            .putInt(value);
-        mwPrivate.sendCommand(buffer.array());
+        Uint8List payload = Uint8List(7);
+        ByteData view = ByteData.view(payload.buffer);
+        view.setInt8(0, ModuleType.DATA_PROCESSOR.id);
+        view.setInt8(1, DataProcessorImpl.STATE);
+        view.setInt8(2, source.eventConfig[2]);
+        view.setInt32(3, value);
+        mwPrivate.sendCommand(payload);
     }
 }
-class AccumulatorEditorInner extends EditorImplBase implements DataProcessor.AccumulatorEditor {
+class AccumulatorEditorInner extends EditorImplBase implements AccumulatorEditor {
 
-    AccumulatorEditorInner(DataProcessorConfig configObj, DataTypeBase source, MetaWearBoardPrivate mwPrivate) {
-        super(configObj, source, mwPrivate);
-    }
+    AccumulatorEditorInner(DataProcessorConfig configObj, DataTypeBase source, MetaWearBoardPrivate mwPrivate) : super(configObj,source,mwPrivate);
 
     @override
     void reset() {
-        mwPrivate.sendCommand(new byte[] {DATA_PROCESSOR.id, DataProcessorImpl.STATE, source.eventConfig[2],
-        0x00, 0x00, 0x00, 0x00});
+        mwPrivate.sendCommand(Uint8List.fromList([ModuleType.DATA_PROCESSOR.id, DataProcessorImpl.STATE, source.eventConfig[2], 0x00, 0x00, 0x00, 0x00]);
     }
 
     @override
-    void set(Number value) {
-        Number scaledValue = source.convertToFirmwareUnits(mwPrivate, value);
-        ByteBuffer buffer = ByteBuffer.allocate(7).order(ByteOrder.LITTLE_ENDIAN)
-            .put(DATA_PROCESSOR.id)
-            .put(DataProcessorImpl.STATE)
-            .put(source.eventConfig[2])
-            .putInt(scaledValue.intValue());
+    void set(num value) {
+        int scaledValue = source.convertToFirmwareUnits(mwPrivate, value).floor();
 
-        mwPrivate.sendCommand(buffer.array());
+        Uint8List payload = Uint8List(7);
+        ByteData view = ByteData.view(payload.buffer);
+        view.setInt8(0, ModuleType.DATA_PROCESSOR.id);
+        view.setInt8(1, DataProcessorImpl.STATE);
+        view.setInt8(2, source.eventConfig[2]);
+        view.setInt32(3, scaledValue);
+
+        mwPrivate.sendCommand(payload);
     }
 }
 

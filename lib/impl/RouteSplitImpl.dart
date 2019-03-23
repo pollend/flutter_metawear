@@ -22,6 +22,7 @@
  * hello@mbientlab.com.
  */
 
+import 'package:flutter_metawear/IllegalRouteOperationException.dart';
 import 'package:flutter_metawear/builder/RouteComponent.dart';
 import 'package:flutter_metawear/builder/RouteSplit.dart';
 import 'package:flutter_metawear/impl/RouteComponentImpl.dart';
@@ -37,8 +38,8 @@ class RouteSplitImpl implements RouteSplit {
     @override
     RouteComponent index(int i) {
         try {
-            return new RouteComponentImpl(caller.persistantData.splits.peek().second[i], caller);
-        } catch (ArrayIndexOutOfBoundsException e) {
+            return new RouteComponentImpl(caller.persistantData.splits.last.item2[i], caller);
+        } on RangeError catch(e) {
             throw new IllegalRouteOperationException("Index on split data out of bounds", e);
         }
     }

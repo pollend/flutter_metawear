@@ -27,12 +27,17 @@ import 'dart:typed_data';
 
 import 'package:flutter_metawear/Data.dart';
 import 'package:flutter_metawear/DataToken.dart';
+import 'package:flutter_metawear/builder/filter/ComparisonOutput.dart';
+import 'package:flutter_metawear/impl/ArrayData.dart';
+import 'package:flutter_metawear/impl/ByteArrayData.dart';
 import 'package:flutter_metawear/impl/DataAttributes.dart';
 import 'package:flutter_metawear/impl/DataPrivate.dart';
 import 'package:flutter_metawear/impl/DataProcessorConfig.dart';
 import 'package:flutter_metawear/impl/DataProcessorImpl.dart';
+import 'package:flutter_metawear/impl/IntData.dart';
 import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
 import 'package:flutter_metawear/impl/ModuleType.dart';
+import 'package:flutter_metawear/impl/UintData.dart';
 import 'package:flutter_metawear/impl/Util.dart';
 import 'package:flutter_metawear/module/AccelerometerMma8452q.dart';
 import 'package:tuple/tuple.dart';
@@ -50,12 +55,9 @@ import 'package:flutter_metawear/impl/SensorFusionBoschImpl.dart';
 import 'package:flutter_metawear/impl/SwitchImpl.dart';
 import 'package:flutter_metawear/impl/TemperatureImpl.dart';
 import 'package:flutter_metawear/impl/GpioImpl.dart';
-import 'package:flutter_metawear/impl/DataProcessorImpl.dart';
 import 'package:flutter_metawear/impl/AccelerometerMma8452qImpl.dart';
 import 'package:flutter_metawear/impl/AccelerometerBmi160Impl.dart';
 import 'package:flutter_metawear/impl/AccelerometerBoschImpl.dart';
-
-import 'package:flutter_metawear/impl/DataProcessorConfig.dart';
 
 import 'package:flutter_metawear/module/DataProcessor.dart';
 import 'package:flutter_metawear/module/Accelerometer.dart';
@@ -88,7 +90,8 @@ class _DataTypeBase extends DataTypeBase {
  * Created by etsai on 9/4/16.
  */
 abstract class DataTypeBase implements DataToken {
-    static String createUri(DataTypeBase dataType, MetaWearBoardPrivate mwPrivate) {
+    static String createUri(DataTypeBase dataType,
+        MetaWearBoardPrivate mwPrivate) {
         String uri = null;
         switch (ModuleType.lookupEnum(dataType.eventConfig[0])) {
             case ModuleType.SWITCH:
@@ -168,14 +171,19 @@ abstract class DataTypeBase implements DataToken {
     final DataTypeBase input;
     List<DataTypeBase> split;
 
-    DataTypeBase.raw(Uint8List config, int offset, int length):
+    DataTypeBase.raw(Uint8List config, int offset, int length)
+        :
             eventConfig = config,
             input = null,
             split = null,
-            attributes = DataAttributes(Uint8List.fromList([length]),1,offset,false);
+            attributes = DataAttributes(
+                Uint8List.fromList([length]), 1, offset, false);
 
-    DataTypeBase(ModuleType module, int register, DataAttributes attributes, {int id, DataTypeBase input}):
-            this.eventConfig = Uint8List.fromList([module.id,register,id == null ? NO_DATA_ID: id]),
+    DataTypeBase(ModuleType module, int register, DataAttributes attributes,
+        {int id, DataTypeBase input})
+        :
+            this.eventConfig = Uint8List.fromList(
+                [module.id, register, id == null ? NO_DATA_ID : id]),
             this.attributes = attributes,
             this.input = input {
         this.split = createSplits();
@@ -183,23 +191,26 @@ abstract class DataTypeBase implements DataToken {
 
 
     Tuple3<int, int, int> eventConfigAsTuple() {
-        return Tuple3<int,int,int>(eventConfig[0], eventConfig[1], eventConfig[2]);
+        return Tuple3<int, int, int>(
+            eventConfig[0], eventConfig[1], eventConfig[2]);
     }
 
-    void read(MetaWearBoardPrivate mwPrivate,[Uint8List parameters]) {
-      if(parameters == null) {
-          if (eventConfig[2] == NO_DATA_ID) {
-              mwPrivate.sendCommand(Uint8List.fromList([eventConfig[0], eventConfig[1]]));
-          } else {
-              mwPrivate.sendCommand(eventConfig);
-          }
-      }
-      else{
-          Uint8List command = Uint8List(eventConfig.length + parameters.length);
-          command.setAll(0, eventConfig);
-          command.setAll(eventConfig.length, parameters);
-          mwPrivate.sendCommand(command);
-      }
+    void read(MetaWearBoardPrivate mwPrivate, [Uint8List parameters]) {
+        if (parameters == null) {
+            if (eventConfig[2] == NO_DATA_ID) {
+                mwPrivate.sendCommand(
+                    Uint8List.fromList([eventConfig[0], eventConfig[1]]));
+            } else {
+                mwPrivate.sendCommand(eventConfig);
+            }
+        }
+        else {
+            Uint8List command = Uint8List(
+                eventConfig.length + parameters.length);
+            command.setAll(0, eventConfig);
+            command.setAll(eventConfig.length, parameters);
+            mwPrivate.sendCommand(command);
+        }
     }
 
 
@@ -218,25 +229,39 @@ abstract class DataTypeBase implements DataToken {
     double scale(MetaWearBoardPrivate mwPrivate) {
         return (input == null) ? 1.0 : input.scale(mwPrivate);
     }
-    DataTypeBase copy(DataTypeBase input, ModuleType module, int register, int id, DataAttributes attributes);
-    DataTypeBase dataProcessorCopy(DataTypeBase input, DataAttributes attributes) {
-        return copy(input, ModuleType.DATA_PROCESSOR, DataProcessorImpl.NOTIFY, NO_DATA_ID, attributes);
+
+    DataTypeBase copy(DataTypeBase input, ModuleType module, int register,
+        int id, DataAttributes attributes);
+
+    DataTypeBase dataProcessorCopy(DataTypeBase input,
+        DataAttributes attributes) {
+        return copy(input, ModuleType.DATA_PROCESSOR, DataProcessorImpl.NOTIFY,
+            NO_DATA_ID, attributes);
     }
-    DataTypeBase dataProcessorStateCopy(DataTypeBase input, DataAttributes attributes) {
-        return copy(input, ModuleType.DATA_PROCESSOR, Util.setSilentRead(DataProcessorImpl.STATE), NO_DATA_ID, attributes);
+
+    DataTypeBase dataProcessorStateCopy(DataTypeBase input,
+        DataAttributes attributes) {
+        return copy(input, ModuleType.DATA_PROCESSOR,
+            Util.setSilentRead(DataProcessorImpl.STATE), NO_DATA_ID,
+            attributes);
     }
 
     num convertToFirmwareUnits(MetaWearBoardPrivate mwPrivate, num value) {
         return value;
     }
-    Data createMessage(bool logData, MetaWearBoardPrivate mwPrivate, Uint8List data, DateTime timestamp, ClassToObject mapper);
 
-    Tuple2<DataTypeBase, DataTypeBase> dataProcessorTransform(DataProcessorConfig config, DataProcessorImpl dpModule) {
+    Data createMessage(bool logData, MetaWearBoardPrivate mwPrivate,
+        Uint8List data, DateTime timestamp, ClassToObject mapper);
+
+    Tuple2<DataTypeBase, DataTypeBase> dataProcessorTransform(
+        DataProcessorConfig config, DataProcessorImpl dpModule) {
         switch (config.id) {
             case Buffer.ID:
                 return Tuple2(
-                    UintData(this, ModuleType.DATA_PROCESSOR, DataProcessorImpl.NOTIFY,
-                        new DataAttributes(Uint8List(0), 0, 0, false)),
+                    UintData(
+                        ModuleType.DATA_PROCESSOR, DataProcessorImpl.NOTIFY,
+                        new DataAttributes(Uint8List(0), 0, 0, false),
+                        input: this),
                     dataProcessorStateCopy(this, this.attributes)
                 );
             case Accumulator.ID:
@@ -248,11 +273,13 @@ abstract class DataTypeBase implements DataToken {
 
                     return Tuple2(
                         casted.counter ? new UintData(
-                            this, ModuleType.DATA_PROCESSOR, DataProcessorImpl.NOTIFY,
-                            attributes) : dataProcessorCopy(this, attributes),
-                        casted.counter ? new UintData(null, DATA_PROCESSOR,
+                            ModuleType.DATA_PROCESSOR, DataProcessorImpl.NOTIFY,
+                            attributes, input: this) : dataProcessorCopy(
+                            this, attributes),
+                        casted.counter ? new UintData(ModuleType.DATA_PROCESSOR,
                             Util.setSilentRead(DataProcessorImpl.STATE),
-                            DataTypeBase.NO_DATA_ID, attributes) :
+                            attributes, input: null,
+                            id: DataTypeBase.NO_DATA_ID) :
                         dataProcessorStateCopy(this, attributes)
                     );
                 }
@@ -267,8 +294,9 @@ abstract class DataTypeBase implements DataToken {
                         this, this.attributes.dataProcessorCopy()),
                     new UintData(ModuleType.DATA_PROCESSOR,
                         Util.setSilentRead(DataProcessorImpl.STATE),
-                        DataTypeBase.NO_DATA_ID, new DataAttributes(
-                            new byte[] {2}, (byte) 1, (byte) 0, false))
+                        new DataAttributes(
+                            Uint8List.fromList([2]), 1, 0, false),
+                        id: DataTypeBase.NO_DATA_ID)
                 );
             case Maths.ID:
                 {
@@ -277,7 +305,7 @@ abstract class DataTypeBase implements DataToken {
                     switch (casted.op) {
                         case Operation.ADD:
                             processor = dataProcessorCopy(this,
-                                attributes.dataProcessorCopySize((byte) 4));
+                                attributes.dataProcessorCopySize(4));
                             break;
                         case Operation.MULTIPLY:
                             processor = dataProcessorCopy(this,
@@ -308,124 +336,187 @@ abstract class DataTypeBase implements DataToken {
                         case Operation.EXPONENT:
                             {
                                 processor = new ByteArrayData(
-                                    this, ModuleType.DATA_PROCESSOR,
+                                    ModuleType.DATA_PROCESSOR,
                                     DataProcessorImpl.NOTIFY,
-                                    attributes.dataProcessorCopySize((byte) 4));
+                                    attributes.dataProcessorCopySize(4),
+                                    input: this);
                                 break;
                             }
                         case Operation.LEFT_SHIFT:
                             {
                                 processor = new ByteArrayData(
-                                    this, ModuleType.DATA_PROCESSOR,
+                                    ModuleType.DATA_PROCESSOR,
                                     DataProcessorImpl.NOTIFY,
-                                    attributes.dataProcessorCopySize(
-                                        Math.min(attributes.sizes[0] + (
-                                        casted.rhs / 8), 4)));
-        break;
-        }
-        case Operation.RIGHT_SHIFT: {
-        processor = new ByteArrayData(this, ModuleType.DATA_PROCESSOR, DataProcessorImpl.NOTIFY,
-        attributes.dataProcessorCopySize((byte) Math.max(attributes.sizes[0] - (casted.rhs / 8), 1)));
-        break;
-        }
-        case Operation.SQRT: {
-        processor = new ByteArrayData(this, ModuleType.DATA_PROCESSOR, DataProcessorImpl.NOTIFY, attributes.dataProcessorCopySigned(false));
-        break;
-        }
-        case Operation.CONSTANT:
-        DataAttributes attributes = new DataAttributes(new byte[] {4}, (byte) 1, (byte) 0, casted.rhs >= 0);
-        processor = attributes.signed ? new IntData(this, ModuleType.DATA_PROCESSOR, DataProcessorImpl.NOTIFY, attributes) :
-        new UintData(this, ModuleType.DATA_PROCESSOR, DataProcessorImpl.NOTIFY, attributes);
-        break;
-        }
-        if (processor != null) {
-        return Tuple2(processor, null);
-        }
-        break;
-        }
-        case Pulse.ID: {
-        Pulse casted = config as Pulse;
-        DataTypeBase processor;
-        switch(casted.mode) {
-        case PulseOutput.WIDTH:
-        processor = new UintData(this, ModuleType.DATA_PROCESSOR, DataProcessorImpl.NOTIFY, new DataAttributes(new byte[] {2}, (byte) 1, (byte) 0, false));
-        break;
-        case PulseOutput.AREA:
-        processor = dataProcessorCopy(this, attributes.dataProcessorCopySize((byte) 4));
-        break;
-        case PulseOutput.PEAK:
-        processor = dataProcessorCopy(this, attributes.dataProcessorCopy());
-        break;
-        case PulseOutput.ON_DETECT:
-        processor = new UintData(this, ModuleType.DATA_PROCESSOR, DataProcessorImpl.NOTIFY, new DataAttributes(new byte[] {1}, (byte) 1, (byte) 0, false));
-        break;
-        default:
-        processor = null;
-        }
-        if (processor != null) {
-        return Tuple2(processor, null);
-        }
-        break;
-        }
-        case Comparison.ID: {
-        DataTypeBase processor = null;
-        if (config is SingleValueComparison) {
-        processor = dataProcessorCopy(this, this.attributes.dataProcessorCopy());
-        } else if (config is MultiValueComparison) {
-        MultiValueComparison casted = config as MultiValueComparison;
-        if (casted.mode == ComparisonOutput.PASS_FAIL || casted.mode == ComparisonOutput.ZONE) {
-        processor = new UintData(this, ModuleType.DATA_PROCESSOR, DataProcessorImpl.NOTIFY, new DataAttributes(new byte[] {1}, (byte) 1, (byte) 0, false));
-        } else {
-        processor = dataProcessorCopy(this, attributes.dataProcessorCopy());
-        }
-        }
-        if (processor != null) {
-        return Tuple2(processor, null);
-        }
-        break;
-        }
-        case Threshold.ID: {
-        Threshold casted = config as Threshold;
-        switch (casted.mode) {
-        case ThresholdOutput.ABSOLUTE:
-        return Tuple2(dataProcessorCopy(this, attributes.dataProcessorCopy()), null);
-        case ThresholdOutput.BINARY:
-        return Tuple2(new IntData(this, ModuleType.DATA_PROCESSOR, DataProcessorImpl.NOTIFY,new DataAttributes(new byte[] {1}, (byte) 1, (byte) 0, true)), null);
-        }
-        break;
-        }
-        case Differential.ID: {
-        Differential casted = config as Differential;
-        switch(casted.mode) {
-        case DifferentialOutput.ABSOLUTE:
-        return Tuple2(dataProcessorCopy(this, attributes.dataProcessorCopy()), null);
-        case DifferentialOutput.DIFFERENCE:
-        throw new Exception("Differential processor in 'difference' mode must be handled by subclasses");
-        case DifferentialOutput.BINARY:
-        return Tuple2(new IntData(this, ModuleType.DATA_PROCESSOR, DataProcessorImpl.NOTIFY, new DataAttributes(new byte[] {1}, (byte) 1, (byte) 0, true)), null);
-        }
-        break;
-        }
-        case Packer.ID: {
-        Packer casted = config as Packer;
-        return Tuple2(dataProcessorCopy(this, attributes.dataProcessorCopyCopies(casted.count)), null);
-        }
-        case Accounter.ID: {
-        Accounter casted = config as Accounter;
-        return Tuple2(dataProcessorCopy(this, new DataAttributes(Uint8List.fromList([casted.length, attributes.length()]), 1, 0, attributes.signed)), null);
-        }
-        case Fuser.ID: {
-        int fusedLength = attributes.length();
-        Fuser casted = config as Fuser;
+                                    attributes.dataProcessorCopySize(min(
+                                        attributes.sizes[0] +
+                                            (casted.rhs / 8).floor(), 4)),
+                                    input: this);
+                                break;
+                            }
+                        case Operation.RIGHT_SHIFT:
+                            {
+                                processor = new ByteArrayData(
+                                    ModuleType.DATA_PROCESSOR,
+                                    DataProcessorImpl.NOTIFY,
+                                    attributes.dataProcessorCopySize(max(
+                                        attributes.sizes[0] -
+                                            (casted.rhs / 8).floor(), 1)),
+                                    input: this);
+                                break;
+                            }
+                        case Operation.SQRT:
+                            {
+                                processor = new ByteArrayData(
+                                    ModuleType.DATA_PROCESSOR,
+                                    DataProcessorImpl.NOTIFY,
+                                    attributes.dataProcessorCopySigned(false),
+                                    input: this);
+                                break;
+                            }
+                        case Operation.CONSTANT:
+                            DataAttributes attributes = new DataAttributes(
+                                Uint8List.fromList([4]), 1, 0, casted.rhs >= 0);
+                            processor = attributes.signed ? new IntData(
+                                this, ModuleType.DATA_PROCESSOR,
+                                DataProcessorImpl.NOTIFY, attributes) :
+                            new UintData(ModuleType.DATA_PROCESSOR,
+                                DataProcessorImpl.NOTIFY, attributes,
+                                input: this);
+                            break;
+                    }
+                    if (processor != null) {
+                        return Tuple2(processor, null);
+                    }
+                    break;
+                }
+            case Pulse.ID:
+                {
+                    Pulse casted = config as Pulse;
+                    DataTypeBase processor;
+                    switch (casted.mode) {
+                        case PulseOutput.WIDTH:
+                            processor = new UintData(ModuleType.DATA_PROCESSOR,
+                                DataProcessorImpl.NOTIFY, new DataAttributes(
+                                    Uint8List.fromList([2]), 1, 0, false),
+                                input: this);
+                            break;
+                        case PulseOutput.AREA:
+                            processor = dataProcessorCopy(
+                                this, attributes.dataProcessorCopySize(4));
+                            break;
+                        case PulseOutput.PEAK:
+                            processor = dataProcessorCopy(
+                                this, attributes.dataProcessorCopy());
+                            break;
+                        case PulseOutput.ON_DETECT:
+                            processor = new UintData(ModuleType.DATA_PROCESSOR,
+                                DataProcessorImpl.NOTIFY, new DataAttributes(
+                                    Uint8List.fromList([1]), 1, 0, false),
+                                input: this);
+                            break;
+                        default:
+                            processor = null;
+                    }
+                    if (processor != null) {
+                        return Tuple2(processor, null);
+                    }
+                    break;
+                }
+            case Comparison.ID:
+                {
+                    DataTypeBase processor = null;
+                    if (config is SingleValueComparison) {
+                        processor = dataProcessorCopy(
+                            this, this.attributes.dataProcessorCopy());
+                    } else if (config is MultiValueComparison) {
+                        MultiValueComparison casted = config as MultiValueComparison;
+                        if (casted.mode == ComparisonOutput.PASS_FAIL ||
+                            casted.mode == ComparisonOutput.ZONE) {
+                            processor = new UintData(ModuleType.DATA_PROCESSOR,
+                                DataProcessorImpl.NOTIFY, new DataAttributes(
+                                    Uint8List.fromList([1]), 1, 0, false),
+                                input: this);
+                        } else {
+                            processor = dataProcessorCopy(
+                                this, attributes.dataProcessorCopy());
+                        }
+                    }
+                    if (processor != null) {
+                        return Tuple2(processor, null);
+                    }
+                    break;
+                }
+            case Threshold.ID:
+                {
+                    Threshold casted = config as Threshold;
+                    switch (casted.mode) {
+                        case ThresholdOutput.ABSOLUTE:
+                            return Tuple2(dataProcessorCopy(
+                                this, attributes.dataProcessorCopy()), null);
+                        case ThresholdOutput.BINARY:
+                            return Tuple2(new IntData(
+                                this, ModuleType.DATA_PROCESSOR,
+                                DataProcessorImpl.NOTIFY, new DataAttributes(
+                                Uint8List.fromList([1]), 1, 0, true)), null);
+                    }
+                    break;
+                }
+            case Differential.ID:
+                {
+                    Differential casted = config as Differential;
+                    switch (casted.mode) {
+                        case DifferentialOutput.ABSOLUTE:
+                            return Tuple2(dataProcessorCopy(
+                                this, attributes.dataProcessorCopy()), null);
+                        case DifferentialOutput.DIFFERENCE:
+                            throw new Exception(
+                                "Differential processor in 'difference' mode must be handled by subclasses");
+                        case DifferentialOutput.BINARY:
+                            return Tuple2(new IntData(
+                                this, ModuleType.DATA_PROCESSOR,
+                                DataProcessorImpl.NOTIFY, new DataAttributes(
+                                Uint8List.fromList([1]), 1, 0, true)), null);
+                    }
+                    break;
+                }
+            case Packer.ID:
+                {
+                    Packer casted = config as Packer;
+                    return Tuple2(dataProcessorCopy(
+                        this, attributes.dataProcessorCopyCopies(casted.count)),
+                        null);
+                }
+            case Accounter.ID:
+                {
+                    Accounter casted = config as Accounter;
+                    return Tuple2(dataProcessorCopy(this, new DataAttributes(
+                        Uint8List.fromList(
+                            [casted.length, attributes.length()]), 1, 0,
+                        attributes.signed)), null);
+                }
+            case Fuser.ID:
+                {
+                    int fusedLength = attributes.length();
+                    Fuser casted = config as Fuser;
 
-        for(int id in casted.filterIds) {
-        fusedLength+= dpModule.activeProcessors.get(id).state.attributes.length();
+                    for (int id in casted.filterIds) {
+                        fusedLength += dpModule.activeProcessors[id]
+                            .state
+                            .attributes
+                            .length();
+                    }
+
+                    return Tuple2(new ArrayData(
+                        ModuleType.DATA_PROCESSOR, DataProcessorImpl.NOTIFY,
+                        new DataAttributes(
+                            Uint8List.fromList([fusedLength]), 1, 0, false),
+                        input: this), null);
+                }
         }
 
-        return Tuple2(new ArrayData(this, ModuleType.DATA_PROCESSOR, DataProcessorImpl.NOTIFY, new DataAttributes(new byte[] {fusedLength}, (byte) 1, (byte) 0, false)), null);
-        }
-        }
-        throw new IllegalStateException("Unable to determine the DataTypeBase object for config: " + Util.arrayToHexString(config.build()));
+        throw Exception(
+            "Unable to determine the DataTypeBase object for config: " +
+                Util.arrayToHexString(config.build()));
     }
 
     List<DataTypeBase> createSplits() {
@@ -438,7 +529,8 @@ abstract class DataTypeBase implements DataToken {
         }
         if (offset + length > attributes.length()) {
             int len = attributes.length();
-            throw RangeError("offset + length is greater than data length ($len)");
+            throw RangeError(
+                "offset + length is greater than data length ($len)");
         }
         return _DataTypeBase.raw(eventConfig, offset, length);
     }

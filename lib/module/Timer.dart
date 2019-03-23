@@ -56,14 +56,14 @@ abstract class ScheduledTask {
     /**
      * Removes this task from the board
      */
-    void remove();
+    void remove([bool sync]);
 }
 
 /**
  * On-board scheduler for executing MetaWear commands in the future
  * @author Eric Tsai
  */
-abstract class Timer implements Module {
+abstract class TimerModule implements Module {
 
     /**
      * Schedule a task to be indefinitely executed on-board at fixed intervals

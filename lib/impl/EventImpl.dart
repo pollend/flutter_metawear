@@ -22,10 +22,15 @@
  * hello@mbientlab.com.
  */
 
+import 'dart:async';
+import 'dart:collection';
+
+import 'package:flutter_metawear/CodeBlock.dart';
 import 'package:flutter_metawear/MetaWearBoard.dart';
 import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
 import 'package:flutter_metawear/impl/ModuleImplBase.dart';
 import 'package:flutter_metawear/impl/ModuleType.dart';
+import 'package:flutter_metawear/impl/DataTypeBase.dart';
 
 
 import 'package:tuple/tuple.dart';
@@ -38,15 +43,13 @@ class EventImpl extends ModuleImplBase implements Module {
 
     Tuple3<int, int, int> feedbackParams= null;
     DataTypeBase activeDataType = null;
-
-    ListQueue<byte[]> recordedCommands;
-    TimedTask<byte[]> createEventTask;
+    Queue<Uint8List> recordedCommands;
+    final StreamController<Uint8List> _streamController = StreamController<Uint8List>();
 
     EventImpl(MetaWearBoardPrivate mwPrivate):super(mwPrivate);
 
     void init() {
-        createEventTask = new TimedTask<>();
-        mwPrivate.addResponseHandler(Tuple2(ModuleType.EVENT.id, ENTRY), response -> createEventTask.setResult(response));
+        mwPrivate.addResponseHandler(Tuple2(ModuleType.EVENT.id, ENTRY), (Uint8List response)=> _streamController.add(response));
     }
 
     @override
@@ -58,64 +61,62 @@ class EventImpl extends ModuleImplBase implements Module {
         mwPrivate.sendCommand(Uint8List.fromList([ModuleType.EVENT.id, EventImpl.REMOVE, id]));
     }
 
-    Future<List<int>> queueEvents(final Queue<Pair<? extends DataTypeBase, ? extends CodeBlock>> eventCodeBlocks) {
-        final LinkedList<Byte> ids = new LinkedList<>();
-        final Capture<Boolean> terminate = new Capture<>(false);
+    Future<List<int>> queueEvents(final Queue<Tuple2<DataTypeBase,CodeBlock>> eventCodeBlocks) async {
 
-        return Task.forResult(null).continueWhile(() -> !terminate.get() && !eventCodeBlocks.isEmpty(), ignored -> {
-            Pair<? extends DataTypeBase, ? extends CodeBlock> current = eventCodeBlocks.poll();
+        Stream<Uint8List> stream = _streamController.stream.timeout(ModuleType.RESPONSE_TIMEOUT);
+        StreamIterator<Uint8List> iterator = StreamIterator(stream);
+        List ids = [];
 
-            activeDataType= current.first;
-            recordedCommands= new LinkedList<>();
-            current.second.program();
-            activeDataType= null;
+        try {
+            while (!eventCodeBlocks.isEmpty) {
+                Tuple2<DataTypeBase, CodeBlock> entry = eventCodeBlocks
+                    .removeLast();
+                activeDataType = entry.item1;
+                recordedCommands = Queue();
+                entry.item2.program();
+                activeDataType = null;
+                entry.item2.program();
+                TimeoutException exception;
 
-            final Capture<Boolean> terminate2 = new Capture<>(false);
-            return Task.forResult(null).continueWhile(() -> !terminate2.get() && !recordedCommands.isEmpty(), ignored2 -> {
-                mwPrivate.sendCommand(recordedCommands.poll());
-                return createEventTask.execute("Did not receive event id within %dms", Constant.RESPONSE_TIMEOUT,
-                        () -> mwPrivate.sendCommand(recordedCommands.poll())
-                ).continueWithTask(task -> {
-                    if (task.isFaulted()) {
-                        terminate.set(true);
-                        terminate2.set(true);
-                        return Task.<Void>forError(task.getError());
-                    }
-
-                    ids.add(task.getResult()[2]);
-                    return Task.forResult(null);
-                });
-            });
-        }).continueWithTask(task -> {
-            if (task.isFaulted()) {
-                for(byte it: ids) {
-                    removeEventCommand(it);
+                while (!recordedCommands.isEmpty) {
+                    mwPrivate.sendCommand(recordedCommands.removeLast());
+                    mwPrivate.sendCommand(recordedCommands.removeLast());
+                    exception = TimeoutException("Did not receive event id",
+                        ModuleType.RESPONSE_TIMEOUT);
+                    if (await iterator.moveNext().catchError((
+                        e) => throw exception,
+                        test: (e) => e is TimeoutException) == false)
+                        throw exception;
+                    ids.add(iterator.current[2]);
                 }
-
-                return Task.forError(task.getError());
             }
-
-            return Task.forResult(ids);
-        });
+        }
+        catch (e){
+            for(int id in ids){
+                removeEventCommand(id);
+            }
+            throw e;
+        }
+        return ids;
     }
 
     void convertToEventCommand(Uint8List command) {
-        byte[] commandEntry= new byte[] {EVENT.id, EventImpl.ENTRY,
+        Uint8List commandEntry= Uint8List.fromList([ModuleType.EVENT.id, EventImpl.ENTRY,
                 activeDataType.eventConfig[0], activeDataType.eventConfig[1], activeDataType.eventConfig[2],
-                command[0], command[1], (byte) (command.length - 2)};
+                command[0], command[1], (command.length - 2)]);
 
         if (feedbackParams != null) {
-            byte[] tempEntry= new byte[commandEntry.length + 2];
-            System.arraycopy(commandEntry, 0, tempEntry, 0, commandEntry.length);
-            tempEntry[commandEntry.length]= (byte) (0x01 | ((feedbackParams.first << 1) & 0xff) | ((feedbackParams.second << 4) & 0xff));
-            tempEntry[commandEntry.length + 1]= feedbackParams.third;
+            Uint8List tempEntry= Uint8List(commandEntry.length + 2);
+            tempEntry.setAll(0, commandEntry);
+            tempEntry[commandEntry.length]= (0x01 | ((feedbackParams.item1<< 1) & 0xff) | ((feedbackParams.item2 << 4) & 0xff));
+            tempEntry[commandEntry.length + 1]= feedbackParams.item3;
             commandEntry= tempEntry;
         }
         recordedCommands.add(commandEntry);
 
-        byte[] eventParameters= new byte[command.length];
-        System.arraycopy(command, 2, eventParameters, 2, command.length - 2);
-        eventParameters[0]= EVENT.id;
+        Uint8List eventParameters= Uint8List(command.length);
+        eventParameters.setAll(2, command.skip(2));
+        eventParameters[0]= ModuleType.EVENT.id;
         eventParameters[1]= EventImpl.CMD_PARAMETERS;
         recordedCommands.add(eventParameters);
     }

@@ -39,6 +39,9 @@ import 'package:flutter_metawear/impl/ModuleInfo.dart';
 import 'package:flutter_metawear/Route.dart';
 import 'package:flutter_metawear/module/Logging.dart';
 
+abstract class RegisterResponseHandler {
+  void onResponseReceived(Uint8List response);
+}
 
 enum RouteType {
     DATA,

@@ -23,9 +23,13 @@
  */
 
 
+import 'dart:async';
+import 'dart:typed_data';
+
 import 'package:flutter_metawear/ActiveDataProducer.dart';
 import 'package:flutter_metawear/Route.dart';
 import 'package:flutter_metawear/builder/RouteBuilder.dart';
+import 'package:flutter_metawear/impl/DataAttributes.dart';
 import 'package:flutter_metawear/impl/DataTypeBase.dart';
 import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
 import 'package:flutter_metawear/impl/ModuleImplBase.dart';
@@ -71,17 +75,18 @@ class SwitchImpl extends ModuleImplBase implements Switch {
         }
     }
 
+    final StreamController<int> _streamController = StreamController<int>();
+
     ActiveDataProducer _state;
     TimedTask<int> _stateTasks;
 
     SwitchImpl(MetaWearBoardPrivate mwPrivate): super(mwPrivate) {
-        this.mwPrivate.tagProducer(PRODUCER, new UintData(ModuleType.SWITCH, STATE, new DataAttributes(new byte[] {1}, (byte) 1, (byte) 0, false)));
+        this.mwPrivate.tagProducer(PRODUCER, new UintData(ModuleType.SWITCH, STATE, new DataAttributes(Uint8List.fromList([1]), 1, 0, false)));
     }
 
     @override
     void init() {
-        _stateTasks = TimedTask<>();
-        this.mwPrivate.addResponseHandler(Tuple2<int,int>( ModuleType.SWITCH.id, Util.setRead(STATE)), response -> stateTasks.setResult(response[2]));
+        this.mwPrivate.addResponseHandler(Tuple2<int,int>( ModuleType.SWITCH.id, Util.setRead(STATE)), (Uint8List response) => _streamController.add(response[2]));
     }
 
     @override
@@ -93,8 +98,19 @@ class SwitchImpl extends ModuleImplBase implements Switch {
     }
 
     @override
-    Future<int> readCurrentStateAsync() {
-        return stateTasks.execute("Did not received button state within %dms",  Constant.RESPONSE_TIMEOUT,
-                () -> mwPrivate.sendCommand(new byte[] {SWITCH.id, Util.setRead(STATE)}));
+    Future<int> readCurrentStateAsync() async {
+        Stream<int> stream = _streamController.stream.timeout(
+            ModuleType.RESPONSE_TIMEOUT);
+        StreamIterator<int> iterator = StreamIterator(stream);
+        mwPrivate.sendCommand(
+            Uint8List.fromList([ModuleType.SWITCH.id, Util.setRead(STATE)]));
+        TimeoutException exception = TimeoutException(
+            "Did not received button state", ModuleType.RESPONSE_TIMEOUT);
+        if (await iterator.moveNext().catchError((e) => throw exception,
+            test: (e) => e is TimeoutException) == false)
+            throw exception;
+        int current = iterator.current;
+        await iterator.cancel();
+        return current;
     }
 }

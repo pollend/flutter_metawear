@@ -21,9 +21,14 @@
  * Should you have any questions regarding your right to use this Software, contact MbientLab via email:
  * hello@mbientlab.com.
  */
-import 'DataTypeBase.dart';
+import 'package:flutter_metawear/impl/DataAttributes.dart';
+import 'package:flutter_metawear/impl/DataTypeBase.dart';
+import 'package:flutter_metawear/impl/ModuleImplBase.dart';
+import 'package:flutter_metawear/module/Settings.dart';
+import 'package:flutter_metawear/impl/Util.dart';
 
-class _BatteryStateData extends DataTypeBase {
+class BatteryStateData extends DataTypeBase {
+
     BatteryStateData() {
         super(SETTINGS, Util.setSilentRead(BATTERY_STATE), new DataAttributes(new byte[] {1, 2}, (byte) 1, (byte) 0, false));
     }
@@ -112,55 +117,6 @@ class SettingsImpl extends ModuleImplBase implements Settings {
         POWER_STATUS = 0x11,
         CHARGE_STATUS = 0x12;
 
-    private static class BatteryStateData extends DataTypeBase {
-
-        BatteryStateData() {
-            super(SETTINGS, Util.setSilentRead(BATTERY_STATE), new DataAttributes(new byte[] {1, 2}, (byte) 1, (byte) 0, false));
-        }
-
-        BatteryStateData(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
-            super(input, module, register, id, attributes);
-        }
-
-        @override
-        public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
-            return new BatteryStateData(input, module, register, id, attributes);
-        }
-
-        @override
-        public Number convertToFirmwareUnits(MetaWearBoardPrivate mwPrivate, Number value) {
-            return value;
-        }
-
-        @override
-        public Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, final byte[] data, final Calendar timestamp, DataPrivate.ClassToObject mapper) {
-            final float voltage= ByteBuffer.wrap(data, 1, 2).order(ByteOrder.LITTLE_ENDIAN).getShort() / 1000f;
-            final BatteryState state= new BatteryState(data[0], voltage);
-
-            return new DataPrivate(timestamp, data, mapper) {
-                @override
-                public Class<?>[] types() {
-                    return new Class<?>[]{BatteryState.class};
-                }
-
-                @override
-                public <T> T value(Class<T> clazz) {
-                    if (clazz == BatteryState.class) {
-                        return clazz.cast(state);
-                    }
-                    return super.value(clazz);
-                }
-            };
-        }
-
-        @override
-        public DataTypeBase[] createSplits() {
-            return new DataTypeBase[] {
-                    new UintData(SETTINGS, eventConfig[1], eventConfig[2], new DataAttributes(new byte[] {1}, (byte) 1, (byte) 0, false)),
-                    new MilliUnitsUFloatData(SETTINGS, eventConfig[1], eventConfig[2], new DataAttributes(new byte[] {2}, (byte) 1, (byte) 1, false))
-            };
-        }
-    }
 
     private final DataTypeBase disconnectDummyProducer;
 
@@ -378,7 +334,7 @@ class SettingsImpl extends ModuleImplBase implements Settings {
     }
 
     @override
-    public Task<BleConnectionParameters> readBleConnParamsAsync() {
+    Future<BleConnectionParameters> readBleConnParamsAsync() {
         if (mwPrivate.lookupModuleInfo(SETTINGS).revision < CONN_PARAMS_REVISION) {
             return Task.forError(new UnsupportedOperationException("Reading BLE connection parameters is not supported on this firmware"));
         }
@@ -396,7 +352,7 @@ class SettingsImpl extends ModuleImplBase implements Settings {
     }
 
     @override
-    public BatteryDataProducer battery() {
+    BatteryDataProducer battery() {
         if (mwPrivate.lookupModuleInfo(SETTINGS).revision >= BATTERY_REVISION) {
             return new BatteryDataProducer() {
                 @override
@@ -429,7 +385,7 @@ class SettingsImpl extends ModuleImplBase implements Settings {
     }
 
     @override
-    public ActiveDataProducer powerStatus() {
+    ActiveDataProducer powerStatus() {
         ModuleInfo info = mwPrivate.lookupModuleInfo(SETTINGS);
         if (info.revision >= CHARGE_STATUS_REVISION && (info.extra.length > 0 && (info.extra[0] & 0x1) == 0x1)) {
             if (powerStatus == null) {
@@ -451,7 +407,7 @@ class SettingsImpl extends ModuleImplBase implements Settings {
     }
 
     @override
-    public Task<Byte> readCurrentPowerStatusAsync() {
+    Task<Byte> readCurrentPowerStatusAsync() {
         ModuleInfo info = mwPrivate.lookupModuleInfo(SETTINGS);
         if (info.revision >= CHARGE_STATUS_REVISION && (info.extra.length > 0 && (info.extra[0] & 0x1) == 0x1)) {
             return readPowerStatusTask.execute("Did not receive power status within %dms", Constant.RESPONSE_TIMEOUT,
@@ -461,7 +417,7 @@ class SettingsImpl extends ModuleImplBase implements Settings {
     }
 
     @override
-    public ActiveDataProducer chargeStatus() {
+    ActiveDataProducer chargeStatus() {
         ModuleInfo info = mwPrivate.lookupModuleInfo(SETTINGS);
         if (info.revision >= CHARGE_STATUS_REVISION && (info.extra.length > 0 && (info.extra[0] & 0x2) == 0x2)) {
             if (chargeStatus == null) {
@@ -483,7 +439,7 @@ class SettingsImpl extends ModuleImplBase implements Settings {
     }
 
     @override
-    public Task<Byte> readCurrentChargeStatusAsync() {
+    Task<Byte> readCurrentChargeStatusAsync() {
         ModuleInfo info = mwPrivate.lookupModuleInfo(SETTINGS);
         if (info.revision >= CHARGE_STATUS_REVISION && (info.extra.length > 0 && (info.extra[0] & 0x2) == 0x2)) {
             return readChargeStatusTask.execute("Did not receive charge status within %dms", Constant.RESPONSE_TIMEOUT,
@@ -493,7 +449,7 @@ class SettingsImpl extends ModuleImplBase implements Settings {
     }
 
     @override
-    public Task<Observer> onDisconnectAsync(CodeBlock codeBlock) {
+    Task<Observer> onDisconnectAsync(CodeBlock codeBlock) {
         if (mwPrivate.lookupModuleInfo(SETTINGS).revision < DISCONNECTED_EVENT_REVISION) {
             return Task.forError(new UnsupportedOperationException("Responding to disconnect events on-board is not supported on this firmware"));
         }

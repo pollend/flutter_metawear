@@ -22,6 +22,14 @@
  * hello@mbientlab.com.
  */
 
+import 'package:flutter_metawear/impl/ModuleImplBase.dart';
+import 'package:flutter_metawear/module/Debug.dart';
+import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
+import 'ModuleType.dart';
+import 'package:tuple/tuple.dart';
+import 'Util.dart';
+import 'dart:typed_data';
+
 /**
  * Created by etsai on 10/11/16.
  */
@@ -31,45 +39,43 @@ class DebugImpl extends ModuleImplBase implements Debug {
 
     TimedTask<byte[]> readTmpValueTask;
 
-    DebugImpl(MetaWearBoardPrivate mwPrivate) {
-        super(mwPrivate);
-    }
+    DebugImpl(MetaWearBoardPrivate mwPrivate) : super(null);
 
     void init() {
         readTmpValueTask = new TimedTask<>();
-        this.mwPrivate.addResponseHandler(new Pair<>(DEBUG.id, Util.setRead(TMP_VALUE)), response -> readTmpValueTask.setResult(response));
+        this.mwPrivate.addResponseHandler(Tuple2(ModuleType.DEBUG.id, Util.setRead(TMP_VALUE)), (Uint8List response )=> readTmpValueTask.setResult(response));
     }
 
     @override
-    public Task<Void> resetAsync() {
+    Future<void> resetAsync() {
         EventImpl event = (EventImpl) mwPrivate.getModules().get(EventImpl.class);
-        Task<Void> task= (event != null && event.activeDataType != null) ? Task.cancelled() : mwPrivate.boardDisconnect();
+        Future<void> task= (event != null && event.activeDataType != null) ? Task.cancelled() : mwPrivate.boardDisconnect();
 
         mwPrivate.sendCommand(new byte[] {DEBUG.id, 0x1});
         return task;
     }
 
     @override
-    Task<Void> disconnectAsync() {
+    Future<void> disconnectAsync() {
         EventImpl event = (EventImpl) mwPrivate.getModules().get(EventImpl.class);
-        Task<Void> task= (event != null && event.activeDataType != null) ? Task.cancelled() : mwPrivate.boardDisconnect();
+        Future<void> task= (event != null && event.activeDataType != null) ? Task.cancelled() : mwPrivate.boardDisconnect();
 
         mwPrivate.sendCommand(new byte[] {DEBUG.id, 0x6});
         return task;
     }
 
     @override
-    Task<Void> jumpToBootloaderAsync() {
-        EventImpl event = (EventImpl) mwPrivate.getModules().get(EventImpl.class);
-        Task<Void> task= (event != null && event.activeDataType != null) ? Task.cancelled() : mwPrivate.boardDisconnect();
+    Future<void> jumpToBootloaderAsync() {
+        EventImpl event = (EventImpl) mwPrivate.getModules()[EventImpl];
+        Future<void> task= (event != null && event.activeDataType != null) ? Task.cancelled() : mwPrivate.boardDisconnect();
 
-        mwPrivate.sendCommand(new byte[] {DEBUG.id, 0x2});
+        mwPrivate.sendCommand(Uint8List.fromList([ModuleType.DEBUG.id, 0x2]));
         return task;
     }
 
     @override
     void resetAfterGc() {
-        mwPrivate.sendCommand(new byte[] {DEBUG.id, 0x5});
+        mwPrivate.sendCommand(Uint8List.fromList([ModuleType.DEBUG.id, 0x5]));
     }
 
     @override
@@ -82,16 +88,16 @@ class DebugImpl extends ModuleImplBase implements Debug {
     }
 
     @override
-    Task<Integer> readTmpValueAsync() {
+    Future<int> readTmpValueAsync() {
         return readTmpValueTask.execute("Did not received response from tmp register within %dms", Constant.RESPONSE_TIMEOUT,
                 () -> mwPrivate.sendCommand(new byte[] {DEBUG.id, Util.setRead(TMP_VALUE)})
         ).onSuccessTask(task -> Task.forResult(ByteBuffer.wrap(task.getResult(), 2, 4).order(ByteOrder.LITTLE_ENDIAN).getInt()));
     }
 
     @override
-    boolean enablePowersave() {
-        if (mwPrivate.lookupModuleInfo(DEBUG).revision >= POWER_SAVE_REVISION) {
-            mwPrivate.sendCommand(new byte[] {DEBUG.id, 0x07});
+    bool enablePowersave() {
+        if (mwPrivate.lookupModuleInfo(ModuleType.DEBUG).revision >= POWER_SAVE_REVISION) {
+            mwPrivate.sendCommand(new byte[] {ModuleType.DEBUG.id, 0x07});
             return true;
         }
         return false;

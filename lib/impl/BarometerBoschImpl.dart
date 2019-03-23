@@ -23,6 +23,10 @@
  */
 
 
+import 'package:flutter_metawear/impl/DataTypeBase.dart';
+import 'package:flutter_metawear/impl/ModuleImplBase.dart';
+import 'package:flutter_metawear/module/BarometerBosch.dart';
+
 /**
  * Created by etsai on 9/20/16.
  */
@@ -38,14 +42,12 @@ abstract class BarometerBoschImpl extends ModuleImplBase implements BarometerBos
         }
     }
 
-    private final static String PRESSURE_PRODUCER= "com.mbientlab.metawear.impl.BarometerBoschImpl.PRESSURE_PRODUCER",
+    static const String PRESSURE_PRODUCER= "com.mbientlab.metawear.impl.BarometerBoschImpl.PRESSURE_PRODUCER",
             ALTITUDE_PRODUCER= "com.mbientlab.metawear.impl.BarometerBoschImpl.ALTITUDE_PRODUCER";
-    private static final byte PRESSURE = 1, ALTITUDE = 2, CYCLIC = 4;
-    static final byte CONFIG = 3;
-    private static final long serialVersionUID = 8553278769965522159L;
+    static const int PRESSURE = 1, ALTITUDE = 2, CYCLIC = 4;
+    static const int CONFIG = 3;
 
     private static class BoschPressureUFloatData extends UFloatData {
-        private static final long serialVersionUID = 5645582168037917626L;
 
         BoschPressureUFloatData() {
             super(BAROMETER, PRESSURE, new DataAttributes(new byte[] {4}, (byte) 1, (byte) 0, false));
@@ -66,7 +68,6 @@ abstract class BarometerBoschImpl extends ModuleImplBase implements BarometerBos
         }
     }
     private static class BoschAltitudeSFloatData extends SFloatData {
-        private static final long serialVersionUID = -7561816282096806876L;
 
         BoschAltitudeSFloatData() {
             super(BAROMETER, ALTITUDE, new DataAttributes(new byte[] {4}, (byte) 1, (byte) 0, true));

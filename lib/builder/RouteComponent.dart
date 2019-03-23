@@ -207,14 +207,14 @@ abstract class RouteComponent {
      * @param period    How often to allow data through, in milliseconds (ms)
      * @return Object representing the output of the limiter
      */
-    RouteComponent limit(int period);
+    RouteComponent limit(int period,[Passthrough type]);
     /**
      * Only allow data through under certain user controlled conditions
      * @param type     Passthrough operation type
      * @param value    Initial value to set the passthrough limiter to
      * @return Object representing the output of the limiter
      */
-    RouteComponent limit(Passthrough type, int value);
+//    RouteComponent limit(Passthrough type, int value);
 
     /**
      * Scans the input data for a pulse.  When one is detected, output a summary of the scanned data
@@ -254,7 +254,7 @@ abstract class RouteComponent {
      *                      is on firmware v1.2.3 or later
      * @return Object representing the output of the comparator filter
      */
-    RouteComponent filter(Comparison op, ComparisonOutput output, Number ... references);
+    RouteComponent filter(Comparison op, ComparisonOutput output, List<num> references);
     /**
      * Variant of {@link #filter(Comparison, ComparisonOutput, Number...)} where reference values are outputs
      * from other sensors or processors.
@@ -264,14 +264,14 @@ abstract class RouteComponent {
      *                    new values are produced
      * @return Object representing the output of the comparator filter
      */
-    RouteComponent filter(Comparison op, ComparisonOutput output, String ... dataNames);
+    RouteComponent filter(Comparison op, ComparisonOutput output, List<String> dataNames);
     /**
      * Remove data from the route that doesn't not cross the threshold
      * @param output       Type of output the filter will produce
      * @param threshold    Threshold boundary the data must cross
      * @return Object representing the output of the threshold filter
      */
-    RouteComponent filter(ThresholdOutput output, num threshold);
+    RouteComponent filter(ThresholdOutput output, num threshold,[num hysteresis]);
     /**
      * Variant of {@link #filter(ThresholdOutput, Number)} with a configurable hysteresis value for data
      * that frequently oscillates around the threshold boundary
@@ -280,7 +280,7 @@ abstract class RouteComponent {
      * @param hysteresis   Minimum distance between the boundary and value that indicates a successful crossing
      * @return Object representing the output of the threshold filter
      */
-    RouteComponent filter(ThresholdOutput output, num threshold, num hysteresis);
+//    RouteComponent filter(ThresholdOutput output, num threshold, num hysteresis);
     /**
      * Removes data that it is not a minimum distance away from a reference value.  The reference value is
      * continually updated to be the previous passing value
@@ -301,11 +301,11 @@ abstract class RouteComponent {
      * Variant of {@link #account(AccountType)} that defaults to recalculating timestamps
      * @return Object representing the accounter output
      */
-    RouteComponent account();
+    RouteComponent account([AccountType type]);
     /**
      * Add additional information to the payload to assist in checking if streamed data is lost
      * @param type      Type of information to append to the data<
      * @return Object representing the accounter output
      */
-    RouteComponent account(AccountType type);
+//    RouteComponent account(AccountType type);
 }

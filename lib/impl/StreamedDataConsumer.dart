@@ -23,22 +23,29 @@
  */
 
 import 'package:flutter_metawear/Subscriber.dart';
+import 'package:flutter_metawear/impl/DataProcessorConfig.dart';
+import 'package:flutter_metawear/impl/DataProcessorImpl.dart';
 import 'package:flutter_metawear/impl/DataTypeBase.dart';
 import 'package:flutter_metawear/impl/DeviceDataConsumer.dart';
 import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
 import 'package:flutter_metawear/impl/JseMetaWearBoard.dart';
 import 'package:flutter_metawear/impl/ModuleType.dart';
+import 'package:flutter_metawear/module/DataProcessor.dart';
 
 import 'dart:typed_data';
-
+import 'package:tuple/tuple.dart';
+import 'package:flutter_metawear/builder/RouteComponent.dart';
 /**
  * Created by etsai on 10/27/16.
  */
 
 class StreamedDataConsumer extends DeviceDataConsumer {
-    RegisterResponseHandler dataResponseHandler= null;
+
+
+    void Function(Uint8List handler) dataResponseHandler;
 
     StreamedDataConsumer(DataTypeBase source, Subscriber subscriber) : super(source,subscriber);
+
 
     void enableStream(final MetaWearBoardPrivate mwPrivate) {
         addDataHandler(mwPrivate);
@@ -46,13 +53,13 @@ class StreamedDataConsumer extends DeviceDataConsumer {
         if ((source.eventConfig[1] & 0x80) == 0x0) {
             if (source.eventConfig[2] == DataTypeBase.NO_DATA_ID) {
                 if (mwPrivate.numDataHandlers(source.eventConfigAsTuple()) == 1) {
-                    mwPrivate.sendCommand(Uint8List.fromList([source.eventConfig[0], source.eventConfig[1], 0x1]);
+                    mwPrivate.sendCommand(Uint8List.fromList([source.eventConfig[0], source.eventConfig[1], 0x1]));
                 }
             } else {
                 mwPrivate.sendCommand(Uint8List.fromList([source.eventConfig[0], source.eventConfig[1], 0x1]));
                 if (mwPrivate.numDataHandlers(source.eventConfigAsTuple()) == 1) {
                     if (source.eventConfig[0] ==  ModuleType.DATA_PROCESSOR.id && source.eventConfig[1] == DataProcessorImpl.NOTIFY) {
-                        mwPrivate.sendCommand(new byte[]{source.eventConfig[0], DataProcessorImpl.NOTIFY_ENABLE, source.eventConfig[2], 0x1});
+                        mwPrivate.sendCommand(Uint8List.fromList([source.eventConfig[0], DataProcessorImpl.NOTIFY_ENABLE, source.eventConfig[2], 0x1]));
                     }
                 }
             }
@@ -64,13 +71,22 @@ class StreamedDataConsumer extends DeviceDataConsumer {
     void disableStream(MetaWearBoardPrivate mwPrivate) {
         if ((source.eventConfig[1] & 0x80) == 0x0) {
             if (source.eventConfig[2] == DataTypeBase.NO_DATA_ID) {
-                if (mwPrivate.numDataHandlers(source.eventConfigAsTuple()) == 1) {
-                    mwPrivate.sendCommand(new byte[]{source.eventConfig[0], source.eventConfig[1], 0x0});
+                if (mwPrivate.numDataHandlers(source.eventConfigAsTuple()) ==
+                    1) {
+                    mwPrivate.sendCommand(Uint8List.fromList(
+                        [source.eventConfig[0], source.eventConfig[1], 0x0]));
                 }
             } else {
-                if (mwPrivate.numDataHandlers(source.eventConfigAsTuple()) == 1) {
-                    if (source.eventConfig[0] == DATA_PROCESSOR.id && source.eventConfig[1] == DataProcessorImpl.NOTIFY) {
-                        mwPrivate.sendCommand(new byte[]{source.eventConfig[0], DataProcessorImpl.NOTIFY_ENABLE, source.eventConfig[2], 0x0});
+                if (mwPrivate.numDataHandlers(source.eventConfigAsTuple()) ==
+                    1) {
+                    if (source.eventConfig[0] == ModuleType.DATA_PROCESSOR.id &&
+                        source.eventConfig[1] == DataProcessorImpl.NOTIFY) {
+                        mwPrivate.sendCommand(Uint8List.fromList([
+                            source.eventConfig[0],
+                            DataProcessorImpl.NOTIFY_ENABLE,
+                            source.eventConfig[2],
+                            0x0
+                        ]));
                     }
                 }
             }
@@ -80,32 +96,34 @@ class StreamedDataConsumer extends DeviceDataConsumer {
             }
         }
 
-        mwPrivate.removeDataHandler(source.eventConfigAsTuple(), dataResponseHandler);
+        mwPrivate.removeDataHandler(
+            source.eventConfigAsTuple(), dataResponseHandler);
     }
 
-    public void addDataHandler(final MetaWearBoardPrivate mwPrivate) {
+    void addDataHandler(final MetaWearBoardPrivate mwPrivate) {
+
         if (source.eventConfig[2] != DataTypeBase.NO_DATA_ID) {
             mwPrivate.addDataIdHeader(new Pair<>(source.eventConfig[0], source.eventConfig[1]));
         }
         if (dataResponseHandler == null) {
             if (source.attributes.copies > 1) {
-                final byte dataUnitLength = source.attributes.unitLength();
-                dataResponseHandler = response -> {
-                    Calendar now = Calendar.getInstance();
-                    DataProcessorImpl.Processor accounter = findParent((DataProcessorImpl) mwPrivate.getModules().get(DataProcessor.class), source, DataProcessorImpl.TYPE_ACCOUNTER);
-                    RouteComponent.AccountType accountType = accounter == null ? RouteComponent.AccountType.TIME : ((DataProcessorConfig.Accounter) accounter.editor.configObj).type;
+                final int dataUnitLength = source.attributes.unitLength();
+                dataResponseHandler = (Uint8List response) {
+                    DateTime now = DateTime.now();
+                    Processor accounter = findParent(mwPrivate.getModules()[DataProcessor] as DataProcessorImpl, source, DataProcessorImpl.TYPE_ACCOUNTER);
+                    AccountType accountType = accounter == null ? AccountType.TIME : (accounter.editor.configObj as Accounter).type;
                     for(int i = 0, j = source.eventConfig[2] == DataTypeBase.NO_DATA_ID ? 2 : 3; i< source.attributes.copies && j < response.length; i++, j+= dataUnitLength) {
-                        Tuple3<Calendar, Integer, Long> account = fillTimestamp(mwPrivate, accounter, response, j);
-                        byte[] dataRaw = new byte[dataUnitLength - (account.second - j)];
-                        System.arraycopy(response, account.second, dataRaw, 0, dataRaw.length);
+                        Tuple3<DateTime, int, int> account = fillTimestamp(mwPrivate, accounter, response, j);
+                        Uint8List dataRaw = Uint8List(dataUnitLength - (account.item2 - j));
+                        System.arraycopy(response, account.item2, dataRaw, 0, dataRaw.length);
                         call(source.createMessage(false, mwPrivate, dataRaw, accounter == null ? now : account.first, accountType == RouteComponent.AccountType.TIME ? null : clazz ->
                                 clazz.equals(Long.class) ? account.third : null)
                         );
                     }
                 };
             } else {
-                dataResponseHandler = response -> {
-                    byte[] dataRaw;
+                dataResponseHandler = (Uint8List response) {
+                    Uint8List dataRaw;
 
                     if (source.eventConfig[2] == DataTypeBase.NO_DATA_ID) {
                         dataRaw = new byte[response.length - 2];
@@ -154,7 +172,7 @@ class StreamedDataConsumer extends DeviceDataConsumer {
         mwPrivate.addDataHandler(source.eventConfigAsTuple(), dataResponseHandler);
     }
 
-    private static DataProcessorImpl.Processor findParent(DataProcessorImpl dataprocessor, DataTypeBase child, byte type) {
+    static Processor findParent(DataProcessorImpl dataprocessor, DataTypeBase child, byte type) {
         if (child.eventConfig[0] == DATA_PROCESSOR.id && child.eventConfig[1] == DataProcessorImpl.NOTIFY) {
             DataProcessorImpl.Processor processor = dataprocessor.lookupProcessor(child.eventConfig[2]);
             if (processor.editor.config[0] == type) {
@@ -166,7 +184,7 @@ class StreamedDataConsumer extends DeviceDataConsumer {
         return null;
     }
 
-    private static Tuple3<Calendar, Integer, Long> fillTimestamp(MetaWearBoardPrivate mwPrivate, DataProcessorImpl.Processor accounter, byte[] response, int offset) {
+    static Tuple3<DateTime, int, int> fillTimestamp(MetaWearBoardPrivate mwPrivate, Processor accounter, Uint8List response, int offset) {
         if (accounter != null) {
             DataProcessorConfig config = accounter.editor.configObj;
             if (config instanceof DataProcessorConfig.Accounter) {

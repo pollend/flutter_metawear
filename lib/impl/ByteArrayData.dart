@@ -25,12 +25,18 @@
 
 import 'dart:typed_data';
 
+import 'package:flutter_metawear/Data.dart';
 import 'package:flutter_metawear/impl/DataAttributes.dart';
 import 'package:flutter_metawear/impl/DataTypeBase.dart';
+import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
 import 'package:flutter_metawear/impl/ModuleType.dart';
 import 'package:flutter_metawear/impl/DataPrivate.dart';
 
 class _DataPrivate extends DataPrivate{
+    MetaWearBoardPrivate _mwPrivate;
+    ByteArrayData _byteArrayData;
+  _DataPrivate(this._mwPrivate,this._byteArrayData,DateTime timestamp, Uint8List dataBytes, ClassToObject mapper) : super(timestamp, dataBytes, mapper);
+
     @override
     List<Type> types() {
         return [Uint8List];
@@ -38,15 +44,15 @@ class _DataPrivate extends DataPrivate{
 
     @override
      double scale() {
-        return ByteArrayData.this.scale(mwPrivate);
+        return _byteArrayData.scale(_mwPrivate);
     }
 
     @override
-    public <T> T value(Class<T> clazz) {
-        if (clazz.equals(byte[].class)) {
-            return clazz.cast(data);
+    T value<T>() {
+        if (T is Uint8List) {
+            return _byteArrayData as T;
         }
-        return super.value(clazz);
+        return super.value<T>();
     }
 }
 
@@ -54,54 +60,25 @@ class _DataPrivate extends DataPrivate{
  * Created by etsai on 9/21/16.
  */
 class ByteArrayData extends DataTypeBase {
-    ByteArrayData(ModuleType module, int register, DataAttributes attributes) : super(module, register, attributes, ()=>{});
-
-
-
-//    ByteArrayData(ModuleType module, int register, DataAttributes attributes,{int id, DataTypeBase input}):
-
-//    ByteArrayData(Module module, byte register, byte id, DataAttributes attributes) {
-//        super(module, register, id, attributes);
-//    }
-//
-//    ByteArrayData(DataTypeBase input, Module module, byte register, DataAttributes attributes) {
-//        super(input, module, register, attributes);
-//    }
-//
-//    ByteArrayData(DataTypeBase input, Module module, byte register, byte id, DataAttributes attributes) {
-//        super(input, module, register, id, attributes);
-//    }
+    ByteArrayData(ModuleType module, int register, DataAttributes attributes,
+        {int id, DataTypeBase input})
+        : super(module, register, attributes, input: input, id: id);
 
     @override
-    DataTypeBase copy(DataTypeBase input, ModuleType module, byte register, byte id, DataAttributes attributes) {
-        return new ByteArrayData(input, module, register, id, attributes);
+    DataTypeBase copy(DataTypeBase input, ModuleType module, int register,
+        int id, DataAttributes attributes) {
+        return new ByteArrayData(
+            module, register, attributes, input: input, id: id);
     }
 
     @override
-    num convertToFirmwareUnits(MetaWearBoardPrivate mwPrivate, Number value) {
+    num convertToFirmwareUnits(MetaWearBoardPrivate mwPrivate, num value) {
         return value;
     }
 
     @override
-    Data createMessage(boolean logData, final MetaWearBoardPrivate mwPrivate, final byte[] data, final Calendar timestamp, DataPrivate.ClassToObject mapper) {
-        return new DataPrivate(timestamp, data, mapper) {
-            @override
-            public Class<?>[] types() {
-                return new Class<?>[] { byte[].class };
-            }
-
-            @override
-            public float scale() {
-                return ByteArrayData.this.scale(mwPrivate);
-            }
-
-            @override
-            public <T> T value(Class<T> clazz) {
-                if (clazz.equals(byte[].class)) {
-                    return clazz.cast(data);
-                }
-                return super.value(clazz);
-            }
-        };
+    Data createMessage(bool logData, MetaWearBoardPrivate mwPrivate,
+        Uint8List data, DateTime timestamp, ClassToObject mapper) {
+        return _DataPrivate(mwPrivate, this, timestamp, data, mapper);
     }
 }

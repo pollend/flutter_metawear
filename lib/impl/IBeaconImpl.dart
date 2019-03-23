@@ -203,8 +203,7 @@ class IBeaconImpl extends ModuleImplBase implements IBeacon {
     int period = null;
     TimeoutException exception;
 
-    Stream<Uint8List> stream = _streamController.stream.timeout(
-        ModuleType.RESPONSE_TIMEOUT);
+    Stream<Uint8List> stream = _streamController.stream.timeout(ModuleType.RESPONSE_TIMEOUT);
     StreamIterator<Uint8List> iterator = StreamIterator(stream);
 
     mwPrivate.sendCommand(Uint8List.fromList(
@@ -247,8 +246,7 @@ class IBeaconImpl extends ModuleImplBase implements IBeacon {
         [ModuleType.IBEACON.id, Util.setRead(TX)])); //request Tx
     exception = TimeoutException(
         "Did not receive iBeacon tx value", ModuleType.RESPONSE_TIMEOUT);
-    if (await iterator.moveNext().catchError((e) => throw exception,
-        test: (e) => e is TimeoutException) == false)
+    if (await iterator.moveNext().catchError((e) => throw exception,test: (e) => e is TimeoutException) == false)
       throw exception;
     txPower = iterator.current[2];
 
@@ -260,6 +258,8 @@ class IBeaconImpl extends ModuleImplBase implements IBeacon {
         test: (e) => e is TimeoutException) == false)
       throw exception;
     period = ByteData.view(iterator.current.buffer).getInt16(2);
+    await iterator.cancel();
+
     return Configuration(ad, major, minor, period, rxPower, txPower);
   }
 }

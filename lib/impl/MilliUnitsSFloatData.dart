@@ -23,29 +23,33 @@
  */
 
 import 'package:flutter_metawear/MetaWearBoard.dart';
+import 'package:flutter_metawear/impl/DataAttributes.dart';
 import 'package:flutter_metawear/impl/DataTypeBase.dart';
 import 'package:flutter_metawear/impl/DataTypeBase.dart';
+import 'package:flutter_metawear/impl/DataTypeBase.dart';
+import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
+import 'package:flutter_metawear/impl/ModuleType.dart';
 import 'package:flutter_metawear/impl/SFloatData.dart';
+
 
 /**
  * Created by etsai on 2/28/17.
  */
 class MilliUnitsSFloatData extends SFloatData {
-    MilliUnitsSFloatData(DataTypeBase input, Module module, int register, DataAttributes attributes, [int  id]) {
-        super(input, module, register, id, attributes);
-    }
 
-    MilliUnitsSFloatData(Module module, byte register, DataAttributes attributes) {
-        super(module, register, attributes);
+    MilliUnitsSFloatData(ModuleType module, int register,
+        DataAttributes attributes, {int id, DataTypeBase input})
+        : super(module, register, attributes, id: id, input: input);
+
+    @override
+    double scale(MetaWearBoardPrivate mwPrivate) {
+        return 1000;
     }
 
     @override
-    protected float scale(MetaWearBoardPrivate mwPrivate) {
-        return 1000.f;
-    }
-
-    @override
-    public DataTypeBase copy(DataTypeBase input, Module module, byte register, byte id, DataAttributes attributes) {
-        return new MilliUnitsSFloatData(input, module, register, id, attributes);
+    DataTypeBase copy(DataTypeBase input, ModuleType module, int register,
+        int id, DataAttributes attributes) {
+        return new MilliUnitsSFloatData(
+            module, register, attributes, input: input, id: id);
     }
 }

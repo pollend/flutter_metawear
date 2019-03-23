@@ -34,6 +34,7 @@ import 'package:flutter_metawear/impl/DataTypeBase.dart';
 import 'package:flutter_metawear/impl/ModuleType.dart';
 import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
 import 'package:flutter_metawear/builder/filter/DifferentialOutput.dart';
+import 'package:flutter_metawear/impl/SFloatData.dart';
 import 'package:flutter_metawear/impl/Util.dart';
 
 import 'package:tuple/tuple.dart';
@@ -74,23 +75,6 @@ class _DataPrivate extends DataPrivate {
 class UFloatData extends DataTypeBase {
     UFloatData(ModuleType module, int register, DataAttributes attributes,{int id, DataTypeBase input}) : super(module, register, attributes,id:id,input:input);
 
-//
-//    UFloatData(Constant.Module module, byte register, byte id, DataAttributes attributes) {
-//        super(module, register, id, attributes);
-//    }
-//
-//    UFloatData(Constant.Module module, byte register, DataAttributes attributes) {
-//        super(module, register, attributes);
-//    }
-//
-//    UFloatData(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
-//        super(input, module, register, id, attributes);
-//    }
-//
-//    UFloatData(DataTypeBase input, Constant.Module module, byte register, DataAttributes attributes) {
-//        super(input, module, register, attributes);
-//    }
-
     @override
     DataTypeBase copy(DataTypeBase input, ModuleType module, int register, int id, DataAttributes attributes) {
         if (input == null) {
@@ -127,24 +111,24 @@ class UFloatData extends DataTypeBase {
                 switch(casted.op) {
                     case Operation.ADD: {
                         DataAttributes newAttrs= attributes.dataProcessorCopySize(4);
-                        processor = casted.rhs < 0 ? new SFloatData(this, ModuleType.DATA_PROCESSOR, DataProcessorImpl.NOTIFY, newAttrs) :
+                        processor = casted.rhs < 0 ? new SFloatData(ModuleType.DATA_PROCESSOR, DataProcessorImpl.NOTIFY, newAttrs,input: this) :
                                 dataProcessorCopy(this, newAttrs);
                         break;
                     }
                     case Operation.MULTIPLY: {
                         DataAttributes newAttrs= attributes.dataProcessorCopySize(casted.rhs.abs() < 1 ? attributes.sizes[0] : 4);
-                        processor = casted.rhs < 0 ? new SFloatData(this, ModuleType.DATA_PROCESSOR, DataProcessorImpl.NOTIFY, newAttrs) :
+                        processor = casted.rhs < 0 ? new SFloatData(ModuleType.DATA_PROCESSOR, DataProcessorImpl.NOTIFY, newAttrs,input: this) :
                                 dataProcessorCopy(this, newAttrs);
                         break;
                     }
                     case Operation.DIVIDE: {
                         DataAttributes newAttrs = attributes.dataProcessorCopySize(casted.rhs.abs() < 1 ? 4 : attributes.sizes[0]);
-                        processor = casted.rhs < 0 ? new SFloatData(this, ModuleType.DATA_PROCESSOR, DataProcessorImpl.NOTIFY, newAttrs) :
+                        processor = casted.rhs < 0 ? new SFloatData(ModuleType.DATA_PROCESSOR, DataProcessorImpl.NOTIFY, newAttrs,input: this) :
                                 dataProcessorCopy(this, newAttrs);
                         break;
                     }
                     case Operation.SUBTRACT:
-                        processor = new SFloatData(this, ModuleType.DATA_PROCESSOR, DataProcessorImpl.NOTIFY, attributes.dataProcessorCopySigned(true));
+                        processor = new SFloatData(ModuleType.DATA_PROCESSOR, DataProcessorImpl.NOTIFY, attributes.dataProcessorCopySigned(true),input: this);
                         break;
                     case Operation.ABS_VALUE:
                         processor = dataProcessorCopy(this, attributes.dataProcessorCopySigned(false));
@@ -162,7 +146,7 @@ class UFloatData extends DataTypeBase {
             case Differential.ID: {
                 Differential casted =  config as Differential;
                 if (casted.mode == DifferentialOutput.DIFFERENCE) {
-                    return Tuple2(new SFloatData(this, DATA_PROCESSOR, DataProcessorImpl.NOTIFY, attributes.dataProcessorCopySigned(true)), null);
+                    return Tuple2(new SFloatData(ModuleType.DATA_PROCESSOR, DataProcessorImpl.NOTIFY, attributes.dataProcessorCopySigned(true),input: this), null);
                 }
             }
         }

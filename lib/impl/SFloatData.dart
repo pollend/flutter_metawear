@@ -30,6 +30,7 @@ import 'package:flutter_metawear/impl/DataProcessorConfig.dart';
 import 'package:flutter_metawear/impl/DataProcessorImpl.dart';
 import 'package:flutter_metawear/impl/DataTypeBase.dart';
 import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
+import 'package:flutter_metawear/impl/UFloatData.dart';
 import 'package:flutter_metawear/impl/Util.dart';
 import 'ModuleType.dart';
 import 'DataAttributes.dart';
@@ -67,7 +68,7 @@ class _DataPrivate extends DataPrivate {
  */
 class SFloatData extends DataTypeBase {
 
-    SFloatData(ModuleType module, int register, DataAttributes attributes,{int id, DataTypeBase input}): super(module,register,attributes,() => {},id:id,input:input);
+    SFloatData(ModuleType module, int register, DataAttributes attributes,{int id, DataTypeBase input}): super(module,register,attributes,id:id,input:input);
 
 
     @override
@@ -106,7 +107,7 @@ class SFloatData extends DataTypeBase {
                 switch(casted.op) {
                     case Operation.ABS_VALUE: {
                         DataAttributes copy= attributes.dataProcessorCopySigned(false);
-                        return Tuple2(new UFloatData(this, DATA_PROCESSOR, DataProcessorImpl.NOTIFY, copy), null);
+                        return Tuple2(new UFloatData(ModuleType.DATA_PROCESSOR, DataProcessorImpl.NOTIFY, copy,input: this), null);
                     }
                     default:
                 }
