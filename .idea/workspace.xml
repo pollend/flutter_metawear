@@ -6,36 +6,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="4cb0f089-fc99-4dea-a4d4-afab97db7b8a" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/IllegalRouteOperationException.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/IllegalRouteOperationException.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/builder/RouteComponent.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/builder/RouteComponent.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/impl/ArrayData.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/ArrayData.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/impl/BarometerBoschImpl.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/BarometerBoschImpl.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/impl/ByteArrayData.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/ByteArrayData.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/impl/ColorTcs34725Impl.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/ColorTcs34725Impl.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/impl/DataTypeBase.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/DataTypeBase.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/impl/DebugImpl.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/DebugImpl.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/impl/EventImpl.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/EventImpl.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/impl/GsrImpl.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/GsrImpl.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/impl/IBeaconImpl.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/IBeaconImpl.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/impl/IntData.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/IntData.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/impl/JseMetaWearBoard.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/JseMetaWearBoard.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/impl/MagnetometerBmm150Impl.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/MagnetometerBmm150Impl.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/impl/MilliUnitsSFloatData.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/MilliUnitsSFloatData.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/impl/MilliUnitsUFloatData.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/MilliUnitsUFloatData.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/impl/ProximityTsl2671Impl.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/ProximityTsl2671Impl.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/impl/RouteComponentImpl.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/RouteComponentImpl.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/impl/RouteSplitImpl.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/RouteSplitImpl.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/impl/SFloatData.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/SFloatData.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/impl/SerialPassthroughImpl.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/SerialPassthroughImpl.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/impl/SettingsImpl.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/SettingsImpl.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/impl/StreamedDataConsumer.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/StreamedDataConsumer.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/impl/SwitchImpl.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/SwitchImpl.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/impl/TemperatureImpl.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/TemperatureImpl.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/impl/TimerImpl.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/TimerImpl.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/impl/UFloatData.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/UFloatData.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/impl/UintData.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/UintData.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/module/Timer.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/module/Timer.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/AccelerometerBoschImpl.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/AccelerometerBoschImpl.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/AmbientLightLtr329Impl.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/AmbientLightLtr329Impl.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/FloatVectorData.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/FloatVectorData.dart" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -51,11 +24,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/lib/impl/SerialPassthroughImpl.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="4335">
-              <caret line="310" column="5" lean-forward="true" selection-start-line="310" selection-start-column="5" selection-end-line="310" selection-end-column="5" />
-              <folding>
-                <element signature="e#0#13740#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="4320">
+              <caret line="310" column="5" selection-start-line="310" selection-start-column="5" selection-end-line="310" selection-end-column="5" />
             </state>
           </provider>
         </entry>
@@ -89,7 +59,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/lib/impl/ColorTcs34725Impl.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="553">
+            <state relative-caret-position="945">
               <caret line="85" column="29" selection-start-line="85" selection-start-column="29" selection-end-line="85" selection-end-column="29" />
               <folding>
                 <element signature="e#1803#1847#0" expanded="true" />
@@ -101,10 +71,9 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/lib/impl/BarometerBoschImpl.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="150">
+            <state relative-caret-position="405">
               <caret line="49" column="12" selection-start-line="49" selection-start-column="4" selection-end-line="49" selection-end-column="12" />
               <folding>
-                <element signature="e#0#5691#0" expanded="true" />
                 <element signature="e#1803#1860#0" expanded="true" />
               </folding>
             </state>
@@ -114,8 +83,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/lib/impl/GpioImpl.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="180">
-              <caret line="174" column="9" lean-forward="true" selection-start-line="174" selection-start-column="9" selection-end-line="174" selection-end-column="9" />
+            <state relative-caret-position="2475">
+              <caret line="174" column="9" selection-start-line="174" selection-start-column="9" selection-end-line="174" selection-end-column="9" />
               <folding>
                 <element signature="e#0#10417#0" expanded="true" />
               </folding>
@@ -126,10 +95,9 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/lib/impl/GsrImpl.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="538">
-              <caret line="39" column="51" lean-forward="true" selection-start-line="39" selection-start-column="51" selection-end-line="39" selection-end-column="51" />
+            <state relative-caret-position="255">
+              <caret line="39" column="51" selection-start-line="39" selection-start-column="51" selection-end-line="39" selection-end-column="51" />
               <folding>
-                <element signature="e#0#5640#0" expanded="true" />
                 <element signature="e#1804#1869#0" expanded="true" />
               </folding>
             </state>
@@ -139,7 +107,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/lib/impl/GyroBmi160Impl.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-3090">
+            <state relative-caret-position="375">
               <caret line="25" column="15" selection-start-line="25" selection-start-column="15" selection-end-line="25" selection-end-column="15" />
             </state>
           </provider>
@@ -519,6 +487,7 @@
       <workItem from="1553268114080" duration="4240000" />
       <workItem from="1553276920659" duration="14200000" />
       <workItem from="1553299762889" duration="1795000" />
+      <workItem from="1553306312309" duration="1000" />
     </task>
     <servers />
   </component>
@@ -528,7 +497,7 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="192409000" />
+    <option name="totallyTimeSpent" value="192410000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -541,7 +510,6 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="27" width="1920" height="1053" extended-state="6" />
-    <editor active="true" />
     <layout>
       <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.65037596" visible="true" weight="0.20757738" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
@@ -954,11 +922,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/impl/SerialPassthroughImpl.dart">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="4335">
-          <caret line="310" column="5" lean-forward="true" selection-start-line="310" selection-start-column="5" selection-end-line="310" selection-end-column="5" />
-          <folding>
-            <element signature="e#0#13740#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="4320">
+          <caret line="310" column="5" selection-start-line="310" selection-start-column="5" selection-end-line="310" selection-end-column="5" />
         </state>
       </provider>
     </entry>
@@ -974,7 +939,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/impl/ColorTcs34725Impl.dart">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="553">
+        <state relative-caret-position="945">
           <caret line="85" column="29" selection-start-line="85" selection-start-column="29" selection-end-line="85" selection-end-column="29" />
           <folding>
             <element signature="e#1803#1847#0" expanded="true" />
@@ -984,10 +949,9 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/impl/BarometerBoschImpl.dart">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="150">
+        <state relative-caret-position="405">
           <caret line="49" column="12" selection-start-line="49" selection-start-column="4" selection-end-line="49" selection-end-column="12" />
           <folding>
-            <element signature="e#0#5691#0" expanded="true" />
             <element signature="e#1803#1860#0" expanded="true" />
           </folding>
         </state>
@@ -995,8 +959,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/impl/GpioImpl.dart">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="180">
-          <caret line="174" column="9" lean-forward="true" selection-start-line="174" selection-start-column="9" selection-end-line="174" selection-end-column="9" />
+        <state relative-caret-position="2475">
+          <caret line="174" column="9" selection-start-line="174" selection-start-column="9" selection-end-line="174" selection-end-column="9" />
           <folding>
             <element signature="e#0#10417#0" expanded="true" />
           </folding>
@@ -1005,10 +969,9 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/impl/GsrImpl.dart">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="538">
-          <caret line="39" column="51" lean-forward="true" selection-start-line="39" selection-start-column="51" selection-end-line="39" selection-end-column="51" />
+        <state relative-caret-position="255">
+          <caret line="39" column="51" selection-start-line="39" selection-start-column="51" selection-end-line="39" selection-end-column="51" />
           <folding>
-            <element signature="e#0#5640#0" expanded="true" />
             <element signature="e#1804#1869#0" expanded="true" />
           </folding>
         </state>
@@ -1016,7 +979,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/impl/GyroBmi160Impl.dart">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-3090">
+        <state relative-caret-position="375">
           <caret line="25" column="15" selection-start-line="25" selection-start-column="15" selection-end-line="25" selection-end-column="15" />
         </state>
       </provider>

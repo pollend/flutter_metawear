@@ -29,6 +29,7 @@ import 'package:flutter_metawear/impl/DataProcessorImpl.dart';
 import 'package:flutter_metawear/impl/DataTypeBase.dart';
 import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
 import 'package:flutter_metawear/impl/ModuleType.dart';
+import 'package:flutter_metawear/impl/UFloatData.dart';
 
 import 'package:tuple/tuple.dart';
 import 'dart:typed_data';
@@ -47,12 +48,12 @@ abstract class FloatVectorData extends DataTypeBase {
 //        super(input, module, register, id, attributes);
 //    }
 
-    FloatVectorData(ModuleType module, int register, DataAttributes attributes,{int id, DataTypeBase input}) : super(module, register, attributes, ()=>{},id:id,input:input);
+    FloatVectorData(ModuleType module, int register, DataAttributes attributes,{int id, DataTypeBase input}) : super(module, register, attributes,id:id,input:input);
 
 
     @override
     num convertToFirmwareUnits(MetaWearBoardPrivate mwPrivate, num value) {
-        return value.floatValue() * scale(mwPrivate);
+        return value.toDouble() * scale(mwPrivate);
     }
 
     @override

@@ -23,16 +23,16 @@
  */
 
 
-class BoschAccCartesianFloatData extends FloatVectorData {
-    BoschAccCartesianFloatData() {
-        this(DATA_INTERRUPT, (byte) 1);
-    }
+import 'package:flutter_metawear/impl/FloatVectorData.dart';
 
-    public BoschAccCartesianFloatData(byte register, byte copies) {
+class BoschAccCartesianFloatData extends FloatVectorData {
+    BoschAccCartesianFloatData.Default() : super(DATA_INTERRUPT,  1);
+
+    BoschAccCartesianFloatData.Register(int register, int copies) {
         super(ACCELEROMETER, register, new DataAttributes(new byte[] {2, 2, 2}, copies, (byte) 0, true));
     }
 
-    public BoschAccCartesianFloatData(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
+    BoschAccCartesianFloatData(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
         super(input, module, register, id, attributes);
     }
 

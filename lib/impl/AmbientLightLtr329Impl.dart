@@ -29,7 +29,9 @@ import 'package:flutter_metawear/impl/ModuleImplBase.dart';
 import 'package:flutter_metawear/impl/ModuleType.dart';
 import 'package:flutter_metawear/module/AmbientLightLtr329.dart';
 import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
-
+import 'package:flutter_metawear/impl/DataTypeBase.dart';
+import 'package:flutter_metawear/impl/MilliUnitsUFloatData.dart';
+import 'package:flutter_metawear/impl/DataAttributes.dart';
 import 'dart:typed_data';
 
 class _configEditor extends ConfigEditor {
@@ -114,7 +116,7 @@ class AmbientLightLtr329Impl extends ModuleImplBase implements AmbientLightLtr32
     AsyncDataProducer illuminanceProducer;
 
     AmbientLightLtr329Impl(MetaWearBoardPrivate mwPrivate): super(mwPrivate){
-        mwPrivate.tagProducer(ILLUMINANCE_PRODUCER, new MilliUnitsUFloatData(ModuleType.AMBIENT_LIGHT, OUTPUT, new DataAttributes(new byte[] {4}, (byte) 1, (byte) 0, false)));
+        mwPrivate.tagProducer(ILLUMINANCE_PRODUCER, new MilliUnitsUFloatData(ModuleType.AMBIENT_LIGHT, OUTPUT, new DataAttributes(Uint8List.fromList([4]), 1, 0, false)));
     }
 
     @override
