@@ -26,6 +26,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter_metawear/Data.dart';
+import 'package:flutter_metawear/builder/RouteComponent.dart';
 import 'package:flutter_metawear/impl/DataAttributes.dart';
 import 'package:flutter_metawear/impl/DataPrivate.dart';
 import 'package:flutter_metawear/impl/DataTypeBase.dart';
@@ -36,7 +37,6 @@ import 'package:flutter_metawear/impl/DataProcessorConfig.dart';
 import 'package:flutter_metawear/impl/Util.dart';
 import 'package:flutter_metawear/impl/DataProcessorImpl.dart';
 import 'package:tuple/tuple.dart';
-import 'package:flutter_metawear/builder/filter/DifferentialOutput.dart';
 import 'dart:math';
 
 class _DataPrivate extends DataPrivate{

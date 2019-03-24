@@ -22,7 +22,11 @@
  * hello@mbientlab.com.
  */
 
+import 'dart:typed_data';
+
+import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
 import 'package:flutter_metawear/impl/ModuleImplBase.dart';
+import 'package:flutter_metawear/impl/ModuleType.dart';
 import 'package:flutter_metawear/module/Haptic.dart';
 
 /**
@@ -34,26 +38,30 @@ class HapticImpl extends ModuleImplBase implements Haptic {
 
     static const DEFAULT_DUTY_CYCLE= 100.0;
 
-    HapticImpl(MetaWearBoardPrivate mwPrivate) {
-        super(mwPrivate);
-    }
+    HapticImpl(MetaWearBoardPrivate mwPrivate) : super(mwPrivate);
+
 
     @override
-    public void startMotor(short pulseWidth) {
-        startMotor(DEFAULT_DUTY_CYCLE, pulseWidth);
+    void startMotor(int pulseWidth, [double dutyCycle = DEFAULT_DUTY_CYCLE]) {
+        int converted= ((dutyCycle / 100.0) * 248).floor();
+        Uint8List payload = Uint8List(4);
+        ByteData byteData = ByteData.view(payload.buffer);
+        byteData.setInt8(0, (converted & 0xff));
+        byteData.setInt16(1, (converted & 0xff),Endian.little);
+        byteData.setInt8(3, (converted & 0xff));
+
+        mwPrivate.sendCommandForModule(ModuleType.HAPTIC, PULSE, payload);
     }
 
-    @override
-    public void startMotor(float dutyCycle, short pulseWidth) {
-        short converted= (short)((dutyCycle / 100.f) * 248);
-        ByteBuffer buffer= ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).put((byte) (converted & 0xff)).putShort(pulseWidth).put((byte) 0);
-
-        mwPrivate.sendCommand(HAPTIC, PULSE, buffer.array());
-    }
 
     @override
-    public void startBuzzer(short pulseWidth) {
-        ByteBuffer buffer= ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).put(BUZZER_DUTY_CYCLE).putShort(pulseWidth).put((byte) 1);
-        mwPrivate.sendCommand(HAPTIC, PULSE, buffer.array());
+    void startBuzzer(int pulseWidth) {
+        Uint8List payload = Uint8List(4);
+        ByteData byteData = ByteData.view(payload.buffer);
+        byteData.setInt8(0, BUZZER_DUTY_CYCLE);
+        byteData.setInt16(1, pulseWidth,Endian.little);
+        byteData.setInt8(3, 1);
+//        ByteBuffer buffer= ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).put(BUZZER_DUTY_CYCLE).putShort(pulseWidth).put((byte) 1);
+        mwPrivate.sendCommandForModule(ModuleType.HAPTIC, PULSE, payload);
     }
 }

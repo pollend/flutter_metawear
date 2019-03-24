@@ -27,13 +27,6 @@ import 'package:flutter_metawear/DataToken.dart';
 import 'package:flutter_metawear/Subscriber.dart';
 import 'package:flutter_metawear/builder/RouteMulticast.dart';
 import 'package:flutter_metawear/builder/RouteSplit.dart';
-import 'package:flutter_metawear/builder/filter/Comparison.dart';
-import 'package:flutter_metawear/builder/filter/ComparisonOutput.dart';
-import 'package:flutter_metawear/builder/filter/DifferentialOutput.dart';
-import 'package:flutter_metawear/builder/filter/Passthrough.dart';
-import 'package:flutter_metawear/builder/filter/ThresholdOutput.dart';
-import 'package:flutter_metawear/builder/function/Function1.dart';
-import 'package:flutter_metawear/builder/function/Function2.dart';
 import 'package:flutter_metawear/builder/predicate/PulseOutput.dart';
 
 /**
@@ -63,6 +56,162 @@ enum AccountType {
     /** Extra information used to calculate actual timestamps for streamed data */
     TIME
 }
+
+/**
+ * Output modes for the differentiail filter
+ * @author Eric Tsai
+ */
+enum DifferentialOutput {
+    /** Return the data as is */
+    ABSOLUTE,
+    /** Return the difference between the value and its reference point */
+    DIFFERENCE,
+    /** 1 if the difference is positive, -1 if negative */
+    BINARY
+}
+
+
+/**
+ * Supported comparison operations
+ * @author Eric Tsai
+ */
+enum Comparison {
+    /** Equal */
+    EQ,
+    /** Not equal */
+    NEQ,
+    /** Less than */
+    LT,
+    /** Less than or equal to */
+    LTE,
+    /** Greater than */
+    GT,
+    /** Greater than or equal to */
+    GTE
+}
+
+
+/**
+ * Operation modes for the passthrough limiter
+ * @author Eric Tsai
+ */
+enum Passthrough {
+    /** Allow all data through */
+    ALL,
+    /** Only allow data through if value &gt; 0 */
+    CONDITIONAL,
+    /** Only allow a fixed number of data samples through */
+    COUNT
+}
+
+
+/**
+ * Output modes for the threshold filter
+ * @author Eric Tsai
+ */
+enum ThresholdOutput {
+    /** Return the data as is */
+    ABSOLUTE,
+    /** 1 if the data exceeded the threshold, -1 if below */
+    BINARY
+}
+
+/**
+ * Output modes for the comparison filter, only supported by firmware v1.2.3 or higher
+ * @author Eric Tsai
+ */
+enum ComparisonOutput {
+    /** Input value is returned when the comparison is satisfied */
+    ABSOLUTE,
+    /** The reference value that satisfies the comparison is returned, no output if none match */
+    REFERENCE,
+    /** The index (0 based) of the value that satisfies the comparison is returned, n if none match */
+    ZONE,
+    /** 0 if comparison failed, 1 if it passed */
+    PASS_FAIL
+}
+
+
+abstract class Filter{
+}
+
+class ThresholdFilter implements Filter {
+    final ThresholdOutput output;
+    final num threshold;
+    final num hysteresis;
+
+    ThresholdFilter(this.output, this.threshold, [this.hysteresis = 0]);
+}
+
+class ComparisonFilter implements Filter {
+    final Comparison op;
+    final ComparisonOutput comparisonOutput;
+    final dynamic target;
+
+    ComparisonFilter(this.op, this.comparisonOutput, this.target);
+}
+
+class DifferentialFilter implements Filter {
+    final DifferentialOutput op;
+    final num distance;
+
+    DifferentialFilter(this.op, this.distance);
+}
+
+
+enum Function1 {
+    /** Calculates the absolute value */
+    ABS_VALUE,
+    /** Calculate root sum square (vector magnitude) */
+    RMS,
+    /** Calculate root mean square */
+    RSS,
+    /** Calculate square root */
+    SQRT
+}
+
+enum Function2 {
+    /** Add the data */
+    ADD,
+    /** Multiply the data */
+    MULTIPLY,
+    /** Divide the data */
+    DIVIDE,
+    /** Calculate the remainder */
+    MODULUS,
+    /** Calculate exponentiation of the data */
+    EXPONENT,
+    /** Perform left shift */
+    LEFT_SHIFT,
+    /** Perform right shift */
+    RIGHT_SHIFT,
+    /** Subtract the data */
+    SUBTRACT,
+    /** Transforms the input into a constant value */
+    CONSTANT
+}
+
+
+class FunctionBuilder {
+    final dynamic handler;
+    final dynamic target;
+
+    FunctionBuilder.abs(): handler = Function1.ABS_VALUE, target = null;
+    FunctionBuilder.rms(): handler = Function1.RMS, target = null;
+    FunctionBuilder.rss(): handler = Function1.RSS, target = null;
+    FunctionBuilder.sqrt(): handler = Function1.SQRT, target = null;
+
+    FunctionBuilder.add(dynamic target): handler = Function2.ADD,this.target = target;
+    FunctionBuilder.multiply(dynamic target): handler = Function2.MULTIPLY,this.target = target;
+    FunctionBuilder.divide(dynamic target): handler = Function2.DIVIDE,this.target = target;
+    FunctionBuilder.modulus(dynamic target): handler = Function2.MODULUS,this.target = target;
+    FunctionBuilder.exponent(dynamic target): handler = Function2.EXPONENT,this.target = target;
+    FunctionBuilder.leftShift(dynamic target): handler = Function2.LEFT_SHIFT,this.target = target;
+    FunctionBuilder.rightShift(dynamic target): handler = Function2.RIGHT_SHIFT,this.target = target;
+    FunctionBuilder.subtract(dynamic target): handler = Function2.SUBTRACT,this.target = target;
+    FunctionBuilder.constant(dynamic target): handler = Function2.CONSTANT,this.target = target;
+}
+
 
 /**
  * Component in a route definition
@@ -138,7 +287,7 @@ abstract class RouteComponent {
      * @param bufferNames   Named buffer components holding the extra data to combine
      * @return Object for continuing the route
      */
-    RouteComponent fuse(String... bufferNames);
+    RouteComponent fuse(List<String> bufferNames);
 
     /**
      * Counts the number of data samples that have passed through this component and outputs the current count
@@ -185,36 +334,38 @@ abstract class RouteComponent {
      * @param fn    Function to use
      * @return Object representing the output of the mapper
      */
-    RouteComponent map(Function1 fn);
-    /**
-     * Apply a 2 input function to all of the input data
-     * @param fn    Function to use
-     * @param rhs   Second input for the function
-     * @return Object representing the output of the mapper
-     */
-    RouteComponent map(Function2 fn, num rhs);
-    /**
-     * Variant of {@link #map(Function2, Number)} where the rhs value is the output of another
-     * sensor or processor
-     * @param fn          Function to apply to the input data
-     * @param dataNames   Keys identifying which sensor or processor data to feed into the mapper
-     * @return Object representing the output of the mapper
-     */
-    RouteComponent map(Function2 fn, List<String> dataNames);
+    RouteComponent map(FunctionBuilder func);
+
+//    /**
+//     * Apply a 2 input function to all of the input data
+//     * @param fn    Function to use
+//     * @param rhs   Second input for the function
+//     * @return Object representing the output of the mapper
+//     */
+//    RouteComponent map(Function2 fn, num rhs);
+//    /**
+//     * Variant of {@link #map(Function2, Number)} where the rhs value is the output of another
+//     * sensor or processor
+//     * @param fn          Function to apply to the input data
+//     * @param dataNames   Keys identifying which sensor or processor data to feed into the mapper
+//     * @return Object representing the output of the mapper
+//     */
+//    RouteComponent map(Function2 fn, List<String> dataNames);
 
     /**
      * Reduce the amount of data allowed through such that the output data rate matches the delay
      * @param period    How often to allow data through, in milliseconds (ms)
      * @return Object representing the output of the limiter
      */
-    RouteComponent limit(int period,[Passthrough type]);
+    RouteComponent resample(int period);
     /**
      * Only allow data through under certain user controlled conditions
      * @param type     Passthrough operation type
      * @param value    Initial value to set the passthrough limiter to
      * @return Object representing the output of the limiter
      */
-//    RouteComponent limit(Passthrough type, int value);
+    RouteComponent limit(Passthrough type, int value);
+
 
     /**
      * Scans the input data for a pulse.  When one is detected, output a summary of the scanned data
@@ -232,7 +383,7 @@ abstract class RouteComponent {
      *                      is on firmware v1.2.3 or later
      * @return Object representing the output of the comparator filter
      */
-    RouteComponent filter(Comparison op, List<num>  references);
+    //RouteComponent filter(Comparison op, List<num>  references);
     /**
      * Variant of the {@link #filter(Comparison, Number...)} function where the reference values are outputs
      * from other sensors or processors
@@ -241,7 +392,7 @@ abstract class RouteComponent {
      *                    new values are produced
      * @return Object representing the output of the comparator filter
      */
-    RouteComponent filter(Comparison op, List<String> dataNames);
+    //RouteComponent filter(Comparison op, List<String> dataNames);
     /**
      * Variant of {@link #filter(Comparison, Number...)} where the filter can output values providing
      * additional details about the comparison.  This variant component is only supported starting with
@@ -254,7 +405,9 @@ abstract class RouteComponent {
      *                      is on firmware v1.2.3 or later
      * @return Object representing the output of the comparator filter
      */
-    RouteComponent filter(Comparison op, ComparisonOutput output, List<num> references);
+//    RouteComponent filter(Comparison op, ComparisonOutput output, List<num> references);
+
+    RouteComponent filter(Filter filter);
     /**
      * Variant of {@link #filter(Comparison, ComparisonOutput, Number...)} where reference values are outputs
      * from other sensors or processors.
@@ -264,14 +417,14 @@ abstract class RouteComponent {
      *                    new values are produced
      * @return Object representing the output of the comparator filter
      */
-    RouteComponent filter(Comparison op, ComparisonOutput output, List<String> dataNames);
+//    RouteComponent filter(Comparison op, ComparisonOutput output, List<String> dataNames);
     /**
      * Remove data from the route that doesn't not cross the threshold
      * @param output       Type of output the filter will produce
      * @param threshold    Threshold boundary the data must cross
      * @return Object representing the output of the threshold filter
      */
-    RouteComponent filter(ThresholdOutput output, num threshold,[num hysteresis]);
+//    RouteComponent filter(ThresholdOutput output, num threshold,[num hysteresis]);
     /**
      * Variant of {@link #filter(ThresholdOutput, Number)} with a configurable hysteresis value for data
      * that frequently oscillates around the threshold boundary
@@ -288,7 +441,7 @@ abstract class RouteComponent {
      * @param distance      Minimum distance from the reference value
      * @return Object representing the output of the differential filter
      */
-    RouteComponent filter(DifferentialOutput output, num distance);
+//    RouteComponent filter(DifferentialOutput output, num distance);
 
     /**
      * Packs multiple input values into 1 BTLE packet.  Used to reduce the number of packets broadcasted over the link.

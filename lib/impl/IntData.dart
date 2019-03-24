@@ -41,7 +41,7 @@ import 'package:tuple/tuple.dart';
 class _DataPrivate extends DataPrivate{
 
   Uint8List _data;
-  _DataPrivate(this._data,DateTime timestamp, Uint8List dataBytes, ClassToObject mapper) : super(timestamp, dataBytes, mapper);
+  _DataPrivate(this._data,DateTime timestamp, Uint8List dataBytes, dynamic apply(Type target)) : super(timestamp, dataBytes, apply);
 
   @override
   List<Type> types() {
@@ -83,11 +83,10 @@ class IntData extends DataTypeBase {
   }
 
   @override
-  Data createMessage(bool logData, MetaWearBoardPrivate mwPrivate,
-      Uint8List data, DateTime timestamp, ClassToObject mapper) {
+  Data createMessage(bool logData, MetaWearBoardPrivate mwPrivate, Uint8List data, DateTime timestamp, dynamic apply(Type target)) {
     final Uint8List buffer = Util.bytesToSIntBuffer(logData, data, attributes);
 
-    return _DataPrivate(buffer, timestamp, data, mapper);
+    return _DataPrivate(buffer, timestamp, data, apply);
   }
 
   @override

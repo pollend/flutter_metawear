@@ -27,8 +27,8 @@ import 'dart:typed_data';
 
 import 'package:flutter_metawear/Data.dart';
 import 'package:flutter_metawear/DataToken.dart';
-import 'package:flutter_metawear/builder/filter/ComparisonOutput.dart';
 import 'package:flutter_metawear/impl/ArrayData.dart';
+import 'package:flutter_metawear/builder/RouteComponent.dart';
 import 'package:flutter_metawear/impl/ByteArrayData.dart';
 import 'package:flutter_metawear/impl/DataAttributes.dart';
 import 'package:flutter_metawear/impl/DataPrivate.dart';
@@ -65,8 +65,6 @@ import 'package:flutter_metawear/module/AccelerometerBmi160.dart';
 import 'package:flutter_metawear/module/AccelerometerBma255.dart';
 
 import 'package:flutter_metawear/builder/predicate/PulseOutput.dart';
-import 'package:flutter_metawear/builder/filter/DifferentialOutput.dart';
-import 'package:flutter_metawear/builder/filter/ThresholdOutput.dart';
 import 'dart:math';
 
 class _DataTypeBase extends DataTypeBase {
@@ -80,8 +78,7 @@ class _DataTypeBase extends DataTypeBase {
     }
 
     @override
-    Data createMessage(bool logData, MetaWearBoardPrivate mwPrivate,
-        Uint8List data, DateTime timestamp, ClassToObject mapper) {
+    Data createMessage(bool logData, MetaWearBoardPrivate mwPrivate, Uint8List data, DateTime timestamp, ClassToObject mapper) {
         throw UnsupportedError("Unsupported DataTypeBase");
     }
 }
@@ -250,8 +247,7 @@ abstract class DataTypeBase implements DataToken {
         return value;
     }
 
-    Data createMessage(bool logData, MetaWearBoardPrivate mwPrivate,
-        Uint8List data, DateTime timestamp, ClassToObject mapper);
+    Data createMessage(bool logData, MetaWearBoardPrivate mwPrivate, Uint8List data, DateTime timestamp, dynamic apply(Type target));
 
     Tuple2<DataTypeBase, DataTypeBase> dataProcessorTransform(
         DataProcessorConfig config, DataProcessorImpl dpModule) {
@@ -288,7 +284,7 @@ abstract class DataTypeBase implements DataToken {
             case Time.ID:
                 return Tuple2(dataProcessorCopy(
                     this, this.attributes.dataProcessorCopy()), null);
-            case Passthrough.ID:
+            case PassthroughConfig.ID:
                 return Tuple2(
                     dataProcessorCopy(
                         this, this.attributes.dataProcessorCopy()),
@@ -422,7 +418,7 @@ abstract class DataTypeBase implements DataToken {
                     }
                     break;
                 }
-            case Comparison.ID:
+            case ComparisonConfig.ID:
                 {
                     DataTypeBase processor = null;
                     if (config is SingleValueComparison) {
