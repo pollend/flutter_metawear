@@ -3,13 +3,8 @@ import 'dart:typed_data';
 
 import 'package:flutter_metawear/IllegalRouteOperationException.dart';
 import 'package:flutter_metawear/builder/RouteComponent.dart';
-import 'package:flutter_metawear/builder/filter/ThresholdOutput.dart';
-import 'package:flutter_metawear/builder/filter/Passthrough.dart' as Pass;
-import 'package:flutter_metawear/builder/filter/Comparison.dart' as Co;
-import 'package:flutter_metawear/builder/filter/ComparisonOutput.dart';
 import 'package:flutter_metawear/builder/predicate/PulseOutput.dart';
 import 'package:flutter_metawear/impl/DataAttributes.dart';
-import 'package:flutter_metawear/builder/filter/DifferentialOutput.dart';
 import 'package:flutter_metawear/impl/DataProcessorImpl.dart';
 import 'package:flutter_metawear/impl/Version.dart';
 
@@ -61,18 +56,18 @@ class Threshold extends DataProcessorConfig {
 
 }
 
-class Passthrough extends DataProcessorConfig {
+class PassthroughConfig extends DataProcessorConfig {
     static const int ID = 0x1;
 
-    final Pass.Passthrough type;
+    final Passthrough type;
     final int value;
 
-    Passthrough.config(Uint8List config):
-            type = Pass.Passthrough.values[config[1] & 0x7],
+    PassthroughConfig.config(Uint8List config):
+            type = Passthrough.values[config[1] & 0x7],
             value = ByteData.view(config.buffer).getUint16(2, Endian.little),
             super(config[0]);
 
-    Passthrough(this.type, this.value) : super(ID);
+    PassthroughConfig(this.type, this.value) : super(ID);
 
     @override
     Uint8List build() {
@@ -166,17 +161,17 @@ class Average extends DataProcessorConfig {
 
 }
 
-abstract class Comparison extends  DataProcessorConfig {
+abstract class ComparisonConfig extends  DataProcessorConfig {
     static const int ID = 0x6;
 
-    Comparison(int id) : super(id);
+    ComparisonConfig(int id) : super(id);
 
     @override
     String createUri(bool state, int procId) => sprintf("comparison?id=%d", procId);
 
 }
 
-class MultiValueComparison extends Comparison {
+class MultiValueComparison extends ComparisonConfig {
     static void fillReferences(ByteData buffer, int length,
         List<num> references) {
         int offset = 0;
@@ -232,7 +227,7 @@ class MultiValueComparison extends Comparison {
 
     int input;
     final List<num> references;
-    final Co.Comparison op;
+    final Comparison op;
     final ComparisonOutput mode;
     final bool isSigned;
 
@@ -267,17 +262,17 @@ class MultiValueComparison extends Comparison {
 }
 
 
-class SingleValueComparison extends Comparison {
+class SingleValueComparison extends ComparisonConfig {
     final bool isSigned;
-    final Co.Comparison op;
+    final Comparison op;
     final int reference;
 
     SingleValueComparison(this.isSigned, this.op, this.reference)
-        : super(Comparison.ID);
+        : super(ComparisonConfig.ID);
 
     SingleValueComparison.config(Uint8List config):
             isSigned = config[1] == 0x1,
-            op = Co.Comparison.values[config[2]],
+            op = Comparison.values[config[2]],
             reference = ByteData.view(config.buffer).getUint8(4),
             super(config[0]);
 
@@ -287,7 +282,7 @@ class SingleValueComparison extends Comparison {
         final data = Uint8List(8);
         final buffer = ByteData.view(data.buffer);
         int offset = 0;
-        buffer.setUint8(offset, Comparison.ID);
+        buffer.setUint8(offset, ComparisonConfig.ID);
         buffer.setUint8(offset += 1, isSigned ? 1 : 0);
         buffer.setUint8(offset += 1, op.index);
         buffer.setUint8(offset += 1, 0);
@@ -653,11 +648,9 @@ class Fuser extends DataProcessorConfig {
                     "No processor named \"" + it + "\" found");
             }
 
-            int id = dpModule.nameToIdMapping.get(it);
-            DataProcessorImpl.Processor value = dpModule.activeProcessors.get(
-                id);
-            if (!(value.editor
-                .configObj instanceof DataProcessorConfig.Buffer)) {
+            int id = dpModule.nameToIdMapping[it];
+            Processor value = dpModule.activeProcessors[id];
+            if (!(value.editor.configObj is Buffer)) {
                 throw new IllegalRouteOperationException(
                     "Can only use buffer processors as inputs to the fuser");
             }
@@ -688,13 +681,13 @@ class Fuser extends DataProcessorConfig {
 abstract class DataProcessorConfig {
     static DataProcessorConfig from(Version firmware, int revision, Uint8List config) {
         switch(config[0]) {
-            case Passthrough.ID:
-                return Passthrough.config(config);
+            case PassthroughConfig.ID:
+                return PassthroughConfig.config(config);
             case Accumulator.ID:
                 return Accumulator.config(config);
             case Average.ID:
                 return Average.config((config);
-            case Comparison.ID:
+            case ComparisonConfig.ID:
                 return firmware.compareTo(MULTI_COMPARISON_MIN_FIRMWARE) >= 0 ?
                         new MultiValueComparison(config) : new SingleValueComparison(config);
             case Combiner.ID:

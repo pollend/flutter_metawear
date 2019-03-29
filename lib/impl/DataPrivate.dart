@@ -42,7 +42,7 @@ abstract class DataPrivate implements Data {
 
   final DateTime _timestamp;
   final Uint8List _dataBytes;
-  final ClassToObject _mapper;
+  final dynamic Function(Type target) _mapper;
 
   DataPrivate(this._timestamp, this._dataBytes, this._mapper);
 
@@ -74,6 +74,7 @@ abstract class DataPrivate implements Data {
     }
     return value;
   }
+
 
   @override
   String toString() =>

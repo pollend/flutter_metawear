@@ -29,10 +29,9 @@ import 'package:flutter_metawear/impl/DataTypeBase.dart';
 import 'package:flutter_metawear/impl/DeviceDataConsumer.dart';
 import 'package:flutter_metawear/impl/LoggingImpl.dart';
 import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
-import 'package:flutter_metawear/impl/JseMetaWearBoard.dart';
-import 'package:flutter_metawear/module/Logging.dart';
 import 'package:flutter_metawear/impl/ModuleType.dart';
 import 'package:flutter_metawear/module/DataProcessor.dart';
+import 'package:flutter_metawear/module/Logging.dart';
 
 import 'dart:typed_data';
 import 'package:tuple/tuple.dart';
@@ -117,10 +116,9 @@ class StreamedDataConsumer extends DeviceDataConsumer {
                     for(int i = 0, j = source.eventConfig[2] == DataTypeBase.NO_DATA_ID ? 2 : 3; i< source.attributes.copies && j < response.length; i++, j+= dataUnitLength) {
                         Tuple3<DateTime, int, int> account = fillTimestamp(mwPrivate, accounter, response, j);
                         Uint8List dataRaw = Uint8List(dataUnitLength - (account.item2 - j));
-                        System.arraycopy(response, account.item2, dataRaw, 0, dataRaw.length);
-                        call(source.createMessage(false, mwPrivate, dataRaw, accounter == null ? now : account.first, accountType == RouteComponent.AccountType.TIME ? null : clazz ->
-                                clazz.equals(Long.class) ? account.third : null)
-                        );
+                        dataRaw.setAll(0, response.skip(account.item2));
+
+                        call(source.createMessage(false, mwPrivate, dataRaw, accounter == null ? now : account.item1, accountType == AccountType.TIME ? null : ((Type clazz) => clazz == int ? account.item3 : null)));
                     }
                 };
             } else {
@@ -130,45 +128,40 @@ class StreamedDataConsumer extends DeviceDataConsumer {
                     if (source.eventConfig[2] == DataTypeBase.NO_DATA_ID) {
                         dataRaw = Uint8List(response.length - 2);
                         dataRaw.setAll(0, response.skip(2));
-//                        System.arraycopy(response, 2, dataRaw, 0, dataRaw.length);
                     } else {
                         dataRaw = Uint8List(response.length - 3);
                         dataRaw.setAll(0, response.skip(3));
-//                      System.arraycopy(response, 3, dataRaw, 0, dataRaw.length);
                     }
 
                     AccountType accountType = AccountType.TIME;
                     Tuple3<DateTime, int, int> account;
                     if (source.eventConfig[0] == ModuleType.DATA_PROCESSOR.id && source.eventConfig[1] == DataProcessorImpl.NOTIFY) {
-                        DataProcessorImpl dataprocessor =  mwPrivate.getModules()[DataProcessor] as DataProcessorImpl;
+                        DataProcessorImpl dataprocessor = mwPrivate.getModules()[DataProcessor] as DataProcessorImpl;
                         DataProcessorConfig config = dataprocessor.lookupProcessor(source.eventConfig[2]).editor.configObj;
                         account = fillTimestamp(mwPrivate, dataprocessor.lookupProcessor(source.eventConfig[2]), dataRaw, 0);
 
                         if (account.item2 > 0) {
                             Uint8List copy = Uint8List(dataRaw.length - account.item2);
-//                            System.arraycopy(dataRaw, account.item2, copy, 0, copy.length);
                             copy.setAll(0, dataRaw.skip(account.item2));
+//                            System.arraycopy(dataRaw, account.second, copy, 0, copy.length);
                             dataRaw = copy;
                             accountType = (config as Accounter).type;
                         }
                     } else {
-                        account = Tuple3(DateTime.now(), 0, 0);
+                        account = new Tuple3(DateTime.now(), 0, 0);
                     }
 
-                    Processor packer = findParent(mwPrivate.getModules()[DataProcessor] as DataProcessorImpl, source, DataProcessorImpl.TYPE_PACKER);
+                   Processor packer = findParent(mwPrivate.getModules()[DataProcessor] as DataProcessorImpl, source, DataProcessorImpl.TYPE_PACKER);
                     if (packer != null) {
                         final int dataUnitLength = packer.editor.source.attributes.unitLength();
                         Uint8List unpacked = Uint8List(dataUnitLength);
                         for(int i = 0, j = 3 + account.item2; i< packer.editor.source.attributes.copies && j < response.length; i++, j+= dataUnitLength) {
-                            System.arraycopy(response, j, unpacked, 0, unpacked.length);
-                            call(source.createMessage(false, mwPrivate, unpacked, account.item1, accountType == AccountType.TIME ? null : clazz ->
-                                    clazz.equals(Long.class) ? account.third : null)
-                            );
+//                            System.arraycopy(response, j, unpacked, 0, unpacked.length);
+                            unpacked.setAll(0, response.skip(j));
+                            call(source.createMessage(false, mwPrivate, unpacked, account.item1, accountType == AccountType.TIME ? null : ((Type clazz) => clazz == int ? account.item3 : null)));
                         }
                     } else {
-                        call(source.createMessage(false, mwPrivate, dataRaw, account.item1, accountType == AccountType.TIME ? null : clazz ->
-                                clazz.equals(Long.class) ? account.third : null)
-                        );
+                        call(source.createMessage(false, mwPrivate, dataRaw, account.item1, accountType == AccountType.TIME ? null :  ((Type clazz) => clazz == int ? account.item3 : null)));
                     }
                 };
             }
@@ -177,7 +170,7 @@ class StreamedDataConsumer extends DeviceDataConsumer {
         mwPrivate.addDataHandler(source.eventConfigAsTuple(), dataResponseHandler);
     }
 
-    static Processor findParent(DataProcessorImpl dataprocessor, DataTypeBase child, byte type) {
+    static Processor findParent(DataProcessorImpl dataprocessor, DataTypeBase child, int type) {
         if (child.eventConfig[0] == ModuleType.DATA_PROCESSOR.id && child.eventConfig[1] == DataProcessorImpl.NOTIFY) {
             Processor processor = dataprocessor.lookupProcessor(child.eventConfig[2]);
             if (processor.editor.config[0] == type) {
@@ -195,10 +188,10 @@ class StreamedDataConsumer extends DeviceDataConsumer {
             if (config is Accounter) {
                 int size = (config as Accounter).length;
                 Uint8List padded = Uint8List(8);
-                padded.setAll(0, response.skip(offset));
+                padded.setAll(0,response.skip(offset));
 //                System.arraycopy(response, offset, padded, 0, size);
-                int tick = ByteData.view(padded.buffer).getInt64(0,Endian.little);
-
+                int tick = ByteData.view(padded.buffer).getUint16(0,Endian.little);
+//                ByteBuffer.wrap(padded).order(ByteOrder.LITTLE_ENDIAN).getLong(0);
 
                 switch((config as Accounter).type) {
                     case AccountType.COUNT: {
@@ -206,7 +199,7 @@ class StreamedDataConsumer extends DeviceDataConsumer {
                     }
                     case AccountType.TIME: {
                         LoggingImpl logging = mwPrivate.getModules()[Logging] as LoggingImpl;
-                        return Tuple3(logging.computeTimestamp((byte) -1, tick), size + offset, tick);
+                        return Tuple3(logging.computeTimestamp(-1, tick), size + offset, tick);
                     }
                 }
             }

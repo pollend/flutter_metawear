@@ -26,6 +26,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter_metawear/Data.dart';
+import 'package:flutter_metawear/builder/RouteComponent.dart';
 import 'package:flutter_metawear/impl/DataAttributes.dart';
 import 'package:flutter_metawear/impl/DataPrivate.dart';
 import 'package:flutter_metawear/impl/DataProcessorConfig.dart';
@@ -33,7 +34,6 @@ import 'package:flutter_metawear/impl/DataProcessorImpl.dart';
 import 'package:flutter_metawear/impl/DataTypeBase.dart';
 import 'package:flutter_metawear/impl/ModuleType.dart';
 import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
-import 'package:flutter_metawear/builder/filter/DifferentialOutput.dart';
 import 'package:flutter_metawear/impl/SFloatData.dart';
 import 'package:flutter_metawear/impl/Util.dart';
 
@@ -45,9 +45,8 @@ class _DataPrivate extends DataPrivate {
     final UFloatData uFloatData;
 
     _DataPrivate(this.uFloatData, this.scaled, this.mwPrivate,
-        DateTime timestamp, Uint8List dataBytes, ClassToObject mapper)
-        : super(timestamp, dataBytes, mapper);
-
+        DateTime timestamp, Uint8List dataBytes, dynamic apply(Type target))
+        : super(timestamp, dataBytes, apply);
 
     @override
     double scale() {
@@ -95,11 +94,11 @@ class UFloatData extends DataTypeBase {
     }
 
     @override
-    Data createMessage(bool logData, MetaWearBoardPrivate mwPrivate, Uint8List data, DateTime timestamp, ClassToObject mapper) {
+    Data createMessage(bool logData, MetaWearBoardPrivate mwPrivate, Uint8List data, DateTime timestamp, dynamic apply(Type target)) {
         Uint8List buffer = Util.bytesToUIntBuffer(logData, data, attributes);
         double scaled = ByteData.view(buffer.buffer).getUint64(0,Endian.little)/scale(mwPrivate);
 
-        return _DataPrivate(this,scaled,mwPrivate,timestamp,data,mapper);
+        return _DataPrivate(this,scaled,mwPrivate,timestamp,data,apply);
     }
 
     @override

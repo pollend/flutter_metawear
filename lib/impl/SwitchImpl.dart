@@ -36,7 +36,6 @@ import 'package:flutter_metawear/impl/ModuleImplBase.dart';
 import 'package:flutter_metawear/impl/ModuleType.dart';
 import 'package:flutter_metawear/impl/UintData.dart';
 import 'package:flutter_metawear/impl/Util.dart';
-import 'package:flutter_metawear/impl/platform/TimedTask.dart';
 import 'package:flutter_metawear/module/Switch.dart';
 
 
@@ -78,7 +77,6 @@ class SwitchImpl extends ModuleImplBase implements Switch {
     final StreamController<int> _streamController = StreamController<int>();
 
     ActiveDataProducer _state;
-    TimedTask<int> _stateTasks;
 
     SwitchImpl(MetaWearBoardPrivate mwPrivate): super(mwPrivate) {
         this.mwPrivate.tagProducer(PRODUCER, new UintData(ModuleType.SWITCH, STATE, new DataAttributes(Uint8List.fromList([1]), 1, 0, false)));

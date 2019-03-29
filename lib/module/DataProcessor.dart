@@ -25,8 +25,7 @@
 
 import 'package:flutter_metawear/ForcedDataProducer.dart';
 import 'package:flutter_metawear/MetaWearBoard.dart';
-import 'package:flutter_metawear/builder/filter/Comparison.dart';
-import 'package:flutter_metawear/builder/filter/Passthrough.dart';
+import 'package:flutter_metawear/builder/RouteComponent.dart';
 
 /**
  * Common base class for all data processor editors

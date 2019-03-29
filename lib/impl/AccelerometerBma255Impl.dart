@@ -263,7 +263,7 @@ class AccelerometerBma255Impl extends AccelerometerBoschImpl implements Accelero
         }
         return (NoMotionDataProducer) noMotion;
     }
-    private AnyMotionDataProducer anyMotion() {
+    AnyMotionDataProducer anyMotion() {
         if (anyMotion == null) {
             anyMotion = new AnyMotionDataProducer() {
                 @override
@@ -294,7 +294,7 @@ class AccelerometerBma255Impl extends AccelerometerBoschImpl implements Accelero
         }
         return (AnyMotionDataProducer) anyMotion;
     }
-    private SlowMotionDataProducer slowMotion() {
+    SlowMotionDataProducer slowMotion() {
         if (slowMotion == null) {
             slowMotion = new SlowMotionDataProducer() {
                 @override
