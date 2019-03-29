@@ -258,9 +258,9 @@ class LoggingImpl extends ModuleImplBase implements Logging {
             rollbackTimestamps = new HashMap<>();
         }
 
-        this.mwPrivate.addResponseHandler(new Pair<>(LOGGING.id, Util.setRead(TRIGGER)), response -> syncLoggerConfigTask.setResult(response));
-        this.mwPrivate.addResponseHandler(new Pair<>(LOGGING.id, TRIGGER), response -> createLoggerTask.setResult(response));
-        this.mwPrivate.addResponseHandler(new Pair<>(LOGGING.id, READOUT_NOTIFY), response -> {
+        this.mwPrivate.addResponseHandler(Tuple2(ModuleType.LOGGING.id, Util.setRead(TRIGGER)), response -> syncLoggerConfigTask.setResult(response));
+        this.mwPrivate.addResponseHandler(Tuple2(ModuleType.LOGGING.id, TRIGGER), response -> createLoggerTask.setResult(response));
+        this.mwPrivate.addResponseHandler(Tuple2(ModuleType.LOGGING.id, READOUT_NOTIFY), response -> {
             processLogData(Arrays.copyOfRange(response, 2, 11));
 
             if (response.length == 20) {

@@ -23,56 +23,63 @@
  */
 
 
-/**
- * Created by etsai on 9/20/16.
- */
-class BarometerBme280Impl extends BarometerBoschImpl implements BarometerBme280 {
-    static final byte IMPLEMENTATION= 1;
-    private static final long serialVersionUID = -8762879587731816595L;
+import 'package:flutter_metawear/impl/BarometerBoschImpl.dart';
+import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
+import 'package:flutter_metawear/module/BarometerBme280.dart' as BarometerBme280 ;
+import 'package:flutter_metawear/module/BarometerBosch.dart';
+import 'package:flutter_metawear/impl/ModuleType.dart';
+import 'dart:typed_data';
 
-    BarometerBme280Impl(MetaWearBoardPrivate mwPrivate) {
-        super(mwPrivate);
+class _Configure implements BarometerBme280.ConfigEditor {
+    OversamplingMode samplingMode = OversamplingMode.STANDARD;
+    FilterCoeff _filterCoeff = FilterCoeff.OFF;
+    BarometerBme280.StandbyTime _time = BarometerBme280.StandbyTime.TIME_0_5;
+    int _tempOversampling = 1;
+
+    final MetaWearBoardPrivate _mwPrivate;
+
+    _Configure(this._mwPrivate);
+
+    @override
+    BarometerBme280.ConfigEditor standbyTime(BarometerBme280.StandbyTime time) {
+        this._time = time;
+        return this;
     }
 
     @override
-    public BarometerBme280.ConfigEditor configure() {
-        return new BarometerBme280.ConfigEditor() {
-            private OversamplingMode samplingMode= OversamplingMode.STANDARD;
-            private FilterCoeff filterCoeff = FilterCoeff.OFF;
-            private StandbyTime time= StandbyTime.TIME_0_5;
-            private byte tempOversampling= 1;
+    void commit() {
+        _mwPrivate.sendCommand(Uint8List.fromList(
+            [ModuleType.BAROMETER.id, BarometerBoschImpl.CONFIG,
+            ((samplingMode.index << 2) | (_tempOversampling << 5)),
+            ((_filterCoeff.index << 2) | (_time.index << 5))
+            ]));
+    }
 
-            @override
-            public BarometerBme280.ConfigEditor standbyTime(StandbyTime time) {
-                this.time= time;
-                return this;
-            }
+    @override
+    BarometerBme280.ConfigEditor pressureOversampling(OversamplingMode mode) {
+        samplingMode = mode;
+        _tempOversampling = ((mode == OversamplingMode.ULTRA_HIGH) ? 2 : 1);
+        return this;
+    }
 
-            @override
-            public void commit() {
-                mwPrivate.sendCommand(new byte[] {BAROMETER.id, CONFIG,
-                        (byte) ((samplingMode.ordinal() << 2) | (tempOversampling << 5)),
-                        (byte) ((filterCoeff.ordinal() << 2) | (time.ordinal() << 5))});
-            }
+    @override
+    BarometerBme280.ConfigEditor filterCoeff(FilterCoeff coeff) {
+        _filterCoeff = coeff;
+        return this;
+    }
+}
 
-            @override
-            public BarometerBme280.ConfigEditor pressureOversampling(OversamplingMode mode) {
-                samplingMode= mode;
-                tempOversampling= (byte) ((mode == OversamplingMode.ULTRA_HIGH) ? 2 : 1);
-                return this;
-            }
+/**
+ * Created by etsai on 9/20/16.
+ */
+class BarometerBme280Impl extends BarometerBoschImpl implements BarometerBme280.BarometerBme280 {
+    static const int IMPLEMENTATION = 1;
 
-            @override
-            public BarometerBme280.ConfigEditor filterCoeff(FilterCoeff coeff) {
-                filterCoeff = coeff;
-                return this;
-            }
+    BarometerBme280Impl(MetaWearBoardPrivate mwPrivate) : super(mwPrivate);
 
-            @override
-            public BarometerBme280.ConfigEditor standbyTime(float time) {
-                float[] availableTimes= StandbyTime.times();
-                return standbyTime(StandbyTime.values()[Util.closestIndex(availableTimes, time)]);
-            }
-        };
+
+    @override
+    BarometerBme280.ConfigEditor configure() {
+        return _Configure(mwPrivate);
     }
 }

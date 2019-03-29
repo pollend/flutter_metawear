@@ -68,30 +68,35 @@ class Range {
     final double scale;
     final int bitmask;
 
-    const Range._(this.scale,this.bitmask);
+    const Range._(this.scale, this.bitmask);
 
     /** +/- 2000 degrees / second */
-    static const FSR_2000 = Range._(16.4,0x00);
+    static const FSR_2000 = Range._(16.4, 0x00);
+
     /** +/- 1000 degrees / second */
-    static const FSR_1000 = Range._(32.8,0x01);
+    static const FSR_1000 = Range._(32.8, 0x01);
+
     /** +/- 500 degrees / second */
-    static const FSR_500 = Range._(65.6,0x02);
+    static const FSR_500 = Range._(65.6, 0x02);
+
     /** +/- 250 degrees / second */
-    static const FSR_250 = Range._(131.2,0x03);
+    static const FSR_250 = Range._(131.2, 0x03);
+
     /** +/- 125 degrees / second */
-    static const FSR_125 = Range._(262.4,0x04);
+    static const FSR_125 = Range._(262.4, 0x04);
 
 
-    static final Map<int,Range> _bitMaskToRanges = {
+    static final Map<int, Range> _bitMaskToRanges = {
         FSR_2000.bitmask: FSR_2000,
         FSR_1000.bitmask: FSR_1000,
         FSR_500.bitmask: FSR_500,
         FSR_250.bitmask: FSR_250,
         FSR_125.bitmask: FSR_125
-
     };
 
-    static Range bitMaskToRange(int mask){
+    static List<Range> get values => [FSR_2000, FSR_1000, FSR_500, FSR_250, FSR_125];
+
+    static Range bitMaskToRange(int mask) {
         return _bitMaskToRanges[mask];
     }
 

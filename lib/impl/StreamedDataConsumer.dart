@@ -27,8 +27,10 @@ import 'package:flutter_metawear/impl/DataProcessorConfig.dart';
 import 'package:flutter_metawear/impl/DataProcessorImpl.dart';
 import 'package:flutter_metawear/impl/DataTypeBase.dart';
 import 'package:flutter_metawear/impl/DeviceDataConsumer.dart';
+import 'package:flutter_metawear/impl/LoggingImpl.dart';
 import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
 import 'package:flutter_metawear/impl/JseMetaWearBoard.dart';
+import 'package:flutter_metawear/module/Logging.dart';
 import 'package:flutter_metawear/impl/ModuleType.dart';
 import 'package:flutter_metawear/module/DataProcessor.dart';
 
@@ -103,7 +105,7 @@ class StreamedDataConsumer extends DeviceDataConsumer {
     void addDataHandler(final MetaWearBoardPrivate mwPrivate) {
 
         if (source.eventConfig[2] != DataTypeBase.NO_DATA_ID) {
-            mwPrivate.addDataIdHeader(new Pair<>(source.eventConfig[0], source.eventConfig[1]));
+            mwPrivate.addDataIdHeader(Tuple2(source.eventConfig[0], source.eventConfig[1]));
         }
         if (dataResponseHandler == null) {
             if (source.attributes.copies > 1) {
@@ -126,42 +128,45 @@ class StreamedDataConsumer extends DeviceDataConsumer {
                     Uint8List dataRaw;
 
                     if (source.eventConfig[2] == DataTypeBase.NO_DATA_ID) {
-                        dataRaw = new byte[response.length - 2];
-                        System.arraycopy(response, 2, dataRaw, 0, dataRaw.length);
+                        dataRaw = Uint8List(response.length - 2);
+                        dataRaw.setAll(0, response.skip(2));
+//                        System.arraycopy(response, 2, dataRaw, 0, dataRaw.length);
                     } else {
-                        dataRaw = new byte[response.length - 3];
-                        System.arraycopy(response, 3, dataRaw, 0, dataRaw.length);
+                        dataRaw = Uint8List(response.length - 3);
+                        dataRaw.setAll(0, response.skip(3));
+//                      System.arraycopy(response, 3, dataRaw, 0, dataRaw.length);
                     }
 
-                    RouteComponent.AccountType accountType = RouteComponent.AccountType.TIME;
-                    Tuple3<Calendar, Integer, Long> account;
-                    if (source.eventConfig[0] == DATA_PROCESSOR.id && source.eventConfig[1] == DataProcessorImpl.NOTIFY) {
-                        DataProcessorImpl dataprocessor = (DataProcessorImpl) mwPrivate.getModules().get(DataProcessor.class);
+                    AccountType accountType = AccountType.TIME;
+                    Tuple3<DateTime, int, int> account;
+                    if (source.eventConfig[0] == ModuleType.DATA_PROCESSOR.id && source.eventConfig[1] == DataProcessorImpl.NOTIFY) {
+                        DataProcessorImpl dataprocessor =  mwPrivate.getModules()[DataProcessor] as DataProcessorImpl;
                         DataProcessorConfig config = dataprocessor.lookupProcessor(source.eventConfig[2]).editor.configObj;
                         account = fillTimestamp(mwPrivate, dataprocessor.lookupProcessor(source.eventConfig[2]), dataRaw, 0);
 
-                        if (account.second > 0) {
-                            byte[] copy = new byte[dataRaw.length - account.second];
-                            System.arraycopy(dataRaw, account.second, copy, 0, copy.length);
+                        if (account.item2 > 0) {
+                            Uint8List copy = Uint8List(dataRaw.length - account.item2);
+//                            System.arraycopy(dataRaw, account.item2, copy, 0, copy.length);
+                            copy.setAll(0, dataRaw.skip(account.item2));
                             dataRaw = copy;
-                            accountType = ((DataProcessorConfig.Accounter) config).type;
+                            accountType = (config as Accounter).type;
                         }
                     } else {
-                        account = new Tuple3<>(Calendar.getInstance(), 0, 0L);
+                        account = Tuple3(DateTime.now(), 0, 0);
                     }
 
-                    DataProcessorImpl.Processor packer = findParent((DataProcessorImpl) mwPrivate.getModules().get(DataProcessor.class), source, DataProcessorImpl.TYPE_PACKER);
+                    Processor packer = findParent(mwPrivate.getModules()[DataProcessor] as DataProcessorImpl, source, DataProcessorImpl.TYPE_PACKER);
                     if (packer != null) {
-                        final byte dataUnitLength = packer.editor.source.attributes.unitLength();
-                        byte[] unpacked = new byte[dataUnitLength];
-                        for(int i = 0, j = 3 + account.second; i< packer.editor.source.attributes.copies && j < response.length; i++, j+= dataUnitLength) {
+                        final int dataUnitLength = packer.editor.source.attributes.unitLength();
+                        Uint8List unpacked = Uint8List(dataUnitLength);
+                        for(int i = 0, j = 3 + account.item2; i< packer.editor.source.attributes.copies && j < response.length; i++, j+= dataUnitLength) {
                             System.arraycopy(response, j, unpacked, 0, unpacked.length);
-                            call(source.createMessage(false, mwPrivate, unpacked, account.first, accountType == RouteComponent.AccountType.TIME ? null : clazz ->
+                            call(source.createMessage(false, mwPrivate, unpacked, account.item1, accountType == AccountType.TIME ? null : clazz ->
                                     clazz.equals(Long.class) ? account.third : null)
                             );
                         }
                     } else {
-                        call(source.createMessage(false, mwPrivate, dataRaw, account.first, accountType == RouteComponent.AccountType.TIME ? null : clazz ->
+                        call(source.createMessage(false, mwPrivate, dataRaw, account.item1, accountType == AccountType.TIME ? null : clazz ->
                                 clazz.equals(Long.class) ? account.third : null)
                         );
                     }
@@ -173,8 +178,8 @@ class StreamedDataConsumer extends DeviceDataConsumer {
     }
 
     static Processor findParent(DataProcessorImpl dataprocessor, DataTypeBase child, byte type) {
-        if (child.eventConfig[0] == DATA_PROCESSOR.id && child.eventConfig[1] == DataProcessorImpl.NOTIFY) {
-            DataProcessorImpl.Processor processor = dataprocessor.lookupProcessor(child.eventConfig[2]);
+        if (child.eventConfig[0] == ModuleType.DATA_PROCESSOR.id && child.eventConfig[1] == DataProcessorImpl.NOTIFY) {
+            Processor processor = dataprocessor.lookupProcessor(child.eventConfig[2]);
             if (processor.editor.config[0] == type) {
                 return processor;
             }
@@ -187,23 +192,25 @@ class StreamedDataConsumer extends DeviceDataConsumer {
     static Tuple3<DateTime, int, int> fillTimestamp(MetaWearBoardPrivate mwPrivate, Processor accounter, Uint8List response, int offset) {
         if (accounter != null) {
             DataProcessorConfig config = accounter.editor.configObj;
-            if (config instanceof DataProcessorConfig.Accounter) {
-                int size = ((DataProcessorConfig.Accounter) config).length;
-                byte[] padded = new byte[8];
-                System.arraycopy(response, offset, padded, 0, size);
-                long tick = ByteBuffer.wrap(padded).order(ByteOrder.LITTLE_ENDIAN).getLong(0);
+            if (config is Accounter) {
+                int size = (config as Accounter).length;
+                Uint8List padded = Uint8List(8);
+                padded.setAll(0, response.skip(offset));
+//                System.arraycopy(response, offset, padded, 0, size);
+                int tick = ByteData.view(padded.buffer).getInt64(0,Endian.little);
 
-                switch(((DataProcessorConfig.Accounter) config).type) {
-                    case COUNT: {
-                        return new Tuple3<>(Calendar.getInstance(), size + offset, tick);
+
+                switch((config as Accounter).type) {
+                    case AccountType.COUNT: {
+                        return Tuple3(DateTime.now(), size + offset, tick);
                     }
-                    case TIME: {
-                        LoggingImpl logging = (LoggingImpl) mwPrivate.getModules().get(Logging.class);
-                        return new Tuple3<>(logging.computeTimestamp((byte) -1, tick), size + offset, tick);
+                    case AccountType.TIME: {
+                        LoggingImpl logging = mwPrivate.getModules()[Logging] as LoggingImpl;
+                        return Tuple3(logging.computeTimestamp((byte) -1, tick), size + offset, tick);
                     }
                 }
             }
         }
-        return new Tuple3<>(Calendar.getInstance(), offset, 0L);
+        return Tuple3(DateTime.now(), offset, 0);
     }
 }

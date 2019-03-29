@@ -31,21 +31,21 @@ import 'package:flutter_metawear/module/BarometerBosch.dart' as BarometerBosch;
  */
 class StandbyTime {
     /** 0.5ms */
-    static const TIME_0_5 = StandbyTime._(0.5);
+    static const TIME_0_5 = StandbyTime._(0.5,0);
     /** 62.5ms */
-    static const TIME_62_5 = StandbyTime._(62.5);
+    static const TIME_62_5 = StandbyTime._(62.5,1);
     /** 125ms */
-    static const TIME_125 = StandbyTime._(125);
+    static const TIME_125 = StandbyTime._(125,2);
     /** 250ms */
-    static const TIME_250 = StandbyTime._(250);
+    static const TIME_250 = StandbyTime._(250,3);
     /** 500ms */
-    static const TIME_500 = StandbyTime._(500);
+    static const TIME_500 = StandbyTime._(500,4);
     /** 1000ms */
-    static const TIME_1000 = StandbyTime._(1000);
+    static const TIME_1000 = StandbyTime._(1000,5);
     /** 10ms */
-    static const TIME_10 = StandbyTime._(10);
+    static const TIME_10 = StandbyTime._(10,6);
     /** 20ms */
-    static const TIME_20 = StandbyTime._(20);
+    static const TIME_20 = StandbyTime._(20,7);
 
     static List<StandbyTime> _entries = [
         TIME_0_5,
@@ -59,8 +59,9 @@ class StandbyTime {
     ];
 
     final double time;
+    final index;
 
-    const StandbyTime._(this.time);
+    const StandbyTime._(this.time,this.index);
 
     static List<double> get times => _entries.map((e) => e.time);
 

@@ -62,6 +62,8 @@ class AccRange {
         return _bitMaskToRange[bitmask];
     }
 
+    static List<AccRange> get values => [AR_2G, AR_4G, AR_8G, AR_16G];
+
     static List<double> ranges(){
       return [AR_2G.range, AR_4G.range, AR_8G.range, AR_16G.range];
     }

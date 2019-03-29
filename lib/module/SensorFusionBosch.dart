@@ -397,27 +397,30 @@ abstract class SensorFusionBosch implements Module, Configurable<ConfigEditor> {
      * @param updateHandler     Handler for calibration state updates
      * @return Task containing the calibration data
      */
-    Future<CalibrationData> calibrate(CancellationToken ct, int pollingPeriod, CalibrationStateUpdateHandler updateHandler);
+    Future<CalibrationData> calibrate(bool cancel(),{void updateHandler(CalibrationState state), int pollingPeriod});
+
+//    CancellationToken ct,
+
     /**
      * Variant of {@link #calibrate(CancellationToken, long, CalibrationStateUpdateHandler)} with polling period set to 1000ms
      * @param ct                The cancellation token that will be checked before reading the calibration state
      * @param updateHandler     Handler for calibration state updates
      * @return @return Task containing the calibration data
      */
-    Future<CalibrationData> calibrate(CancellationToken ct, CalibrationStateUpdateHandler updateHandler);
+//    Future<CalibrationData> calibrate(CancellationToken ct, CalibrationStateUpdateHandler updateHandler);
     /**
      * Variant of {@link #calibrate(CancellationToken, long, CalibrationStateUpdateHandler)} with no calibration state updates
      * @param ct                The cancellation token that will be checked before reading the calibration state
      * @param pollingPeriod     How frequently poll the calibration state in milliseconds
      * @return @return Task containing the calibration data
      */
-    Future<CalibrationData> calibrate(CancellationToken ct, int pollingPeriod);
+//    Future<CalibrationData> calibrate(CancellationToken ct, int pollingPeriod);
     /**
      * Variant of {@link #calibrate(CancellationToken, long, CalibrationStateUpdateHandler)} with polling period set to 1000ms and no calibration state updates
      * @param ct                The cancellation token that will be checked before reading the calibration state
      * @return @return Task containing the calibration data
      */
-    Future<CalibrationData> calibrate(CancellationToken ct);
+//    Future<CalibrationData> calibrate(CancellationToken ct);
     /**
      * Writes calibration data to the sensor fusion algorithm, only for firmware v1.4.2+.
      * Combine this function with the {@link Macro} module to write the data at boot time

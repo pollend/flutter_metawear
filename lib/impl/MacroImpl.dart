@@ -22,6 +22,9 @@
  * hello@mbientlab.com.
  */
 
+import 'dart:typed_data';
+
+import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
 import 'package:flutter_metawear/impl/ModuleImplBase.dart';
 import 'package:flutter_metawear/module/Macro.dart';
 
@@ -41,30 +44,29 @@ class MacroImpl extends ModuleImplBase implements Macro {
     bool execOnBoot;
     TimedTask<Byte> startMacroTask;
 
-    MacroImpl(MetaWearBoardPrivate mwPrivate) {
-        super(mwPrivate);
-    }
+    MacroImpl(MetaWearBoardPrivate mwPrivate): super(mwPrivate);
+
 
     @override
-    protected void init() {
+    void init() {
         startMacroTask = new TimedTask<>();
         this.mwPrivate.addResponseHandler(new Pair<>(MACRO.id, BEGIN), response -> startMacroTask.setResult(response[2]));
     }
 
     @override
-    public void startRecord() {
+    void startRecord() {
         startRecord(true);
     }
 
     @override
-    public void startRecord(boolean execOnBoot) {
+    void startRecord(bool execOnBoot) {
         isRecording = true;
         commands = new LinkedList<>();
         this.execOnBoot = execOnBoot;
     }
 
     @override
-    public Task<Byte> endRecordAsync() {
+    Task<Byte> endRecordAsync() {
         isRecording = false;
         return Task.delay(WRITE_MACRO_DELAY).onSuccessTask(ignored ->
                 startMacroTask.execute("Did not received macro id within %dms", Constant.RESPONSE_TIMEOUT,
@@ -83,12 +85,12 @@ class MacroImpl extends ModuleImplBase implements Macro {
     }
 
     @override
-    public void execute(byte id) {
+    void execute(byte id) {
         mwPrivate.sendCommand(new byte[] {MACRO.id, EXECUTE, id});
     }
 
     @override
-    public void eraseAll() {
+    void eraseAll() {
         mwPrivate.sendCommand(new byte[] {MACRO.id, ERASE_ALL});
     }
 
@@ -96,11 +98,11 @@ class MacroImpl extends ModuleImplBase implements Macro {
         commands.add(command);
     }
 
-    boolean isRecording() {
+    bool isRecording() {
         return isRecording;
     }
 
-    private byte[][] convertToMacroCommand(byte[] command) {
+    List<Uint8List> convertToMacroCommand(Uint8List command) {
         if (command.length >= Constant.COMMAND_LENGTH) {
             byte[][] macroCmds = new byte[2][];
 

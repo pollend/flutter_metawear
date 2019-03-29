@@ -24,8 +24,51 @@
 
 
 import 'package:flutter_metawear/impl/DataTypeBase.dart';
+import 'package:flutter_metawear/impl/DataTypeBase.dart';
+import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
 import 'package:flutter_metawear/impl/ModuleImplBase.dart';
+import 'package:flutter_metawear/impl/SFloatData.dart';
+import 'package:flutter_metawear/impl/UFloatData.dart';
 import 'package:flutter_metawear/module/BarometerBosch.dart';
+import 'package:flutter_metawear/impl/ModuleType.dart';
+import 'package:flutter_metawear/impl/DataAttributes.dart';
+
+import 'dart:typed_data';
+
+
+class BoschPressureUFloatData extends UFloatData {
+
+    BoschPressureUFloatData.Default(): super(ModuleType.BAROMETER, BarometerBoschImpl.PRESSURE, new DataAttributes(Uint8List.fromList([4]), 1, 0, false));
+
+
+    BoschPressureUFloatData(DataTypeBase input, ModuleType module, int register, int id, DataAttributes attributes): super(module, register, attributes,id:id,input:input,);
+
+
+    @override
+    DataTypeBase copy(DataTypeBase input, ModuleType module, int register, int id, DataAttributes attributes) {
+        return new BoschPressureUFloatData(input, module, register, id, attributes);
+    }
+
+    @override
+    double scale(MetaWearBoardPrivate mwPrivate) {
+        return 256.0;
+    }
+}
+class BoschAltitudeSFloatData extends SFloatData {
+
+    BoschAltitudeSFloatData() :   super(ModuleType.BAROMETER, ALTITUDE, new DataAttributes(new byte[] {4}, (byte) 1, (byte) 0, true));
+
+
+    @override
+    DataTypeBase copy(DataTypeBase input, ModuleType module, byte register, byte id, DataAttributes attributes) {
+        return new BoschPressureUFloatData(input, module, register, id, attributes);
+    }
+
+    @override
+    double scale(MetaWearBoardPrivate mwPrivate) {
+        return 256.0;
+    }
+}
 
 /**
  * Created by etsai on 9/20/16.
@@ -47,42 +90,6 @@ abstract class BarometerBoschImpl extends ModuleImplBase implements BarometerBos
     static const int PRESSURE = 1, ALTITUDE = 2, CYCLIC = 4;
     static const int CONFIG = 3;
 
-    private static class BoschPressureUFloatData extends UFloatData {
-
-        BoschPressureUFloatData() {
-            super(BAROMETER, PRESSURE, new DataAttributes(new byte[] {4}, (byte) 1, (byte) 0, false));
-        }
-
-        BoschPressureUFloatData(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
-            super(input, module, register, id, attributes);
-        }
-
-        @override
-        public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
-            return new BoschPressureUFloatData(input, module, register, id, attributes);
-        }
-
-        @override
-        protected float scale(MetaWearBoardPrivate mwPrivate) {
-            return 256.f;
-        }
-    }
-    private static class BoschAltitudeSFloatData extends SFloatData {
-
-        BoschAltitudeSFloatData() {
-            super(BAROMETER, ALTITUDE, new DataAttributes(new byte[] {4}, (byte) 1, (byte) 0, true));
-        }
-
-        @override
-        public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
-            return new BoschPressureUFloatData(input, module, register, id, attributes);
-        }
-
-        @override
-        protected float scale(MetaWearBoardPrivate mwPrivate) {
-            return 256.f;
-        }
-    }
 
     private byte enableAltitude= 0;
 
