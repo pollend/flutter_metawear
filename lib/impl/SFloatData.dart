@@ -43,8 +43,8 @@ class _DataPrivate extends DataPrivate {
     final double scaled;
 
     _DataPrivate(this.mwPrivate, this.sFloatData, this.scaled,
-        DateTime timestamp, Uint8List dataBytes, dynamic mapper(Type target))
-        : super(timestamp, dataBytes, mapper);
+        DateTime timestamp, Uint8List dataBytes,  T Function<T>() mapping)
+        : super(timestamp, dataBytes, mapping);
 
 
     @override
@@ -92,11 +92,16 @@ class SFloatData extends DataTypeBase {
 
 
     @override
-    Data createMessage(bool logData, MetaWearBoardPrivate mwPrivate, Uint8List data, DateTime timestamp, dynamic mapper(Type target)) {
+    Data createMessage(bool logData, MetaWearBoardPrivate mwPrivate, Uint8List data, DateTime timestamp, T Function<T>() apply) {
         final Uint8List buffer = Util.bytesToSIntBuffer(logData, data, attributes);
         final double scaled= buffer[0] / scale(mwPrivate);
-        return _DataPrivate(mwPrivate,this,scaled,timestamp,data,mapper);
+        return DataPrivate2(timestamp,data,apply,() => this.scale(mwPrivate), <T>(){
+            if(T is double){
+                return scaled as T;
+            }
+            throw CastError();
 
+        });
     }
 
     @override

@@ -25,9 +25,9 @@
 
 import 'dart:math';
 
-import 'package:flutter_metawear/module/Accelerometer.dart' as Accelerometer;
-import 'package:flutter_metawear/module/AccelerometerBosch.dart';
+import 'package:flutter_metawear/ConfigEditorBase.dart';
 import 'package:flutter_metawear/module/AccelerometerBosch.dart' as AccelerometerBosch;
+import 'package:flutter_metawear/module/Accelerometer.dart' as Accelerometer;
 /**
  * Operating frequencies of the accelerometer
  * @author Eric Tsai
@@ -128,14 +128,14 @@ abstract class ConfigEditor extends Accelerometer.ConfigEditor<ConfigEditor> {
      * @param odr    New output data rate
      * @return Calling object
      */
-    ConfigEditor odr(OutputDataRate odr);
+    ConfigEditor byOdr(OutputDataRate odr);
 
     /**
      * Set the data range
      * @param fsr    New data range
      * @return Calling object
      */
-    ConfigEditor rangeForRange(AccRange fsr);
+    ConfigEditor byRange(AccelerometerBosch.AccRange fsr);
 }
 
 /**

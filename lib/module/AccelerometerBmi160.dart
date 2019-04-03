@@ -113,14 +113,14 @@ abstract class ConfigEditor extends Accelerometer.ConfigEditor<ConfigEditor> {
      * @param odr    New output data rate
      * @return Calling object
      */
-    ConfigEditor odr(OutputDataRate odr);
+    ConfigEditor odrType(OutputDataRate odr);
 
     /**
      * Set the data range
      * @param fsr    New data range
      * @return Calling object
      */
-    ConfigEditor range(AccelerometerBosch.AccRange fsr);
+    ConfigEditor rangeType(AccelerometerBosch.AccRange fsr);
 
     /**
      * Set the filter mode.  This parameter is ignored if the data rate is less than 12.5Hz

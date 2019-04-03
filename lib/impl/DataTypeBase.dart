@@ -31,7 +31,6 @@ import 'package:flutter_metawear/impl/ArrayData.dart';
 import 'package:flutter_metawear/builder/RouteComponent.dart';
 import 'package:flutter_metawear/impl/ByteArrayData.dart';
 import 'package:flutter_metawear/impl/DataAttributes.dart';
-import 'package:flutter_metawear/impl/DataPrivate.dart';
 import 'package:flutter_metawear/impl/DataProcessorConfig.dart';
 import 'package:flutter_metawear/impl/DataProcessorImpl.dart';
 import 'package:flutter_metawear/impl/IntData.dart';
@@ -78,7 +77,7 @@ class _DataTypeBase extends DataTypeBase {
     }
 
     @override
-    Data createMessage(bool logData, MetaWearBoardPrivate mwPrivate, Uint8List data, DateTime timestamp, ClassToObject mapper) {
+    Data createMessage(bool logData, MetaWearBoardPrivate mwPrivate, Uint8List data, DateTime timestamp, T Function<T>() apply) {
         throw UnsupportedError("Unsupported DataTypeBase");
     }
 }
@@ -247,7 +246,7 @@ abstract class DataTypeBase implements DataToken {
         return value;
     }
 
-    Data createMessage(bool logData, MetaWearBoardPrivate mwPrivate, Uint8List data, DateTime timestamp, dynamic apply(Type target));
+    Data createMessage(bool logData, MetaWearBoardPrivate mwPrivate, Uint8List data, DateTime timestamp, T Function<T>() apply);
 
     Tuple2<DataTypeBase, DataTypeBase> dataProcessorTransform(
         DataProcessorConfig config, DataProcessorImpl dpModule) {

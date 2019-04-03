@@ -149,14 +149,14 @@ abstract class ConfigEditor implements Accelerometer.ConfigEditor<ConfigEditor> 
      * @param odr    How frequently data is measured
      * @return Calling object
      */
-    ConfigEditor odr(OutputDataRate odr);
+    ConfigEditor odrType(OutputDataRate odr);
 
     /**
      * Sets the data range
      * @param fsr    Range of the measured acceleration
      * @return Calling object
      */
-    ConfigEditor range(FullScaleRange fsr);
+    ConfigEditor rangeType(FullScaleRange fsr);
 
     /**
      * Enables use of the high pass filter when measuring acceleration, closest valid frequency will be used.

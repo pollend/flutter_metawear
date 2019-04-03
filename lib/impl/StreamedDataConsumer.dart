@@ -118,7 +118,7 @@ class StreamedDataConsumer extends DeviceDataConsumer {
                         Uint8List dataRaw = Uint8List(dataUnitLength - (account.item2 - j));
                         dataRaw.setAll(0, response.skip(account.item2));
 
-                        call(source.createMessage(false, mwPrivate, dataRaw, accounter == null ? now : account.item1, accountType == AccountType.TIME ? null : ((Type clazz) => clazz == int ? account.item3 : null)));
+                        call(source.createMessage(false, mwPrivate, dataRaw, accounter == null ? now : account.item1, accountType == AccountType.TIME ? null : (<T>() => T is int ? account.item3 as T : null)));
                     }
                 };
             } else {
@@ -158,10 +158,10 @@ class StreamedDataConsumer extends DeviceDataConsumer {
                         for(int i = 0, j = 3 + account.item2; i< packer.editor.source.attributes.copies && j < response.length; i++, j+= dataUnitLength) {
 //                            System.arraycopy(response, j, unpacked, 0, unpacked.length);
                             unpacked.setAll(0, response.skip(j));
-                            call(source.createMessage(false, mwPrivate, unpacked, account.item1, accountType == AccountType.TIME ? null : ((Type clazz) => clazz == int ? account.item3 : null)));
+                            call(source.createMessage(false, mwPrivate, unpacked, account.item1, accountType == AccountType.TIME ? null : (<T>() => T is int ? account.item3 as T : null)));
                         }
                     } else {
-                        call(source.createMessage(false, mwPrivate, dataRaw, account.item1, accountType == AccountType.TIME ? null :  ((Type clazz) => clazz == int ? account.item3 : null)));
+                        call(source.createMessage(false, mwPrivate, dataRaw, account.item1, accountType == AccountType.TIME ? null :  (<T>() => T is int ? account.item3 as T: null)));
                     }
                 };
             }

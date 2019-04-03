@@ -32,53 +32,34 @@ import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
 import 'package:flutter_metawear/impl/ModuleType.dart';
 import 'package:flutter_metawear/impl/DataPrivate.dart';
 
-class _DataPrivate extends DataPrivate{
-    MetaWearBoardPrivate _mwPrivate;
-    ByteArrayData _byteArrayData;
-  _DataPrivate(this._mwPrivate,this._byteArrayData,DateTime timestamp, Uint8List dataBytes, ClassToObject mapper) : super(timestamp, dataBytes, mapper);
-
-    @override
-    List<Type> types() {
-        return [Uint8List];
-    }
-
-    @override
-     double scale() {
-        return _byteArrayData.scale(_mwPrivate);
-    }
-
-    @override
-    T value<T>() {
-        if (T is Uint8List) {
-            return _byteArrayData as T;
-        }
-        return super.value<T>();
-    }
-}
-
 /**
  * Created by etsai on 9/21/16.
  */
 class ByteArrayData extends DataTypeBase {
-    ByteArrayData(ModuleType module, int register, DataAttributes attributes,
-        {int id, DataTypeBase input})
-        : super(module, register, attributes, input: input, id: id);
+  ByteArrayData(ModuleType module, int register, DataAttributes attributes,
+      {int id, DataTypeBase input})
+      : super(module, register, attributes, input: input, id: id);
 
-    @override
-    DataTypeBase copy(DataTypeBase input, ModuleType module, int register,
-        int id, DataAttributes attributes) {
-        return new ByteArrayData(
-            module, register, attributes, input: input, id: id);
-    }
+  @override
+  DataTypeBase copy(DataTypeBase input, ModuleType module, int register,
+      int id, DataAttributes attributes) {
+    return new ByteArrayData(
+        module, register, attributes, input: input, id: id);
+  }
 
-    @override
-    num convertToFirmwareUnits(MetaWearBoardPrivate mwPrivate, num value) {
-        return value;
-    }
+  @override
+  num convertToFirmwareUnits(MetaWearBoardPrivate mwPrivate, num value) {
+    return value;
+  }
 
-    @override
-    Data createMessage(bool logData, MetaWearBoardPrivate mwPrivate,
-        Uint8List data, DateTime timestamp, ClassToObject mapper) {
-        return _DataPrivate(mwPrivate, this, timestamp, data, mapper);
-    }
+  @override
+  Data createMessage(bool logData, MetaWearBoardPrivate mwPrivate,
+      Uint8List data, DateTime timestamp, T Function<T>() apply) {
+    return DataPrivate2(timestamp, data, apply, () => 1.0, <T>() {
+      if (T is Uint8List) {
+        return data as T;
+      }
+      throw CastError();
+    });
+  }
 }

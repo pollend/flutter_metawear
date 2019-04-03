@@ -27,6 +27,7 @@ import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter_metawear/Data.dart';
+import 'package:flutter_metawear/Data.dart';
 import 'package:flutter_metawear/impl/Util.dart';
 import 'package:sprintf/sprintf.dart';
 
@@ -42,7 +43,7 @@ abstract class DataPrivate implements Data {
 
   final DateTime _timestamp;
   final Uint8List _dataBytes;
-  final dynamic Function(Type target) _mapper;
+  final T Function<T>() _mapper;
 
   DataPrivate(this._timestamp, this._dataBytes, this._mapper);
 
@@ -64,12 +65,60 @@ abstract class DataPrivate implements Data {
 
   @override
   T value<T>() {
+
     throw CastError();
   }
 
   T extra<T>() {
     Object value;
-    if (_mapper == null || (value = _mapper.apply<T>()) == null) {
+    if (_mapper == null || (value = _mapper<T>()) == null) {
+      throw CastError();
+    }
+
+    return value;
+  }
+
+
+  @override
+  String toString() =>
+      sprintf("{timestamp: %s, data: %s}",
+          [formattedTimestamp(), Util.arrayToHexString(bytes())]);
+}
+
+class DataPrivate2 implements Data{
+
+  final DateTime _timestamp;
+  final Uint8List _dataBytes;
+  final T Function<T>() _mapper;
+  final double Function() _scale;
+  final T Function<T>() _value;
+
+
+  DataPrivate2(this._timestamp, this._dataBytes, this._mapper,this._scale,this._value);
+
+  @override
+  DateTime timestamp() {
+    return _timestamp;
+  }
+
+  @override
+  String formattedTimestamp() {
+    return timestamp().toIso8601String();
+  }
+
+  @override
+  double scale() => _scale();
+
+  @override
+  Uint8List bytes() => _dataBytes;
+
+  @override
+  Y value<Y>() => _value<Y>();
+
+
+  T extra<T>() {
+    Object value;
+    if (_mapper == null || (value = _mapper<T>()) == null) {
       throw CastError();
     }
     return value;
@@ -80,4 +129,5 @@ abstract class DataPrivate implements Data {
   String toString() =>
       sprintf("{timestamp: %s, data: %s}",
           [formattedTimestamp(), Util.arrayToHexString(bytes())]);
+
 }

@@ -39,35 +39,6 @@ import 'package:flutter_metawear/impl/Util.dart';
 
 import 'package:tuple/tuple.dart';
 
-class _DataPrivate extends DataPrivate {
-    final double scaled;
-    final MetaWearBoardPrivate mwPrivate;
-    final UFloatData uFloatData;
-
-    _DataPrivate(this.uFloatData, this.scaled, this.mwPrivate,
-        DateTime timestamp, Uint8List dataBytes, dynamic apply(Type target))
-        : super(timestamp, dataBytes, apply);
-
-    @override
-    double scale() {
-        return uFloatData.scale(mwPrivate);
-    }
-
-    @override
-    List<Type> types() {
-        return [double];
-    }
-
-    @override
-    T value<T>() {
-        if (T is double) {
-            return scaled as T;
-        }
-        return super.value<T>();
-    }
-
-}
-
 /**
  * Created by etsai on 9/5/16.
  */
@@ -79,7 +50,6 @@ class UFloatData extends DataTypeBase {
         if (input == null) {
             if (this.input == null) {
                 throw NullThrownError();
-//                throw new NullPointerException("SFloatData cannot have null input variable");
             }
             return this.input.copy(null, module, register, id, attributes);
         }
@@ -94,11 +64,17 @@ class UFloatData extends DataTypeBase {
     }
 
     @override
-    Data createMessage(bool logData, MetaWearBoardPrivate mwPrivate, Uint8List data, DateTime timestamp, dynamic apply(Type target)) {
+    Data createMessage(bool logData, MetaWearBoardPrivate mwPrivate, Uint8List data, DateTime timestamp, T Function<T>() apply) {
         Uint8List buffer = Util.bytesToUIntBuffer(logData, data, attributes);
-        double scaled = ByteData.view(buffer.buffer).getUint64(0,Endian.little)/scale(mwPrivate);
-
-        return _DataPrivate(this,scaled,mwPrivate,timestamp,data,apply);
+        final double scaled = ByteData.view(buffer.buffer).getUint64(
+            0, Endian.little) / scale(mwPrivate);
+        DataPrivate2(
+            timestamp, data, apply, () => this.scale(mwPrivate), <T>() {
+            if (T is double) {
+                return scaled as T;
+            }
+            throw CastError();
+        });
     }
 
     @override

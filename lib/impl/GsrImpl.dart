@@ -24,20 +24,27 @@
 
 
 
+import 'package:flutter_metawear/Route.dart';
+import 'package:flutter_metawear/builder/RouteBuilder.dart';
+import 'package:flutter_metawear/impl/DataAttributes.dart';
 import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
 import 'package:flutter_metawear/impl/ModuleImplBase.dart';
+import 'package:flutter_metawear/impl/Util.dart';
 import 'package:flutter_metawear/module/Gsr.dart';
 import 'package:flutter_metawear/ForcedDataProducer.dart';
 import 'package:flutter_metawear/impl/ModuleType.dart';
 import 'package:flutter_metawear/impl/UintData.dart';
 import 'dart:typed_data';
 import 'package:sprintf/sprintf.dart';
-class Channel implements ForcedDataProducer{
+
+class Channel implements ForcedDataProducer {
     final int id;
     MetaWearBoardPrivate mwPrivate;
 
-    Channel(this.id,this.mwPrivate) {
-        mwPrivate.tagProducer(new UintData(ModuleType.GSR, Util.setSilentRead(CONDUCTANCE), new DataAttributes(Uint8List.FromList([4]), 1, 0, false),id: id,input: name()));
+    Channel(this.id, this.mwPrivate) {
+        mwPrivate.tagProducer(name(), new UintData(
+            ModuleType.GSR, Util.setSilentRead(GsrImpl.CONDUCTANCE),
+            new DataAttributes(Uint8List.fromList([4]), 1, 0, false), id: id));
     }
 
     void restoreTransientVariables(MetaWearBoardPrivate mwPrivate) {
@@ -50,14 +57,42 @@ class Channel implements ForcedDataProducer{
     }
 
     @override
-    Future<Route> addRouteAsync(RouteBuilder builder) {
-        return mwPrivate.queueRouteBuilder(builder, name());
-    }
-
-    @override
     String name() {
         return sprintf(GsrImpl.CONDUCTANCE_PRODUCER_FORMAT, id);
     }
+
+    @override
+    Future<Route> addRouteAsync(RouteBuilder builder) {
+        return mwPrivate.queueRouteBuilder(builder, name());
+    }
+}
+
+class _ConfigEditor extends ConfigEditor {
+    ConstantVoltage _newCv = ConstantVoltage.CV_500MV;
+    Gain _newGain = Gain.GSR_499K;
+
+    final MetaWearBoardPrivate _mwPrivate;
+
+    _ConfigEditor(this._mwPrivate);
+
+    @override
+    void commit() {
+        _mwPrivate.sendCommandForModule(ModuleType.GSR, GsrImpl.CONFIG,
+            Uint8List.fromList([_newCv.index, _newGain.index]));
+    }
+
+    @override
+    ConfigEditor constantVoltage(ConstantVoltage cv) {
+        _newCv = cv;
+        return this;
+    }
+
+    @override
+    ConfigEditor gain(Gain gain) {
+        _newGain = gain;
+        return this;
+    }
+
 }
 
 /**
@@ -66,15 +101,15 @@ class Channel implements ForcedDataProducer{
 class GsrImpl extends ModuleImplBase implements Gsr {
     static const String CONDUCTANCE_PRODUCER_FORMAT= "com.mbientlab.metawear.impl.GsrImpl.CONDUCTANCE_PRODUCER_%d";
     static const  int CONDUCTANCE = 0x1, CALIBRATE = 0x2, CONFIG= 0x3;
-    final List<Channel> conductanceChannels;
+    List<Channel> conductanceChannels;
 
-    GsrImpl(MetaWearBoardPrivate mwPrivate) {
-        super(mwPrivate);
-
-        byte[] extra= mwPrivate.lookupModuleInfo(GSR).extra;
-        conductanceChannels= new Channel[extra[0]];
-        for(byte i= 0; i < extra[0]; i++) {
-            conductanceChannels[i]= new Channel(i, mwPrivate);
+    GsrImpl(MetaWearBoardPrivate mwPrivate): super(mwPrivate) {
+        Uint8List extra = mwPrivate
+            .lookupModuleInfo(ModuleType.GSR)
+            .extra;
+        conductanceChannels = List<Channel>(extra[0]);
+        for (int i = 0; i < extra[0]; i++) {
+            conductanceChannels[i] = new Channel(i, mwPrivate);
         }
     }
 
@@ -82,43 +117,23 @@ class GsrImpl extends ModuleImplBase implements Gsr {
     void restoreTransientVars(MetaWearBoardPrivate mwPrivate) {
         super.restoreTransientVars(mwPrivate);
 
-        for(Channel it: conductanceChannels) {
+        for(Channel it in conductanceChannels) {
             it.restoreTransientVariables(mwPrivate);
         }
     }
 
     @override
     ConfigEditor configure() {
-        return new ConfigEditor() {
-            private ConstantVoltage newCv= ConstantVoltage.CV_500MV;
-            private Gain newGain= Gain.GSR_499K;
-
-            @override
-            ConfigEditor constantVoltage(ConstantVoltage cv) {
-                newCv= cv;
-                return this;
-            }
-
-            @override
-            ConfigEditor gain(Gain gain) {
-                newGain= gain;
-                return this;
-            }
-
-            @override
-            void commit() {
-                mwPrivate.sendCommand(GSR, CONFIG, new byte[] {(byte) newCv.ordinal(), (byte) newGain.ordinal()});
-            }
-        };
+        return _ConfigEditor(mwPrivate);
     }
 
     @override
-    Channel[] channels() {
+    List<Channel> channels() {
         return conductanceChannels;
     }
 
     @override
     void calibrate() {
-        mwPrivate.sendCommand(new byte[] {GSR.id, CALIBRATE});
+        mwPrivate.sendCommand(Uint8List.fromList([ModuleType.GSR.id, CALIBRATE]));
     }
 }

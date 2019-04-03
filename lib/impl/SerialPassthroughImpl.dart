@@ -24,13 +24,22 @@
 
 
 
+import 'dart:async';
+
+import 'package:flutter_metawear/Route.dart';
+import 'package:flutter_metawear/builder/RouteBuilder.dart';
 import 'package:flutter_metawear/impl/ByteArrayData.dart';
+import 'package:flutter_metawear/impl/ModuleImplBase.dart';
 import 'package:flutter_metawear/impl/ModuleType.dart';
 import 'package:flutter_metawear/impl/DataAttributes.dart';
 import 'package:flutter_metawear/impl/DataTypeBase.dart';
 import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
+import 'package:flutter_metawear/impl/Util.dart';
 import 'package:flutter_metawear/module/SerialPassthrough.dart';
 import 'dart:typed_data';
+import 'package:sprintf/sprintf.dart';
+import 'package:tuple/tuple.dart';
+import 'package:flutter_metawear/impl/DataProcessorImpl.dart';
 
 class SerialPassthroughData extends ByteArrayData {
 
@@ -41,11 +50,11 @@ class SerialPassthroughData extends ByteArrayData {
 
 
     DataTypeBase dataProcessorCopy(DataTypeBase input, DataAttributes attributes) {
-        return new ByteArrayData(ModuleType.DATA_PROCESSOR, DataProcessorImpl.NOTIFY, attributes,input: input,id: NO_DATA_ID);
+        return new ByteArrayData(ModuleType.DATA_PROCESSOR, DataProcessorImpl.NOTIFY, attributes,input: input,id: DataTypeBase.NO_DATA_ID);
     }
 
     DataTypeBase dataProcessorStateCopy(DataTypeBase input, DataAttributes attributes) {
-        return new ByteArrayData(input, ModuleType.DATA_PROCESSOR, Util.setSilentRead(DataProcessorImpl.STATE), NO_DATA_ID, attributes);
+        return new ByteArrayData(ModuleType.DATA_PROCESSOR, Util.setSilentRead(DataProcessorImpl.STATE), attributes,input: input,id: DataTypeBase.NO_DATA_ID);
     }
 
     @override
@@ -54,27 +63,42 @@ class SerialPassthroughData extends ByteArrayData {
     }
 
     @override
-    void read(MetaWearBoardPrivate mwPrivate) {
-        throw new UnsupportedOperationException("Serial passthrough reads require parameters");
-    }
-
-    @override
-    void read(MetaWearBoardPrivate mwPrivate, byte[] parameters) {
-    byte[] command= new byte[eventConfig.length - 1 + parameters.length];
-    System.arraycopy(eventConfig, 0, command, 0, 2);
-    System.arraycopy(parameters, 0, command, 2, parameters.length);
-
-    mwPrivate.sendCommand(command);
+    void read(MetaWearBoardPrivate mwPrivate,[Uint8List parameters]) {
+        if(parameters != null){
+            Uint8List command= Uint8List(eventConfig.length - 1 + parameters.length);
+            command.setAll(0, eventConfig);
+            command.setAll(2, parameters);
+            mwPrivate.sendCommand(command);
+            return;
+        }
+        throw new Exception("Serial passthrough reads require parameters");
     }
 }
 
+
+class _SpiParameterBuilderInner extends SpiParameterBuilderInner<void> {
+    final DataTypeBase _spiProducer;
+    final MetaWearBoardPrivate _mwPrivate;
+
+    _SpiParameterBuilderInner(this._spiProducer, this._mwPrivate) : super();
+
+    _SpiParameterBuilderInner.value(int fifthValue, this._spiProducer,
+        this._mwPrivate) : super.value(fifthValue);
+
+    @override
+    commit() {
+        _spiProducer.read(_mwPrivate, config);
+        return null;
+    }
+
+}
 
 class I2cInner implements I2C{
     final int id;
     MetaWearBoardPrivate mwPrivate;
 
     I2cInner(this.id, int length, this.mwPrivate) {
-        mwPrivate.tagProducer(name(), new SerialPassthroughData(Util.setSilentRead(I2C_RW), id, length));
+        mwPrivate.tagProducer(name(), new SerialPassthroughData.Default(Util.setSilentRead(SerialPassthroughImpl.I2C_RW), id, length));
     }
 
     void restoreTransientVars(MetaWearBoardPrivate mwPrivate) {
@@ -84,7 +108,7 @@ class I2cInner implements I2C{
     @override
     void read(int deviceAddr, int registerAddr) {
         DataTypeBase i2cProducer= mwPrivate.lookupProducer(name());
-        i2cProducer.read(mwPrivate, Uint8List.fromList([deviceAddr, registerAddr, id, i2cProducer.attributes.length()]);
+        i2cProducer.read(mwPrivate, Uint8List.fromList([deviceAddr, registerAddr, id, i2cProducer.attributes.length()]));
     }
 
     @override
@@ -94,20 +118,16 @@ class I2cInner implements I2C{
 
     @override
     String name() {
-        return String.format(Locale.US, I2C_PRODUCER_FORMAT, id);
+        return sprintf(SerialPassthroughImpl.I2C_PRODUCER_FORMAT, id);
     }
 }
-class SpiInner implements SPI, Serializable {
-    private static final long serialVersionUID = -1781850442398737602L;
+class SpiInner implements SPI {
 
-    private final byte id;
-    transient MetaWearBoardPrivate mwPrivate;
+    final int id;
+    MetaWearBoardPrivate mwPrivate;
 
-    SpiInner(byte id, byte length, MetaWearBoardPrivate mwPrivate) {
-        this.id= id;
-        this.mwPrivate = mwPrivate;
-
-        mwPrivate.tagProducer(name(), new SerialPassthroughData(Util.setSilentRead(SPI_RW), id, length));
+    SpiInner(this.id, int length, this.mwPrivate) {
+        mwPrivate.tagProducer(name(), new SerialPassthroughData.Default(Util.setSilentRead(SerialPassthroughImpl.SPI_RW), id, length));
     }
 
     void restoreTransientVars(MetaWearBoardPrivate mwPrivate) {
@@ -115,72 +135,62 @@ class SpiInner implements SPI, Serializable {
     }
 
     @override
-    SpiParameterBuilder<Void> read() {
+    SpiParameterBuilder<void> read() {
         final DataTypeBase spiProducer= mwPrivate.lookupProducer(name());
-        return new SpiParameterBuilderInner<Void>((byte) ((spiProducer.attributes.length() - 1) | (id << 4))) {
-            @override
-            Void commit() {
-                spiProducer.read(mwPrivate, config);
-                return null;
-            }
-        };
+        return _SpiParameterBuilderInner.value(((spiProducer.attributes.length() - 1) | (id << 4)), spiProducer, mwPrivate);
     }
 
     @override
-    Task<Route> addRouteAsync(RouteBuilder builder) {
+    Future<Route> addRouteAsync(RouteBuilder builder) {
         return mwPrivate.queueRouteBuilder(builder, name());
     }
 
     @override
     String name() {
-        return String.format(Locale.US, SPI_PRODUCER_FORMAT, id);
+        return sprintf(SerialPassthroughImpl.SPI_PRODUCER_FORMAT, id);
     }
 }
 
-class SpiParameterBuilderInner<T> implements SpiParameterBuilder<T> {
-    final byte originalLength;
-    byte[] config;
+abstract class SpiParameterBuilderInner<T> implements SpiParameterBuilder<T> {
+    final int originalLength;
+    Uint8List config;
 
-    SpiParameterBuilderInner() {
-        this.originalLength = 5;
-        this.config= new byte[this.originalLength];
-    }
+    SpiParameterBuilderInner(): originalLength = 5, this.config= Uint8List(5);
 
-    SpiParameterBuilderInner(byte fifthValue) {
-        this.originalLength = 6;
-        this.config= new byte[this.originalLength];
+
+    SpiParameterBuilderInner.value(int fifthValue): this.originalLength = 6, this.config= Uint8List(6){
         config[5] = fifthValue;
     }
 
     @override
-    SpiParameterBuilder<T> data(byte[] data) {
-    byte[] copy = new byte[config.length + data.length];
-    System.arraycopy(config, 0, copy, 0, this.originalLength);
-    System.arraycopy(data, 0, copy, this.originalLength, data.length);
-    config = copy;
-    return this;
+    SpiParameterBuilder<T> data(Uint8List data) {
+        Uint8List copy = Uint8List(config.length + data.length);
+        copy.setAll(0, config);
+        copy.setAll(originalLength, data);
+        config = copy;
+        return this;
     }
 
     @override
-    SpiParameterBuilder<T> slaveSelectPin(byte pin) {
+    SpiParameterBuilder<T> slaveSelectPin(int pin) {
         config[0]= pin;
         return this;
     }
 
     @override
-    SpiParameterBuilder<T> clockPin(byte pin) {
+    SpiParameterBuilder<T> clockPin(int pin) {
         config[1]= pin;
         return this;
     }
 
     @override
-    SpiParameterBuilder<T> mosiPin(byte pin) {
+    SpiParameterBuilder<T> mosiPin(int pin) {
         config[2]= pin;
         return this;
     }
 
     @override
-    SpiParameterBuilder<T> misoPin(byte pin) {
+    SpiParameterBuilder<T> misoPin(int pin) {
         config[3]= pin;
         return this;
     }
@@ -192,14 +202,14 @@ class SpiParameterBuilderInner<T> implements SpiParameterBuilder<T> {
     }
 
     @override
-    SpiParameterBuilder<T> mode(byte mode) {
+    SpiParameterBuilder<T> mode(int mode) {
         config[4]|= (mode << 1);
         return this;
     }
 
     @override
     SpiParameterBuilder<T> frequency(SpiFrequency freq) {
-        config[4]|= (freq.ordinal() << 3);
+        config[4]|= (freq.index << 3);
         return this;
     }
 
@@ -210,6 +220,63 @@ class SpiParameterBuilderInner<T> implements SpiParameterBuilder<T> {
     }
 }
 
+class _SpiParameterBuilderInner3 extends SpiParameterBuilderInner {
+    final MetaWearBoardPrivate _mwPrivate;
+
+    _SpiParameterBuilderInner3(this._mwPrivate) : super();
+
+    _SpiParameterBuilderInner3.value(int fifthValue, this._mwPrivate)
+        : super.value(fifthValue);
+
+    @override
+    commit() {
+        _mwPrivate.sendCommandForModule(
+            ModuleType.SERIAL_PASSTHROUGH, SerialPassthroughImpl.SPI_RW,
+            config);
+        return null;
+    }
+
+}
+
+class _SpiParameterBuilderInner1 extends SpiParameterBuilderInner<Future<Uint8List>> {
+    final StreamController<Uint8List> _readControllerSpiController;
+    final MetaWearBoardPrivate _mwPrivate;
+
+    _SpiParameterBuilderInner1.value(int fifthValue,
+        this._readControllerSpiController, this._mwPrivate)
+        : super.value(fifthValue);
+
+    _SpiParameterBuilderInner1(this._readControllerSpiController,
+        this._mwPrivate) : super();
+
+    @override
+    commit() async {
+        Stream<Uint8List> stream = _readControllerSpiController.stream.timeout(
+            ModuleType.RESPONSE_TIMEOUT);
+        StreamIterator<Uint8List> iterator = StreamIterator(stream);
+
+        TimeoutException exception = TimeoutException(
+            "Did not receive I2C data", ModuleType.RESPONSE_TIMEOUT);
+        _mwPrivate.sendCommandForModule(ModuleType.SERIAL_PASSTHROUGH,
+            Util.setRead(SerialPassthroughImpl.SPI_RW), config);
+
+        if (await iterator.moveNext().catchError((e) => throw exception,
+            test: (e) => e is TimeoutException) == false)
+            throw exception;
+
+        Uint8List response = iterator.current;
+        await iterator.cancel();
+
+        if (response.length > 0) {
+            Uint8List data = Uint8List(response.length - 3);
+            data.setAll(0, response.skip(3));
+            return data;
+        }
+        throw Exception(
+            "Error reading SPI data from device or register address.  Response: " +
+                Util.arrayToHexString(response));
+    }
+}
 /**
  * Created by etsai on 10/3/16.
  */
@@ -217,133 +284,144 @@ class SerialPassthroughImpl extends ModuleImplBase implements SerialPassthrough 
     static String createUri(DataTypeBase dataType) {
         switch (Util.clearRead(dataType.eventConfig[1])) {
             case I2C_RW:
-                return String.format(Locale.US, "i2c[%d]", dataType.eventConfig[2]);
+                return sprintf("i2c[%d]", dataType.eventConfig[2]);
             case SPI_RW:
-                return String.format(Locale.US, "spi[%d]", dataType.eventConfig[2]);
+                return sprintf("spi[%d]", dataType.eventConfig[2]);
             default:
                 return null;
         }
     }
 
-    static const int SPI_REVISION= 1;
-    static const int I2C_RW = 0x1, SPI_RW = 0x2, DIRECT_I2C_READ_ID = 0xff, DIRECT_SPI_READ_ID = 0xf;
-    static const String I2C_PRODUCER_FORMAT= "com.mbientlab.metawear.impl.SerialPassthroughImpl.I2C_PRODUCER_%d",
-            SPI_PRODUCER_FORMAT= "com.mbientlab.metawear.impl.SerialPassthroughImpl.SPI_PRODUCER_%d";
+    static const int SPI_REVISION = 1;
+    static const int I2C_RW = 0x1,
+        SPI_RW = 0x2,
+        DIRECT_I2C_READ_ID = 0xff,
+        DIRECT_SPI_READ_ID = 0xf;
+    static const String I2C_PRODUCER_FORMAT = "com.mbientlab.metawear.impl.SerialPassthroughImpl.I2C_PRODUCER_%d",
+        SPI_PRODUCER_FORMAT = "com.mbientlab.metawear.impl.SerialPassthroughImpl.SPI_PRODUCER_%d";
 
 
-    final Map<int, I2C> i2cDataProducers= new ConcurrentHashMap<>();
-    final Map<int, SPI> spiDataProducers = new ConcurrentHashMap<>();
-//    transient TimedTask<byte[]> readI2cDataTask, readSpiDataTask;
+    final Map<int, I2C> i2cDataProducers = Map();
+    final Map<int, SPI> spiDataProducers = Map();
+    final StreamController<
+        Uint8List> _readControllerI2cController = StreamController<Uint8List>();
+    final StreamController<
+        Uint8List> _readControllerSpiController = StreamController<Uint8List>();
 
-    SerialPassthroughImpl(MetaWearBoardPrivate mwPrivate): super(mwPrivate);
+    SerialPassthroughImpl(MetaWearBoardPrivate mwPrivate) : super(mwPrivate);
 
 
     @override
     void restoreTransientVars(MetaWearBoardPrivate mwPrivate) {
         super.restoreTransientVars(mwPrivate);
 
-        for(I2C it in i2cDataProducers.values()) {
-            ((I2cInner) it).restoreTransientVars(mwPrivate);
+        for (I2C it in i2cDataProducers.values) {
+            (it as I2cInner).restoreTransientVars(mwPrivate);
         }
 
-        for(SPI it in spiDataProducers.values()) {
-            ((SpiInner) it).restoreTransientVars(mwPrivate);
+        for (SPI it in spiDataProducers.values) {
+            (it as SpiInner).restoreTransientVars(mwPrivate);
         }
     }
 
     @override
-    protected void init() {
-        readI2cDataTask = new TimedTask<>();
-        readSpiDataTask = new TimedTask<>();
+    void init() {
+        mwPrivate.addDataIdHeader(
+            Tuple2(ModuleType.SERIAL_PASSTHROUGH.id, Util.setRead(I2C_RW)));
+        mwPrivate.addDataHandler(Tuple3(
+            ModuleType.SERIAL_PASSTHROUGH.id, Util.setRead(I2C_RW),
+            DIRECT_I2C_READ_ID), (Uint8List response) =>
+            _readControllerI2cController.add(response));
 
-        mwPrivate.addDataIdHeader(new Pair<>(SERIAL_PASSTHROUGH.id, Util.setRead(I2C_RW)));
-        mwPrivate.addDataHandler(new Tuple3<>(SERIAL_PASSTHROUGH.id, Util.setRead(I2C_RW), DIRECT_I2C_READ_ID), response -> readI2cDataTask.setResult(response));
-
-        mwPrivate.addDataIdHeader(new Pair<>(SERIAL_PASSTHROUGH.id, Util.setRead(SPI_RW)));
-        mwPrivate.addDataHandler(new Tuple3<>(SERIAL_PASSTHROUGH.id, Util.setRead(SPI_RW), DIRECT_SPI_READ_ID), response -> readSpiDataTask.setResult(response));
+        mwPrivate.addDataIdHeader(
+            Tuple2(ModuleType.SERIAL_PASSTHROUGH.id, Util.setRead(SPI_RW)));
+        mwPrivate.addDataHandler(Tuple3(
+            ModuleType.SERIAL_PASSTHROUGH.id, Util.setRead(SPI_RW),
+            DIRECT_SPI_READ_ID), (Uint8List response) =>
+            _readControllerSpiController.add(response));
     }
 
     @override
-    I2C i2c(final byte length, final byte id) {
+    I2C i2c(final int length, final int id) {
         if (!i2cDataProducers.containsKey(id)) {
-            i2cDataProducers.put(id, new I2cInner(id, length, mwPrivate));
+            i2cDataProducers[id] = new I2cInner(id, length, mwPrivate);
         }
 
-        return i2cDataProducers.get(id);
+        return i2cDataProducers[id];
     }
 
     @override
-    void writeI2c(byte deviceAddr, byte registerAddr, byte[] data) {
-        byte[] params= new byte[data.length + 4];
-        params[0]= deviceAddr;
-        params[1]= registerAddr;
-        params[2]= (byte) 0xff;
-        params[3]= (byte) data.length;
-        System.arraycopy(data, 0, params, 4, data.length);
-
-        mwPrivate.sendCommand(SERIAL_PASSTHROUGH, I2C_RW, params);
+    void writeI2c(int deviceAddr, int registerAddr, Uint8List data) {
+        Uint8List params = Uint8List(data.length + 4);
+        params[0] = deviceAddr;
+        params[1] = registerAddr;
+        params[2] = 0xff;
+        params[3] = data.length;
+        params.setAll(4, data);
+        mwPrivate.sendCommandForModule(
+            ModuleType.SERIAL_PASSTHROUGH, I2C_RW, params);
     }
 
     @override
-    Task<byte[]> readI2cAsync(final byte deviceAddr, final byte registerAddr, final byte length) {
-        return readI2cDataTask.execute("Did not receive I2C data within %dms", Constant.RESPONSE_TIMEOUT,
-                () -> mwPrivate.sendCommand(new byte[] {SERIAL_PASSTHROUGH.id, Util.setRead(I2C_RW), deviceAddr, registerAddr, DIRECT_I2C_READ_ID, length})
-        ).onSuccessTask(task -> {
-            byte[] response = task.getResult();
+    Future<Uint8List> readI2cAsync(final int deviceAddr, final int registerAddr,
+        final int length) async {
+        Stream<Uint8List> stream = _readControllerI2cController.stream.timeout(
+            ModuleType.RESPONSE_TIMEOUT);
+        StreamIterator<Uint8List> iterator = StreamIterator(stream);
 
-            if (response.length > 3) {
-                byte[] data = new byte[response.length - 3];
-                System.arraycopy(response, 3, data, 0, response.length - 3);
-                return Task.forResult(data);
-            }
-            return Task.forError(new RuntimeException("Error reading I2C data from device or register address.  Response: " + Util.arrayToHexString(response)));
-        });
+        TimeoutException exception = TimeoutException(
+            "Did not receive I2C data", ModuleType.RESPONSE_TIMEOUT);
+        mwPrivate.sendCommand(Uint8List.fromList([
+            ModuleType.SERIAL_PASSTHROUGH.id,
+            Util.setRead(I2C_RW),
+            deviceAddr,
+            registerAddr,
+            DIRECT_I2C_READ_ID,
+            length
+        ]));
+        if (await iterator.moveNext().catchError((e) => throw exception,
+            test: (e) => e is TimeoutException) == false)
+            throw exception;
+
+        Uint8List result = iterator.current;
+        if (result.length > 3) {
+            Uint8List data = Uint8List(result.length - 3);
+            data.setAll(0, result.skip(3));
+            return data;
+        }
+        throw Exception(
+            ("Error reading I2C data from device or register address.  Response: " +
+                Util.arrayToHexString(result)));
     }
 
     @override
-    SPI spi(final byte length, final byte id) {
-        if (mwPrivate.lookupModuleInfo(Constant.Module.SERIAL_PASSTHROUGH).revision < SPI_REVISION) {
+    SPI spi(final int length, final int id) {
+        if (mwPrivate
+            .lookupModuleInfo(ModuleType.SERIAL_PASSTHROUGH)
+            .revision < SPI_REVISION) {
             return null;
         }
 
         if (!spiDataProducers.containsKey(id)) {
-            spiDataProducers.put(id, new SpiInner(id, length, mwPrivate));
+            spiDataProducers[id] = new SpiInner(id, length, mwPrivate);
         }
 
-        return spiDataProducers.get(id);
+        return spiDataProducers[id];
     }
 
     @override
-    SpiParameterBuilder<Void> writeSpi() {
-        return mwPrivate.lookupModuleInfo(Constant.Module.SERIAL_PASSTHROUGH).revision >= SPI_REVISION ?
-                new SpiParameterBuilderInner<Void>() {
-                    @override
-                    Void commit() {
-                        mwPrivate.sendCommand(SERIAL_PASSTHROUGH, SPI_RW, config);
-                        return null;
-                    }
-                } :
-                null;
+    SpiParameterBuilder<void> writeSpi() {
+        return mwPrivate
+            .lookupModuleInfo(ModuleType.SERIAL_PASSTHROUGH)
+            .revision >= SPI_REVISION
+            ? _SpiParameterBuilderInner3(mwPrivate)
+            : null;
     }
 
     @override
-    SpiParameterBuilder<Task<byte[]>> readSpiAsync(byte length) {
-        return new SpiParameterBuilderInner<Task<byte[]>>((byte) ((length - 1) | (DIRECT_SPI_READ_ID << 4))) {
-            @override
-            Task<byte[]> commit() {
-                return readSpiDataTask.execute("Did not received SPI data within %dms", Constant.RESPONSE_TIMEOUT,
-                        () -> mwPrivate.sendCommand(SERIAL_PASSTHROUGH, Util.setRead(SPI_RW), config)
-                ).onSuccessTask(task -> {
-                    byte[] response = task.getResult();
-
-                    if (response.length > 3) {
-                        byte[] data = new byte[response.length - 3];
-                        System.arraycopy(response, 3, data, 0, response.length - 3);
-                        return Task.forResult(data);
-                    }
-                    return Task.forError(new RuntimeException("Error reading SPI data from device or register address.  Response: " + Util.arrayToHexString(response)));
-                });
-            }
-        };
+    SpiParameterBuilder<Future<Uint8List>> readSpiAsync(int length) {
+        return _SpiParameterBuilderInner1.value(
+            (length - 1) | (DIRECT_SPI_READ_ID << 4),
+            _readControllerSpiController, mwPrivate);
     }
 }

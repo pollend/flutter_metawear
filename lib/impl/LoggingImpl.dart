@@ -30,7 +30,6 @@ import 'package:flutter_metawear/impl/DataTypeBase.dart';
 import 'package:flutter_metawear/impl/DeviceDataConsumer.dart';
 import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
 import 'package:flutter_metawear/impl/ModuleImplBase.dart';
-import 'package:flutter_metawear/impl/platform/TimedTask.dart';
 import 'package:flutter_metawear/module/Logging.dart';
 import 'package:sprintf/sprintf.dart';
 import 'package:flutter_metawear/impl/Util.dart';
@@ -150,9 +149,9 @@ class LoggingImpl extends ModuleImplBase implements Logging {
 
     // Logger state
     final Map<int, TimeReference> logReferenceTicks= Map();
-    final HashMap<Byte, Long> lastTimestamp = Map();
+    final HashMap<int, int> lastTimestamp = Map();
     TimeReference latestReference;
-    final HashMap<Byte, DataLogger> dataLoggers= Map();
+    final HashMap<int, DataLogger> dataLoggers= Map();
     HashMap<int, int> rollbackTimestamps = Map();
 
     int nLogEntries;
@@ -216,7 +215,7 @@ class LoggingImpl extends ModuleImplBase implements Logging {
 
         DataTypeBase original = null;
         bool multipleEntries = false;
-        for(DataTypeBase it: possible) {
+        for(DataTypeBase it in  possible) {
             if (it.attributes.length() > 4) {
                 original = it;
                 multipleEntries = true;
@@ -267,7 +266,7 @@ class LoggingImpl extends ModuleImplBase implements Logging {
                 processLogData(Arrays.copyOfRange(response, 11, 20));
             }
         });
-        this.mwPrivate.addResponseHandler(new Pair<>(LOGGING.id, READOUT_PROGRESS), response -> {
+        this.mwPrivate.addResponseHandler(Tuple2(ModuleType.LOGGING.id, READOUT_PROGRESS), response -> {
             byte[] padded= new byte[8];
             System.arraycopy(response, 2, padded, 0, response.length - 2);
             long nEntriesLeft= ByteBuffer.wrap(padded).order(ByteOrder.LITTLE_ENDIAN).getLong(0);
@@ -278,7 +277,7 @@ class LoggingImpl extends ModuleImplBase implements Logging {
                 updateHandler.receivedUpdate(nEntriesLeft, nLogEntries);
             }
         });
-        this.mwPrivate.addResponseHandler(new Pair<>(LOGGING.id, Util.setRead(TIME)), response -> {
+        this.mwPrivate.addResponseHandler(Tuple2(ModuleType.LOGGING.id, Util.setRead(TIME)), response -> {
             byte[] padded= new byte[8];
             System.arraycopy(response, 2, padded, 0, 4);
             final long tick= ByteBuffer.wrap(padded).order(ByteOrder.LITTLE_ENDIAN).getLong(0);

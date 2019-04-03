@@ -38,25 +38,6 @@ import 'package:flutter_metawear/impl/Util.dart';
 
 import 'package:tuple/tuple.dart';
 
-class _DataPrivate extends DataPrivate{
-
-  Uint8List _data;
-  _DataPrivate(this._data,DateTime timestamp, Uint8List dataBytes, dynamic apply(Type target)) : super(timestamp, dataBytes, apply);
-
-  @override
-  List<Type> types() {
-    return [bool,int];
-  }
-
-  @override
-  T value<T>() {
-      if(T is bool || T is int){
-          return _data[0] as T;
-      }
-      return super.value<T>();
-  }
-
-}
 
 /**
  * Created by etsai on 9/5/16.
@@ -83,10 +64,18 @@ class IntData extends DataTypeBase {
   }
 
   @override
-  Data createMessage(bool logData, MetaWearBoardPrivate mwPrivate, Uint8List data, DateTime timestamp, dynamic apply(Type target)) {
+  Data createMessage(bool logData, MetaWearBoardPrivate mwPrivate, Uint8List data, DateTime timestamp, T Function<T>() apply) {
     final Uint8List buffer = Util.bytesToSIntBuffer(logData, data, attributes);
 
-    return _DataPrivate(buffer, timestamp, data, apply);
+    return DataPrivate2(timestamp, data, apply, () => 1.0, <T>(){
+      if(T is bool){
+        return ByteData.view(buffer.buffer).getInt8(0) > 0 as T;
+      }
+      if(T is int){
+        return ByteData.view(buffer.buffer).getInt32(0) as T;
+      }
+      throw CastError();
+    });
   }
 
   @override

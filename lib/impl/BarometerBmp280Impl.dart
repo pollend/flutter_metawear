@@ -23,55 +23,60 @@
 
 
 import 'package:flutter_metawear/impl/BarometerBoschImpl.dart';
+import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
+import 'package:flutter_metawear/module/BarometerBosch.dart';
 import 'package:flutter_metawear/module/BarometerBmp280.dart' as BarometerBmp280;
+import 'dart:typed_data';
+import 'package:flutter_metawear/impl/ModuleType.dart';
+
+class _ConfigEditor extends BarometerBmp280.ConfigEditor {
+    OversamplingMode samplingMode = OversamplingMode.STANDARD;
+    FilterCoeff _filterCoeff = FilterCoeff.OFF;
+    BarometerBmp280.StandbyTime _time = BarometerBmp280.StandbyTime.TIME_0_5;
+    int tempOversampling = 1;
+
+    final MetaWearBoardPrivate _mwPrivate;
+
+    _ConfigEditor(this._mwPrivate);
+
+    @override
+    BarometerBmp280.ConfigEditor standbyTime(BarometerBmp280.StandbyTime time) {
+        this._time = time;
+        return this;
+    }
+
+    @override
+    void commit() {
+        _mwPrivate.sendCommand(Uint8List.fromList(
+            [ModuleType.BAROMETER.id, BarometerBoschImpl.CONFIG,
+            ((samplingMode.index << 2) | (tempOversampling << 5)),
+            ((_filterCoeff.index << 2) | (_time.index << 5))
+            ]));
+    }
+
+    @override
+    BarometerBmp280.ConfigEditor pressureOversampling(OversamplingMode mode) {
+        samplingMode = mode;
+        tempOversampling = ((mode == OversamplingMode.ULTRA_HIGH) ? 2 : 1);
+        return this;
+    }
+
+    @override
+    BarometerBmp280.ConfigEditor filterCoeff(FilterCoeff coeff) {
+        _filterCoeff = coeff;
+        return this;
+    }
+}
 
 /**
  * Created by etsai on 9/20/16.
  */
 class BarometerBmp280Impl extends BarometerBoschImpl implements BarometerBmp280.BarometerBmp280 {
-    static final byte IMPLEMENTATION= 0;
-    BarometerBmp280Impl(MetaWearBoardPrivate mwPrivate): super(mwPrivate);
+    BarometerBmp280Impl(MetaWearBoardPrivate mwPrivate) : super(mwPrivate);
 
-//
-//    @override
-//    BarometerBmp280.ConfigEditor configure() {
-//        return new BarometerBmp280.ConfigEditor() {
-//            private OversamplingMode samplingMode= OversamplingMode.STANDARD;
-//            private FilterCoeff filterCoeff = FilterCoeff.OFF;
-//            private StandbyTime time= StandbyTime.TIME_0_5;
-//            private byte tempOversampling= 1;
-//
-//            @override
-//            public BarometerBmp280.ConfigEditor standbyTime(StandbyTime time) {
-//                this.time= time;
-//                return this;
-//            }
-//
-//            @override
-//            public void commit() {
-//                mwPrivate.sendCommand(new byte[] {BAROMETER.id, CONFIG,
-//                        (byte) ((samplingMode.ordinal() << 2) | (tempOversampling << 5)),
-//                        (byte) ((filterCoeff.ordinal() << 2) | (time.ordinal() << 5))});
-//            }
-//
-//            @override
-//            public BarometerBmp280.ConfigEditor pressureOversampling(OversamplingMode mode) {
-//                samplingMode= mode;
-//                tempOversampling= (byte) ((mode == OversamplingMode.ULTRA_HIGH) ? 2 : 1);
-//                return this;
-//            }
-//
-//            @override
-//            public BarometerBmp280.ConfigEditor filterCoeff(FilterCoeff coeff) {
-//                filterCoeff = coeff;
-//                return this;
-//            }
-//
-//            @override
-//            public BarometerBmp280.ConfigEditor standbyTime(float time) {
-//                float[] availableTimes= StandbyTime.times();
-//                return standbyTime(StandbyTime.values()[Util.closestIndex(availableTimes, time)]);
-//            }
-//        };
-//    }
+    @override
+    BarometerBmp280.ConfigEditor configure() {
+        return _ConfigEditor(mwPrivate);
+    }
+
 }

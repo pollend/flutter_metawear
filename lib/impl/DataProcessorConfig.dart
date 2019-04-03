@@ -6,6 +6,7 @@ import 'package:flutter_metawear/builder/RouteComponent.dart';
 import 'package:flutter_metawear/builder/predicate/PulseOutput.dart';
 import 'package:flutter_metawear/impl/DataAttributes.dart';
 import 'package:flutter_metawear/impl/DataProcessorImpl.dart';
+import 'package:flutter_metawear/impl/RouteComponentImpl.dart';
 import 'package:flutter_metawear/impl/Version.dart';
 
 import 'package:sprintf/sprintf.dart';
@@ -232,14 +233,14 @@ class MultiValueComparison extends ComparisonConfig {
     final bool isSigned;
 
     MultiValueComparison(this.isSigned, this.input, this.op, this.mode,
-        this.references) : super(Comparison.ID);
+        this.references) : super(ComparisonConfig.ID);
 
 
     MultiValueComparison.config(Uint8List config)
         :
             this.isSigned = (config[1] & 0x1) == 0x1,
             this.input = (((config[1] >> 1) & 0x3) + 1),
-            this.op = Co.Comparison.values[(config[1] >> 3) & 0x7],
+            this.op = Comparison.values[(config[1] >> 3) & 0x7],
             this.mode = ComparisonOutput.values[(config[1] >> 6) & 0x3],
             this.references = extractReferences(ByteData.view(config.buffer, 2),
                 (((config[1] >> 1) & 0x3) + 1)),
@@ -686,34 +687,36 @@ abstract class DataProcessorConfig {
             case Accumulator.ID:
                 return Accumulator.config(config);
             case Average.ID:
-                return Average.config((config);
+                return Average.config(config);
             case ComparisonConfig.ID:
-                return firmware.compareTo(MULTI_COMPARISON_MIN_FIRMWARE) >= 0 ?
-                        new MultiValueComparison(config) : new SingleValueComparison(config);
+                return firmware.compareTo(RouteComponentImpl.MULTI_COMPARISON_MIN_FIRMWARE) >= 0 ?
+                        new MultiValueComparison.config(config) : new SingleValueComparison.config(config);
             case Combiner.ID:
                 return Combiner.config(config);
             case Time.ID:
-                return Time.config((config);
+                return Time.config(config);
             case Maths.ID:
-                return new Maths(firmware.compareTo(MULTI_CHANNEL_MATH) >= 0, config);
+                return new Maths.config(firmware.compareTo(RouteComponentImpl.MULTI_CHANNEL_MATH) >= 0, config);
             case Delay.ID:
-                return new Delay(revision >= DataProcessorImpl.EXPANDED_DELAY, config);
+                return new Delay.config(revision >= DataProcessorImpl.EXPANDED_DELAY, config);
             case Pulse.ID:
-                return Pulse.config((config);
+                return Pulse.config(config);
             case Differential.ID:
-                return Differential.config((config);
+                return Differential.config(config);
             case Threshold.ID:
-                return Threshold.config((config);
+                return Threshold.config(config);
             case Buffer.ID:
-                return Buffer.config((config);
+                return Buffer.config(config);
             case Packer.ID:
-                return Packer.config((config);
+                return Packer.config(config);
             case Accounter.ID:
-                return Accounter.config((config);
+                return Accounter.confg(config);
             case Fuser.ID:
-                return Fuser.config((config);
+                return Fuser.config(config);
+            default:
+                break;
         }
-        throw new InvalidParameterException("Unrecognized config id: " + config[0]);
+        throw Exception("Unrecognized config id: $config[0]");
     }
 
     final int id;

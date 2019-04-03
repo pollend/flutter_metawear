@@ -33,15 +33,15 @@ abstract class ModuleImplBase{
 
     ModuleImplBase(MetaWearBoardPrivate mwPrivate) {
         this.mwPrivate= mwPrivate;
-        _init();
+        init();
     }
 
     void restoreTransientVars(MetaWearBoardPrivate mwPrivate) {
         this.mwPrivate= mwPrivate;
-        _init();
+        init();
     }
 
-    void _init() { }
+    void init() { }
     void tearDown() { }
     void disconnected() { }
 }

@@ -53,11 +53,6 @@ abstract class Data {
      * @return Byte array of the value
      */
     Uint8List bytes();
-    /**
-     * Classes that can be used when calling {@link #value(Class)}
-     * @return Array of valid classes
-     */
-    List<Type> types();
 
     /**
      * Converts the data bytes to a usable data type

@@ -26,55 +26,67 @@ import 'package:flutter_metawear/impl/DataTypeBase.dart';
 import 'package:flutter_metawear/impl/ModuleImplBase.dart';
 import 'package:flutter_metawear/module/Settings.dart';
 import 'package:flutter_metawear/impl/Util.dart';
+import 'package:flutter_metawear/impl/ModuleType.dart';
+import 'dart:typed_data';
+import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
+
 
 class BatteryStateData extends DataTypeBase {
 
-    BatteryStateData() {
-        super(SETTINGS, Util.setSilentRead(BATTERY_STATE), new DataAttributes(new byte[] {1, 2}, (byte) 1, (byte) 0, false));
-    }
+    BatteryStateData.Default(): super(ModuleType.SETTINGS, Util.setSilentRead(SettingsImpl.BATTERY_STATE), new DataAttributes(Uint8List.fromList([1, 2]), 1, 0, false));
 
-    BatteryStateData(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
-        super(input, module, register, id, attributes);
-    }
+
+    BatteryStateData(DataTypeBase input, ModuleType module, int register, int id, DataAttributes attributes): super(module, register, attributes,id:id,input:input);
+
 
     @override
-    public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
+     DataTypeBase copy(DataTypeBase input, ModuleType module, int register, int id, DataAttributes attributes) {
         return new BatteryStateData(input, module, register, id, attributes);
     }
 
     @override
-    public Number convertToFirmwareUnits(MetaWearBoardPrivate mwPrivate, Number value) {
+     num convertToFirmwareUnits(MetaWearBoardPrivate mwPrivate, num value) {
         return value;
     }
 
     @override
-    public Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, final byte[] data, final Calendar timestamp, DataPrivate.ClassToObject mapper) {
-    final float voltage= ByteBuffer.wrap(data, 1, 2).order(ByteOrder.LITTLE_ENDIAN).getShort() / 1000f;
-    final BatteryState state= new BatteryState(data[0], voltage);
-
-    return new DataPrivate(timestamp, data, mapper) {
-    @override
-    public Class<?>[] types() {
-    return new Class<?>[]{BatteryState.class};
+    Data createMessage(bool logData, MetaWearBoardPrivate mwPrivate, Uint8List data, DateTime timestamp, T Function<T>() apply) {
+        throw UnsupportedError("Unsupported DataTypeBase");
     }
 
-    @override
-    public <T> T value(Class<T> clazz) {
-    if (clazz == BatteryState.class) {
-    return clazz.cast(state);
-    }
-    return super.value(clazz);
-    }
-    };
-    }
+//    @override
+//    Data createMessage(bool logData, MetaWearBoardPrivate mwPrivate,Uint8List data, DateTime timestamp, T Function<T>() apply) {
+//    final double voltage= ByteBuffer.wrap(data, 1, 2).order(ByteOrder.LITTLE_ENDIAN).getShort() / 1000f;
+//    final BatteryState state= new BatteryState(data[0], voltage);
+//    return null;
+//
+////    return new DataPrivate(timestamp, data, mapper) {
+////    @override
+////    Class<?>[] types() {
+////    return new Class<?>[]{BatteryState.class};
+////    }
+////
+////    @override
+////    <T> T value(Class<T> clazz) {
+////    if (clazz == BatteryState.class) {
+////    return clazz.cast(state);
+////    }
+////    return super.value(clazz);
+////    }
+////    };
+//    }
 
     @override
-    public DataTypeBase[] createSplits() {
-        return new DataTypeBase[] {
-            new UintData(SETTINGS, eventConfig[1], eventConfig[2], new DataAttributes(new byte[] {1}, (byte) 1, (byte) 0, false)),
-        new MilliUnitsUFloatData(SETTINGS, eventConfig[1], eventConfig[2], new DataAttributes(new byte[] {2}, (byte) 1, (byte) 1, false))
-    };
+    List<DataTypeBase> createSplits() {
+        return [
+            new UintData(SETTINGS, eventConfig[1], eventConfig[2], new DataAttributes(Uint8List.fromList([1]), 1, 0, false)),
+        new MilliUnitsUFloatData(SETTINGS, eventConfig[1], eventConfig[2], new DataAttributes(Uint8List.fromList([2]), 1, 1, false))];
     }
+}
+
+
+class _BleAdvertisementConfigEditor extends BleAdvertisementConfigEditor{
+    
 }
 
 /**
@@ -120,9 +132,9 @@ class SettingsImpl extends ModuleImplBase implements Settings {
 
     final DataTypeBase disconnectDummyProducer;
 
-    private transient ActiveDataProducer powerStatus, chargeStatus;
-    private transient TimedTask<byte[]> readConnParamsTask, readAdConfigTask;
-    private transient TimedTask<Byte> readPowerStatusTask, readChargeStatusTask;
+    ActiveDataProducer powerStatus, chargeStatus;
+    TimedTask<byte[]> readConnParamsTask, readAdConfigTask;
+    TimedTask<Byte> readPowerStatusTask, readChargeStatusTask;
 
     SettingsImpl(MetaWearBoardPrivate mwPrivate) {
         super(mwPrivate);
@@ -131,10 +143,10 @@ class SettingsImpl extends ModuleImplBase implements Settings {
         this.mwPrivate.tagProducer(BATTERY_PRODUCER, batteryProducer);
         this.mwPrivate.tagProducer(BATTERY_CHARGE_PRODUCER, batteryProducer.split[0]);
         this.mwPrivate.tagProducer(BATTERY_VOLTAGE_PRODUCER, batteryProducer.split[1]);
-        this.mwPrivate.tagProducer(POWER_STATUS_PRODUCER, new UintData(SETTINGS, POWER_STATUS, new DataAttributes(new byte[] { 1 }, (byte) 1, (byte) 0, false)));
-        this.mwPrivate.tagProducer(CHARGE_STATUS_PRODUCER, new UintData(SETTINGS, CHARGE_STATUS, new DataAttributes(new byte[] { 1 }, (byte) 1, (byte) 0, false)));
+        this.mwPrivate.tagProducer(POWER_STATUS_PRODUCER, new UintData(SETTINGS, POWER_STATUS, new DataAttributes(Uint8List.fromList([ 1 }, 1, 0, false)));
+        this.mwPrivate.tagProducer(CHARGE_STATUS_PRODUCER, new UintData(SETTINGS, CHARGE_STATUS, new DataAttributes(Uint8List.fromList([ 1 }, 1, 0, false)));
 
-        disconnectDummyProducer= new UintData(SETTINGS, DISCONNECT_EVENT, new DataAttributes(new byte[] {}, (byte) 0, (byte) 0, false));
+        disconnectDummyProducer= new UintData(SETTINGS, DISCONNECT_EVENT, new DataAttributes(Uint8List.fromList([}, 0, 0, false));
     }
 
     @override
@@ -144,7 +156,7 @@ class SettingsImpl extends ModuleImplBase implements Settings {
         readPowerStatusTask = new TimedTask<>();
         readChargeStatusTask = new TimedTask<>();
 
-        for(byte id: new byte[] {DEVICE_NAME, AD_PARAM, TX_POWER, SCAN_RESPONSE}) {
+        for(int id in [DEVICE_NAME, AD_PARAM, TX_POWER, SCAN_RESPONSE]) {
             this.mwPrivate.addResponseHandler(new Pair<>(SETTINGS.id, Util.setRead(id)), response -> readAdConfigTask.setResult(response));
         }
         if (mwPrivate.lookupModuleInfo(SETTINGS).revision >= CONN_PARAMS_REVISION) {
@@ -157,105 +169,106 @@ class SettingsImpl extends ModuleImplBase implements Settings {
     }
 
     @override
-    public void startBleAdvertising() {
-        mwPrivate.sendCommand(new byte[] {SETTINGS.id, START_ADVERTISING});
+    void startBleAdvertising() {
+        mwPrivate.sendCommand(Uint8List.fromList([SETTINGS.id, START_ADVERTISING});
     }
 
     @override
-    public BleAdvertisementConfigEditor editBleAdConfig() {
-        return new BleAdvertisementConfigEditor() {
-            private String newAdvName= null;
-            private Short newAdvInterval= null;
-            private Byte newAdvTimeout= null, newAdvTxPower= null;
-            private byte[] newAdvResponse= null;
-
-            @override
-            public BleAdvertisementConfigEditor deviceName(String name) {
-                newAdvName = name;
-                return this;
-            }
-
-            @override
-            public BleAdvertisementConfigEditor interval(short interval) {
-                newAdvInterval= interval;
-                return this;
-            }
-
-            @override
-            public BleAdvertisementConfigEditor timeout(byte timeout) {
-                newAdvTimeout = timeout;
-                return this;
-            }
-
-            @override
-            public BleAdvertisementConfigEditor txPower(byte power) {
-                newAdvTxPower = power;
-                return this;
-            }
-
-            @override
-            public BleAdvertisementConfigEditor scanResponse(byte[] response) {
-                newAdvResponse = response;
-                return this;
-            }
-
-            @override
-            public void commit() {
-                if (newAdvName != null) {
-                    try {
-                        mwPrivate.sendCommand(SETTINGS, DEVICE_NAME, newAdvName.getBytes("US-ASCII"));
-                    } catch (UnsupportedEncodingException e) {
-                        mwPrivate.sendCommand(SETTINGS, DEVICE_NAME, newAdvName.getBytes());
-                    }
-                }
-
-                if (newAdvInterval != null || newAdvTimeout != null) {
-                    if (newAdvInterval == null) {
-                        newAdvInterval = 417;
-                    }
-                    if (newAdvTimeout == null) {
-                        newAdvTimeout = 0;
-                    }
-                    byte revision = mwPrivate.lookupModuleInfo(SETTINGS).revision;
-                    if (revision >= CONN_PARAMS_REVISION) {
-                        newAdvInterval = (short) ((newAdvInterval & 0xffff) / AD_INTERVAL_STEP);
-                    }
-                    ByteBuffer buffer = ByteBuffer.allocate(revision >= WHITELIST_REVISION ? 4 : 3).order(ByteOrder.LITTLE_ENDIAN)
-                            .putShort(newAdvInterval).put(newAdvTimeout);
-                    if (revision >= WHITELIST_REVISION) {
-                        buffer.put((byte) 0);
-                    }
-                    mwPrivate.sendCommand(SETTINGS, AD_PARAM, buffer.array());
-                }
-
-                if (newAdvTxPower != null) {
-                    mwPrivate.sendCommand(new byte[] {SETTINGS.id, TX_POWER, newAdvTxPower});
-                }
-
-                if (newAdvResponse != null) {
-                    if (newAdvResponse.length >= Constant.COMMAND_LENGTH) {
-                        byte[] first = new byte[13], second = new byte[newAdvResponse.length - 13];
-                        System.arraycopy(newAdvResponse, 0, first, 0, first.length);
-                        System.arraycopy(newAdvResponse, first.length, second, 0, second.length);
-
-                        mwPrivate.sendCommand(SETTINGS, PARTIAL_SCAN_RESPONSE, first);
-                        mwPrivate.sendCommand(SETTINGS, SCAN_RESPONSE, second);
-                    } else {
-                        mwPrivate.sendCommand(SETTINGS, SCAN_RESPONSE, newAdvResponse);
-                    }
-                }
-            }
-        };
+    BleAdvertisementConfigEditor editBleAdConfig() {
+//        return new BleAdvertisementConfigEditor() {
+//            private String newAdvName= null;
+//            private Short newAdvInterval= null;
+//            private Byte newAdvTimeout= null, newAdvTxPower= null;
+//            private byte[] newAdvResponse= null;
+//
+//            @override
+//            BleAdvertisementConfigEditor deviceName(String name) {
+//                newAdvName = name;
+//                return this;
+//            }
+//
+//            @override
+//            BleAdvertisementConfigEditor interval(short interval) {
+//                newAdvInterval= interval;
+//                return this;
+//            }
+//
+//            @override
+//            BleAdvertisementConfigEditor timeout(byte timeout) {
+//                newAdvTimeout = timeout;
+//                return this;
+//            }
+//
+//            @override
+//            BleAdvertisementConfigEditor txPower(byte power) {
+//                newAdvTxPower = power;
+//                return this;
+//            }
+//
+//            @override
+//            BleAdvertisementConfigEditor scanResponse(byte[] response) {
+//                newAdvResponse = response;
+//                return this;
+//            }
+//
+//            @override
+//            void commit() {
+//                if (newAdvName != null) {
+//                    try {
+//                        mwPrivate.sendCommand(SETTINGS, DEVICE_NAME, newAdvName.getBytes("US-ASCII"));
+//                    } catch (UnsupportedEncodingException e) {
+//                        mwPrivate.sendCommand(SETTINGS, DEVICE_NAME, newAdvName.getBytes());
+//                    }
+//                }
+//
+//                if (newAdvInterval != null || newAdvTimeout != null) {
+//                    if (newAdvInterval == null) {
+//                        newAdvInterval = 417;
+//                    }
+//                    if (newAdvTimeout == null) {
+//                        newAdvTimeout = 0;
+//                    }
+//                    byte revision = mwPrivate.lookupModuleInfo(SETTINGS).revision;
+//                    if (revision >= CONN_PARAMS_REVISION) {
+//                        newAdvInterval = (short) ((newAdvInterval & 0xffff) / AD_INTERVAL_STEP);
+//                    }
+//                    ByteBuffer buffer = ByteBuffer.allocate(revision >= WHITELIST_REVISION ? 4 : 3).order(ByteOrder.LITTLE_ENDIAN)
+//                            .putShort(newAdvInterval).put(newAdvTimeout);
+//                    if (revision >= WHITELIST_REVISION) {
+//                        buffer.put(0);
+//                    }
+//                    mwPrivate.sendCommand(SETTINGS, AD_PARAM, buffer.array());
+//                }
+//
+//                if (newAdvTxPower != null) {
+//                    mwPrivate.sendCommand(Uint8List.fromList([SETTINGS.id, TX_POWER, newAdvTxPower});
+//                }
+//
+//                if (newAdvResponse != null) {
+//                    if (newAdvResponse.length >= Constant.COMMAND_LENGTH) {
+//                        byte[] first = new byte[13], second = new byte[newAdvResponse.length - 13];
+//                        System.arraycopy(newAdvResponse, 0, first, 0, first.length);
+//                        System.arraycopy(newAdvResponse, first.length, second, 0, second.length);
+//
+//                        mwPrivate.sendCommand(SETTINGS, PARTIAL_SCAN_RESPONSE, first);
+//                        mwPrivate.sendCommand(SETTINGS, SCAN_RESPONSE, second);
+//                    } else {
+//                        mwPrivate.sendCommand(SETTINGS, SCAN_RESPONSE, newAdvResponse);
+//                    }
+//                }
+//            }
+//        };
+        return null;
     }
 
     @override
-    public Task<BleAdvertisementConfig> readBleAdConfigAsync() {
+    Task<BleAdvertisementConfig> readBleAdConfigAsync() {
         final Capture<String> deviceName = new Capture<>();
         final Capture<Integer> interval = new Capture<>();
         final Capture<Byte> timeout = new Capture<>(), tx = new Capture<>();
 
         return readAdConfigTask.execute("Did not receive device name within %dms", Constant.RESPONSE_TIMEOUT,
-                () -> mwPrivate.sendCommand(new byte[] {SETTINGS.id, Util.setRead(DEVICE_NAME)})
+                () -> mwPrivate.sendCommand(Uint8List.fromList([SETTINGS.id, Util.setRead(DEVICE_NAME)})
         ).onSuccessTask(task -> {
             byte[] response = task.getResult();
             try {
@@ -264,7 +277,7 @@ class SettingsImpl extends ModuleImplBase implements Settings {
                 deviceName.set(new String(response, 2, response.length - 2));
             }
             return readAdConfigTask.execute("Did not receive ad parameters within %dms", Constant.RESPONSE_TIMEOUT,
-                    () -> mwPrivate.sendCommand(new byte[] {SETTINGS.id, Util.setRead(AD_PARAM)}));
+                    () -> mwPrivate.sendCommand(Uint8List.fromList([SETTINGS.id, Util.setRead(AD_PARAM)}));
         }).onSuccessTask(task -> {
             byte[] response = task.getResult();
             if (mwPrivate.lookupModuleInfo(SETTINGS).revision >= CONN_PARAMS_REVISION) {
@@ -277,11 +290,11 @@ class SettingsImpl extends ModuleImplBase implements Settings {
                 timeout.set(response[4]);
             }
             return readAdConfigTask.execute("Did not receive tx power within %dms", Constant.RESPONSE_TIMEOUT,
-                    () -> mwPrivate.sendCommand(new byte[] {SETTINGS.id, Util.setRead(TX_POWER)}));
+                    () -> mwPrivate.sendCommand(Uint8List.fromList([SETTINGS.id, Util.setRead(TX_POWER)}));
         }).onSuccessTask(task -> {
             tx.set(task.getResult()[2]);
             return readAdConfigTask.execute("Did not receive scan response within %dms", Constant.RESPONSE_TIMEOUT,
-                    () -> mwPrivate.sendCommand(new byte[] {SETTINGS.id, Util.setRead(SCAN_RESPONSE)}));
+                    () -> mwPrivate.sendCommand(Uint8List.fromList([SETTINGS.id, Util.setRead(SCAN_RESPONSE)}));
         }).onSuccessTask(task -> {
             byte[] scanResponse = new byte[task.getResult().length - 2];
             System.arraycopy(task.getResult(), 2, scanResponse, 0, scanResponse.length);
@@ -291,7 +304,7 @@ class SettingsImpl extends ModuleImplBase implements Settings {
     }
 
     @override
-    public BleConnectionParametersEditor editBleConnParams() {
+    BleConnectionParametersEditor editBleConnParams() {
         if (mwPrivate.lookupModuleInfo(SETTINGS).revision < CONN_PARAMS_REVISION) {
             return null;
         }
@@ -300,31 +313,31 @@ class SettingsImpl extends ModuleImplBase implements Settings {
             private Short minConnInterval= 6, maxConnInterval= 0x320, slaveLatency= 0, supervisorTimeout= 0x258;
 
             @override
-            public BleConnectionParametersEditor minConnectionInterval(float interval) {
+            BleConnectionParametersEditor minConnectionInterval(float interval) {
                 minConnInterval= (short) (interval / CONN_INTERVAL_STEP);
                 return this;
             }
 
             @override
-            public BleConnectionParametersEditor maxConnectionInterval(float interval) {
+            BleConnectionParametersEditor maxConnectionInterval(float interval) {
                 maxConnInterval= (short) (interval / CONN_INTERVAL_STEP);
                 return this;
             }
 
             @override
-            public BleConnectionParametersEditor slaveLatency(short latency) {
+            BleConnectionParametersEditor slaveLatency(short latency) {
                 slaveLatency= latency;
                 return this;
             }
 
             @override
-            public BleConnectionParametersEditor supervisorTimeout(short timeout) {
+            BleConnectionParametersEditor supervisorTimeout(short timeout) {
                 supervisorTimeout= (short) (timeout / SUPERVISOR_TIMEOUT_STEP);
                 return this;
             }
 
             @override
-            public void commit() {
+            void commit() {
                 ByteBuffer buffer= ByteBuffer.allocate(8).order(ByteOrder.LITTLE_ENDIAN);
 
                 buffer.putShort(minConnInterval).putShort(maxConnInterval).putShort(slaveLatency).putShort(supervisorTimeout);
@@ -340,7 +353,7 @@ class SettingsImpl extends ModuleImplBase implements Settings {
         }
 
         return readConnParamsTask.execute("Did not receive connection parameters within %dms", Constant.RESPONSE_TIMEOUT,
-                () -> mwPrivate.sendCommand(new byte[] {SETTINGS.id, Util.setRead(CONNECTION_PARAMS)})
+                () -> mwPrivate.sendCommand(Uint8List.fromList([SETTINGS.id, Util.setRead(CONNECTION_PARAMS)})
         ).onSuccessTask(task -> {
             final ByteBuffer buffer = ByteBuffer.wrap(task.getResult()).order(ByteOrder.LITTLE_ENDIAN);
             return Task.forResult(new BleConnectionParameters(
@@ -356,27 +369,27 @@ class SettingsImpl extends ModuleImplBase implements Settings {
         if (mwPrivate.lookupModuleInfo(SETTINGS).revision >= BATTERY_REVISION) {
             return new BatteryDataProducer() {
                 @override
-                public String chargeName() {
+                String chargeName() {
                     return BATTERY_CHARGE_PRODUCER;
                 }
 
                 @override
-                public String voltageName() {
+                String voltageName() {
                     return BATTERY_VOLTAGE_PRODUCER;
                 }
 
                 @override
-                public Task<Route> addRouteAsync(RouteBuilder builder) {
+                Task<Route> addRouteAsync(RouteBuilder builder) {
                     return mwPrivate.queueRouteBuilder(builder, BATTERY_PRODUCER);
                 }
 
                 @override
-                public String name() {
+                String name() {
                     return BATTERY_PRODUCER;
                 }
 
                 @override
-                public void read() {
+                void read() {
                     mwPrivate.lookupProducer(BATTERY_PRODUCER).read(mwPrivate);
                 }
             };
@@ -391,12 +404,12 @@ class SettingsImpl extends ModuleImplBase implements Settings {
             if (powerStatus == null) {
                 powerStatus = new ActiveDataProducer() {
                     @override
-                    public Task<Route> addRouteAsync(RouteBuilder builder) {
+                    Task<Route> addRouteAsync(RouteBuilder builder) {
                         return mwPrivate.queueRouteBuilder(builder, POWER_STATUS_PRODUCER);
                     }
 
                     @override
-                    public String name() {
+                    String name() {
                         return POWER_STATUS_PRODUCER;
                     }
                 };
@@ -411,7 +424,7 @@ class SettingsImpl extends ModuleImplBase implements Settings {
         ModuleInfo info = mwPrivate.lookupModuleInfo(SETTINGS);
         if (info.revision >= CHARGE_STATUS_REVISION && (info.extra.length > 0 && (info.extra[0] & 0x1) == 0x1)) {
             return readPowerStatusTask.execute("Did not receive power status within %dms", Constant.RESPONSE_TIMEOUT,
-                    () -> mwPrivate.sendCommand(new byte[] {SETTINGS.id, Util.setRead(POWER_STATUS)}));
+                    () -> mwPrivate.sendCommand(Uint8List.fromList([SETTINGS.id, Util.setRead(POWER_STATUS)}));
         }
         return Task.forError(new UnsupportedOperationException("Reading power status not supported on this board / firmware"));
     }
@@ -423,12 +436,12 @@ class SettingsImpl extends ModuleImplBase implements Settings {
             if (chargeStatus == null) {
                 chargeStatus = new ActiveDataProducer() {
                     @override
-                    public Task<Route> addRouteAsync(RouteBuilder builder) {
+                    Task<Route> addRouteAsync(RouteBuilder builder) {
                         return mwPrivate.queueRouteBuilder(builder, CHARGE_STATUS_PRODUCER);
                     }
 
                     @override
-                    public String name() {
+                    String name() {
                         return CHARGE_STATUS_PRODUCER;
                     }
                 };
@@ -443,7 +456,7 @@ class SettingsImpl extends ModuleImplBase implements Settings {
         ModuleInfo info = mwPrivate.lookupModuleInfo(SETTINGS);
         if (info.revision >= CHARGE_STATUS_REVISION && (info.extra.length > 0 && (info.extra[0] & 0x2) == 0x2)) {
             return readChargeStatusTask.execute("Did not receive charge status within %dms", Constant.RESPONSE_TIMEOUT,
-                    () -> mwPrivate.sendCommand(new byte[] {SETTINGS.id, Util.setRead(CHARGE_STATUS)}));
+                    () -> mwPrivate.sendCommand(Uint8List.fromList([SETTINGS.id, Util.setRead(CHARGE_STATUS)}));
         }
         return Task.forError(new UnsupportedOperationException("Reading charge status not supported on this board / firmware"));
     }

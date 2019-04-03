@@ -42,25 +42,6 @@ import 'package:tuple/tuple.dart';
 
 import 'package:sprintf/sprintf.dart';
 
-class _DataPrivate extends DataPrivate {
-    final ColorAdc colorAdc;
-
-    _DataPrivate(this.colorAdc, DateTime timestamp, Uint8List dataBytes,
-        ClassToObject mapper) : super(timestamp, dataBytes, mapper);
-
-    @override
-    List<Type> types() {
-        return [ColorAdc];
-    }
-
-    @override
-    T value<T>() {
-        if (T is ColorAdc)
-            return colorAdc as T;
-        return value<T>();
-    }
-}
-
 
 class ColorAdcData extends DataTypeBase {
   ColorAdcData.Default() : super(
@@ -80,7 +61,7 @@ class ColorAdcData extends DataTypeBase {
 
   @override
   Data createMessage(bool logData, MetaWearBoardPrivate mwPrivate,
-      Uint8List data, DateTime timestamp, ClassToObject mapper) {
+      Uint8List data, DateTime timestamp, T Function<T>() apply) {
     ByteData byteData = ByteData.view(data.buffer);
 
     final ColorAdc wrapper = ColorAdc(
@@ -90,7 +71,10 @@ class ColorAdcData extends DataTypeBase {
         byteData.getInt16(6, Endian.little) & 0xffff
     );
 
-    return _DataPrivate(wrapper, timestamp, data, mapper);
+    return DataPrivate2(timestamp, data, apply, () => 1.0, <T>() {
+      if (T is ColorAdc)
+        return wrapper as T;
+    });
   }
 
   @override
@@ -123,126 +107,135 @@ class ColorAdcData extends DataTypeBase {
 
 }
 
-class _ConfigEditor extends ConfigEditor{
-    int aTime= 0xff;
-    Gain _gain= Gain.TCS34725_1X;
-    int illuminate= 0;
-    final MetaWearBoardPrivate _mwPrivate;
+class _ConfigEditor extends ConfigEditor {
+  int aTime = 0xff;
+  Gain _gain = Gain.TCS34725_1X;
+  int illuminate = 0;
+  final MetaWearBoardPrivate _mwPrivate;
 
   _ConfigEditor(this._mwPrivate);
 
 
-    @override
-    ConfigEditor integrationTime(double time) {
-        aTime = (256.0 - time / 2.4).floor();
-        return this;
-    }
+  @override
+  ConfigEditor integrationTime(double time) {
+    aTime = (256.0 - time / 2.4).floor();
+    return this;
+  }
 
-    @override
-    ConfigEditor gain(Gain gain) {
-        this._gain = gain;
-        return this;
-    }
+  @override
+  ConfigEditor gain(Gain gain) {
+    this._gain = gain;
+    return this;
+  }
 
-    @override
-    ConfigEditor enableIlluminatorLed() {
-        illuminate= 1;
-        return this;
-    }
+  @override
+  ConfigEditor enableIlluminatorLed() {
+    illuminate = 1;
+    return this;
+  }
 
-    @override
-    void commit() {
-        _mwPrivate.sendCommand(Uint8List.fromList([ModuleType.COLOR_DETECTOR.id, ColorTcs34725Impl.MODE, aTime, _gain.index, illuminate]));
-    }
+  @override
+  void commit() {
+    _mwPrivate.sendCommand(Uint8List.fromList([
+      ModuleType.COLOR_DETECTOR.id,
+      ColorTcs34725Impl.MODE,
+      aTime,
+      _gain.index,
+      illuminate
+    ]));
+  }
 }
 
-class _ColorAdcDataProducer extends ColorAdcDataProducer{
-    final MetaWearBoardPrivate _mwPrivate;
+class _ColorAdcDataProducer extends ColorAdcDataProducer {
+  final MetaWearBoardPrivate _mwPrivate;
 
   _ColorAdcDataProducer(this._mwPrivate);
-    @override
-    void read() {
-        _mwPrivate.lookupProducer(ColorTcs34725Impl.ADC_PRODUCER).read(_mwPrivate);
-    }
 
-    @override
-    String clearName() {
-        return ColorTcs34725Impl.ADC_CLEAR_PRODUCER;
-    }
+  @override
+  void read() {
+    _mwPrivate.lookupProducer(ColorTcs34725Impl.ADC_PRODUCER).read(_mwPrivate);
+  }
 
-    @override
-    String redName() {
-        return ColorTcs34725Impl.ADC_RED_PRODUCER;
-    }
+  @override
+  String clearName() {
+    return ColorTcs34725Impl.ADC_CLEAR_PRODUCER;
+  }
 
-    @override
-    String greenName() {
-        return ColorTcs34725Impl.ADC_GREEN_PRODUCER;
-    }
+  @override
+  String redName() {
+    return ColorTcs34725Impl.ADC_RED_PRODUCER;
+  }
 
-    @override
-    String blueName() {
-        return ColorTcs34725Impl.ADC_BLUE_PRODUCER;
-    }
+  @override
+  String greenName() {
+    return ColorTcs34725Impl.ADC_GREEN_PRODUCER;
+  }
 
-    @override
-    Future<Route> addRouteAsync(RouteBuilder builder) {
-        return _mwPrivate.queueRouteBuilder(builder, ColorTcs34725Impl.ADC_PRODUCER);
-    }
+  @override
+  String blueName() {
+    return ColorTcs34725Impl.ADC_BLUE_PRODUCER;
+  }
 
-    @override
-    String name() {
-        return ColorTcs34725Impl.ADC_PRODUCER;
-    }
+  @override
+  Future<Route> addRouteAsync(RouteBuilder builder) {
+    return _mwPrivate.queueRouteBuilder(
+        builder, ColorTcs34725Impl.ADC_PRODUCER);
+  }
 
+  @override
+  String name() {
+    return ColorTcs34725Impl.ADC_PRODUCER;
+  }
 }
 
 /**
  * Created by etsai on 9/19/16.
  */
 class ColorTcs34725Impl extends ModuleImplBase implements ColorTcs34725 {
-    static String createUri(DataTypeBase dataType) {
-        switch (Util.clearRead(dataType.eventConfig[1])) {
-            case ADC:
-                return dataType.attributes.length() > 2 ? "color" : sprintf("color[%d]", [dataType.attributes.offset >> 1]);
-            default:
-                return null;
-        }
+  static String createUri(DataTypeBase dataType) {
+    switch (Util.clearRead(dataType.eventConfig[1])) {
+      case ADC:
+        return dataType.attributes.length() > 2 ? "color" : sprintf(
+            "color[%d]", [dataType.attributes.offset >> 1]);
+      default:
+        return null;
     }
+  }
 
-    static const String ADC_PRODUCER= "com.mbientlab.metawear.impl.ColorTcs34725Impl.ADC_PRODUCER",
-            ADC_CLEAR_PRODUCER= "com.mbientlab.metawear.impl.ColorTcs34725Impl.ADC_CLEAR_PRODUCER",
-            ADC_RED_PRODUCER= "com.mbientlab.metawear.impl.ColorTcs34725Impl.ADC_RED_PRODUCER",
-            ADC_GREEN_PRODUCER= "com.mbientlab.metawear.impl.ColorTcs34725Impl.ADC_GREEN_PRODUCER",
-            ADC_BLUE_PRODUCER= "com.mbientlab.metawear.impl.ColorTcs34725Impl.ADC_BLUE_PRODUCER";
-    static const int ADC = 1, MODE = 2;
+  static const String ADC_PRODUCER = "com.mbientlab.metawear.impl.ColorTcs34725Impl.ADC_PRODUCER",
+      ADC_CLEAR_PRODUCER = "com.mbientlab.metawear.impl.ColorTcs34725Impl.ADC_CLEAR_PRODUCER",
+      ADC_RED_PRODUCER = "com.mbientlab.metawear.impl.ColorTcs34725Impl.ADC_RED_PRODUCER",
+      ADC_GREEN_PRODUCER = "com.mbientlab.metawear.impl.ColorTcs34725Impl.ADC_GREEN_PRODUCER",
+      ADC_BLUE_PRODUCER = "com.mbientlab.metawear.impl.ColorTcs34725Impl.ADC_BLUE_PRODUCER";
+  static const int ADC = 1,
+      MODE = 2;
 
-    static UintData createAdcUintDataProducer(int offset) {
-        return new UintData(ModuleType.COLOR_DETECTOR, Util.setSilentRead(ADC), DataAttributes(Uint8List.fromList([2]), 1, offset, true));
+  static UintData createAdcUintDataProducer(int offset) {
+    return new UintData(ModuleType.COLOR_DETECTOR, Util.setSilentRead(ADC),
+        DataAttributes(Uint8List.fromList([2]), 1, offset, true));
+  }
+
+  ColorAdcDataProducer adcProducer;
+
+  ColorTcs34725Impl(MetaWearBoardPrivate mwPrivate) : super(mwPrivate) {
+    DataTypeBase adcProducer = ColorAdcData.Default();
+    this.mwPrivate.tagProducer(ADC_PRODUCER, adcProducer);
+    this.mwPrivate.tagProducer(ADC_CLEAR_PRODUCER, adcProducer.split[0]);
+    this.mwPrivate.tagProducer(ADC_RED_PRODUCER, adcProducer.split[1]);
+    this.mwPrivate.tagProducer(ADC_GREEN_PRODUCER, adcProducer.split[2]);
+    this.mwPrivate.tagProducer(ADC_BLUE_PRODUCER, adcProducer.split[3]);
+  }
+
+  @override
+  ConfigEditor configure() {
+    return _ConfigEditor(mwPrivate);
+  }
+
+  @override
+  ColorAdcDataProducer adc() {
+    if (adcProducer == null) {
+      adcProducer = _ColorAdcDataProducer(mwPrivate);
     }
-
-    ColorAdcDataProducer adcProducer;
-
-    ColorTcs34725Impl(MetaWearBoardPrivate mwPrivate): super(mwPrivate){
-
-        DataTypeBase adcProducer = ColorAdcData.Default();
-        this.mwPrivate.tagProducer(ADC_PRODUCER, adcProducer);
-        this.mwPrivate.tagProducer(ADC_CLEAR_PRODUCER, adcProducer.split[0]);
-        this.mwPrivate.tagProducer(ADC_RED_PRODUCER, adcProducer.split[1]);
-        this.mwPrivate.tagProducer(ADC_GREEN_PRODUCER, adcProducer.split[2]);
-        this.mwPrivate.tagProducer(ADC_BLUE_PRODUCER, adcProducer.split[3]);
-    }
-
-    @override
-    ConfigEditor configure() {
-        return _ConfigEditor(mwPrivate);
-    }
-
-    @override
-    ColorAdcDataProducer adc() {
-        if (adcProducer == null) {
-            adcProducer = _ColorAdcDataProducer(mwPrivate);
-        }
-        return adcProducer;
-    }
+    return adcProducer;
+  }
 }

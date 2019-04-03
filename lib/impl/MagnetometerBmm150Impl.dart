@@ -22,26 +22,106 @@
  * hello@mbientlab.com.
  */
 
-private static class Bmm150SFloatData extends SFloatData {
-  private static final long serialVersionUID = 3109599023484783057L;
+import 'package:flutter_metawear/Data.dart';
+import 'package:flutter_metawear/data/MagneticField.dart';
+import 'package:flutter_metawear/impl/DataPrivate.dart';
+import 'package:flutter_metawear/impl/FloatVectorData.dart';
+import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
+import 'package:flutter_metawear/impl/ModuleImplBase.dart';
+import 'package:flutter_metawear/impl/SFloatData.dart';
+import 'package:flutter_metawear/impl/ModuleType.dart';
+import 'package:flutter_metawear/impl/DataAttributes.dart';
+import 'package:flutter_metawear/impl/DataTypeBase.dart';
+import 'dart:typed_data';
 
-  Bmm150SFloatData(byte offset) {
-    super(MAGNETOMETER, MAG_DATA, new DataAttributes(new byte[] {2}, (byte) 1, offset, true));
-  }
+import 'package:flutter_metawear/module/MagnetometerBmm150.dart';
 
-  Bmm150SFloatData(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
-    super(input, module, register, id, attributes);
+class Bmm150SFloatData extends SFloatData {
+  Bmm150SFloatData.offset(int offset): super(ModuleType.MAGNETOMETER, MagnetometerBmm150Impl.MAG_DATA, new DataAttributes(Uint8List.fromList([2]),1, offset, true));
+
+  Bmm150SFloatData(DataTypeBase input, ModuleType module, int register, int id, DataAttributes attributes): super(module, register, attributes,input:input,id:id);
+
+
+  @override
+  double scale(MetaWearBoardPrivate mwPrivate) {
+    return 16000000;
   }
 
   @override
-  protected float scale(MetaWearBoardPrivate mwPrivate) {
-    return 16000000.f;
-  }
-
-  @override
-  DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
+  DataTypeBase copy(DataTypeBase input, ModuleType module, int register, int id, DataAttributes attributes) {
     return new Bmm150SFloatData(input, module, register, id, attributes);
   }
+}
+
+class Bmm150CartesianFloatData extends FloatVectorData {
+
+
+    Bmm150CartesianFloatData.register([int register = MagnetometerBmm150Impl.MAG_DATA, int copies = 1]): super(ModuleType.MAGNETOMETER, register, new DataAttributes(Uint8List.fromList([2, 2, 2]), copies, 0, true));
+
+
+    Bmm150CartesianFloatData(DataTypeBase input, ModuleType module, int register, int id, DataAttributes attributes): super(module, register, attributes,id:id,input:input);
+
+
+    @override
+    double scale(MetaWearBoardPrivate mwPrivate) {
+        return 16000000.0;
+    }
+
+    @override
+    DataTypeBase copy(DataTypeBase input, ModuleType module, int register, int id, DataAttributes attributes) {
+        return new Bmm150CartesianFloatData(input, module, register, id, attributes);
+    }
+
+    @override
+    List<DataTypeBase> createSplits() {
+        return [new Bmm150SFloatData.offset(0), new Bmm150SFloatData.offset(2), new Bmm150SFloatData.offset(4)];
+        }
+
+    @override
+    Data createMessage(bool logData, MetaWearBoardPrivate mwPrivate, Uint8List data, DateTime timestamp, dynamic apply(Type target)) {
+        ByteData view = ByteData.view(data.buffer);
+        List<int> unscaled = [view.getInt16(0,Endian.little),view.getInt16(2,Endian.little),view.getInt16(4,Endian.little)];
+        final double scale = this.scale(mwPrivate);
+        final MagneticField value = MagneticField(unscaled[0]/scale,unscaled[1]/scale,unscaled[2]/scale);
+
+
+
+
+
+
+//        ByteBuffer buffer = ByteBuffer.wrap(data).order(
+//            ByteOrder.LITTLE_ENDIAN);
+//        short[] unscaled = new short[]
+//        {
+//            buffer.getShort()
+//        , buffer.getShort(), buffer.getShort()};
+//        final float scale= scale(mwPrivate);
+//        final MagneticField value= new MagneticField(unscaled[0] / scale, unscaled[1] / scale, unscaled[2] / scale);
+        return null;
+
+    }
+
+//    return new DataPrivate(timestamp, data, mapper) {
+//        @override
+//        float scale() {
+//            return scale;
+//        }
+//
+//        @override
+//        Class<?>[] types() {
+//        return new Class<?>[] {MagneticField.class, float[].class};
+//        }
+//
+//        @override
+//        <T> T value(Class<T> clazz) {
+//        if (clazz == MagneticField.class) {
+//        return clazz.cast(value);
+//        } else if (clazz.equals(float[].class)) {
+//        return clazz.cast(new float[] {value.x(), value.y(), value.z()});
+//        }
+//        return super.value(clazz);
+//        }
+//    };
 }
 
 /**
@@ -69,66 +149,7 @@ class MagnetometerBmm150Impl extends ModuleImplBase implements MagnetometerBmm15
         DATA_INTERRUPT_ENABLE = 2, DATA_RATE = 3, DATA_REPETITIONS = 4, MAG_DATA = 5,
         PACKED_MAG_DATA = 0x09;
 
-    private static class Bmm150CartesianFloatData extends FloatVectorData {
-        private static final long serialVersionUID = -1411571904651005619L;
 
-        Bmm150CartesianFloatData() {
-            this(MAG_DATA, (byte) 1);
-        }
-
-        Bmm150CartesianFloatData(byte register, byte copies) {
-            super(MAGNETOMETER, register, new DataAttributes(new byte[] {2, 2, 2}, copies, (byte) 0, true));
-        }
-
-        Bmm150CartesianFloatData(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
-            super(input, module, register, id, attributes);
-        }
-
-        @override
-        protected float scale(MetaWearBoardPrivate mwPrivate) {
-            return 16000000.f;
-        }
-
-        @override
-        DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
-            return new Bmm150CartesianFloatData(input, module, register, id, attributes);
-        }
-
-        @override
-        DataTypeBase[] createSplits() {
-            return new DataTypeBase[] {new Bmm150SFloatData((byte) 0), new Bmm150SFloatData((byte) 2), new Bmm150SFloatData((byte) 4)};
-        }
-
-        @override
-        Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, final byte[] data, final Calendar timestamp, DataPrivate.ClassToObject mapper) {
-            ByteBuffer buffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN);
-            short[] unscaled = new short[]{buffer.getShort(), buffer.getShort(), buffer.getShort()};
-            final float scale= scale(mwPrivate);
-            final MagneticField value= new MagneticField(unscaled[0] / scale, unscaled[1] / scale, unscaled[2] / scale);
-
-            return new DataPrivate(timestamp, data, mapper) {
-                @override
-                float scale() {
-                    return scale;
-                }
-
-                @override
-                Class<?>[] types() {
-                    return new Class<?>[] {MagneticField.class, float[].class};
-                }
-
-                @override
-                <T> T value(Class<T> clazz) {
-                    if (clazz == MagneticField.class) {
-                        return clazz.cast(value);
-                    } else if (clazz.equals(float[].class)) {
-                        return clazz.cast(new float[] {value.x(), value.y(), value.z()});
-                    }
-                    return super.value(clazz);
-                }
-            };
-        }
-    }
 
     private transient AsyncDataProducer bfield, packedBfield;
 

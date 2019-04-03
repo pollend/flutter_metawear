@@ -29,32 +29,33 @@ import 'package:flutter_metawear/module/BarometerBosch.dart' as BarometerBosch;
  */
 class StandbyTime {
     /** 0.5ms */
-    static const TIME_0_5 = StandbyTime._(0.5);
+    static const TIME_0_5 = StandbyTime._(0.5,0);
 
     /** 62.5ms */
-    static const TIME_62_5 = StandbyTime._(62.5);
+    static const TIME_62_5 = StandbyTime._(62.5,1);
 
     /** 125ms */
-    static const TIME_125 = StandbyTime._(125);
+    static const TIME_125 = StandbyTime._(125,2);
 
     /** 250ms */
-    static const TIME_250 = StandbyTime._(250);
+    static const TIME_250 = StandbyTime._(250,3);
 
     /** 500ms */
-    static const TIME_500 = StandbyTime._(500);
+    static const TIME_500 = StandbyTime._(500,4);
 
     /** 1000ms */
-    static const TIME_1000 = StandbyTime._(1000);
+    static const TIME_1000 = StandbyTime._(1000,5);
 
     /** 2000ms */
-    static const TIME_2000 = StandbyTime._(2000);
+    static const TIME_2000 = StandbyTime._(2000,6);
 
     /** 4000ms */
-    static const TIME_4000 = StandbyTime._(4000);
+    static const TIME_4000 = StandbyTime._(4000,7);
 
     final double time;
+    final int index;
 
-    const StandbyTime._(this.time);
+    const StandbyTime._(this.time,this.index);
 
     static List<StandbyTime> _entries = [
         TIME_0_5,
@@ -90,7 +91,7 @@ ConfigEditor standbyTime(StandbyTime time);
  * the BMP280 pressure sensor
  * @author Eric Tsai
  */
-abstract class BarometerBmp280 extends BarometerBosch.BarometerBosch<ConfigEditor> {
+abstract class BarometerBmp280 extends BarometerBosch.BarometerBosch {
 
 
     /**

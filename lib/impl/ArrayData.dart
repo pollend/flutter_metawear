@@ -34,36 +34,6 @@ import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
 import 'package:flutter_metawear/impl/ModuleType.dart';
 import 'package:flutter_metawear/module/DataProcessor.dart';
 
-class _DataPrivate extends DataPrivate {
-    final ArrayData _arrayData;
-    final MetaWearBoardPrivate _mwPrivate;
-    final List<Data> _unwrappedData;
-
-    _DataPrivate(this._unwrappedData, this._mwPrivate, this._arrayData,
-        DateTime timestamp, Uint8List dataBytes, ClassToObject mapper)
-        : super(timestamp, dataBytes, mapper);
-
-    @override
-    List<Type> types() {
-        return [List];
-    }
-
-    @override
-    double scale() {
-        // TODO: implement scale
-        return _arrayData.scale(_mwPrivate);
-    }
-
-    @override
-    T value<T>() {
-        if (T is List<Data>) {
-            return _unwrappedData as T;
-        }
-        return super.value<T>();
-    }
-
-}
-
 class ArrayData extends DataTypeBase {
     ArrayData(ModuleType module, int register, DataAttributes attributes,
         {int id, DataTypeBase input})
@@ -83,7 +53,7 @@ class ArrayData extends DataTypeBase {
 
     @override
     Data createMessage(bool logData, MetaWearBoardPrivate mwPrivate,
-        Uint8List data, DateTime timestamp, ClassToObject mapper) {
+        Uint8List data, DateTime timestamp, T Function<T>() apply) {
         DataProcessorImpl dpModules = mwPrivate.getModules()[DataProcessor];
         Processor fuser = dpModules.activeProcessors[eventConfig[2]];
 
@@ -98,7 +68,7 @@ class ArrayData extends DataTypeBase {
         final List<Data> unwrappedData = List<Data>(
             fuser.editor.config.length + 1);
         unwrappedData[0] =
-            source.createMessage(logData, mwPrivate, data, timestamp, mapper);
+            source.createMessage(logData, mwPrivate, data, timestamp, apply);
         offset += source.attributes.length();
 
         for (int i = 2; i < fuser.editor.config.length; i++) {
@@ -109,13 +79,18 @@ class ArrayData extends DataTypeBase {
 
             portion.setAll(0, data.skip(offset));
             unwrappedData[i - 1] = value.state.createMessage(
-                logData, mwPrivate, portion, timestamp, mapper);
+                logData, mwPrivate, portion, timestamp, apply);
 
             offset += value.state.attributes.length();
             i++;
         }
 
-        return _DataPrivate(
-            unwrappedData, mwPrivate, this, timestamp, data, mapper);
+        return DataPrivate2(
+            timestamp, data, apply, () => this.scale(mwPrivate), <T>() {
+            if (T is List<Data>) {
+                return unwrappedData as T;
+            }
+            throw CastError();
+        });
     }
 }

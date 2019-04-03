@@ -397,7 +397,7 @@ abstract class SensorFusionBosch implements Module, Configurable<ConfigEditor> {
      * @param updateHandler     Handler for calibration state updates
      * @return Task containing the calibration data
      */
-    Future<CalibrationData> calibrate(bool cancel(),{void updateHandler(CalibrationState state), int pollingPeriod});
+    Future<CalibrationData> calibrate({void updateHandler(CalibrationState state), int pollingPeriod});
 
 //    CancellationToken ct,
 

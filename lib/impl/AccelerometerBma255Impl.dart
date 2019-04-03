@@ -27,15 +27,59 @@ import 'dart:typed_data';
 import 'package:flutter_metawear/AsyncDataProducer.dart';
 import 'package:flutter_metawear/impl/AccelerometerBoschImpl.dart';
 import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
-import 'package:flutter_metawear/impl/platform/TimedTask.dart';
-import 'package:flutter_metawear/module/AccelerometerBma255.dart';
+import 'package:flutter_metawear/module/AccelerometerBma255.dart' as AccelerometerBma255;
+
+class _ConfigEditor extends AccelerometerBma255.ConfigEditor{
+    OutputDataRate odr= OutputDataRate.ODR_125HZ;
+    AccRange ar= AccRange.AR_2G;
+
+    @override
+     AccelerometerBma255.ConfigEditor odr(OutputDataRate odr) {
+        this.odr= odr;
+        return this;
+    }
+
+    @override
+     AccelerometerBma255.ConfigEditor range(AccRange ar) {
+        this.ar= ar;
+        return this;
+    }
+
+    @override
+     AccelerometerBma255.ConfigEditor odr(float odr) {
+        List<double> frequencies= OutputDataRate.frequencies();
+        int pos= Util.closestIndex(frequencies, odr);
+
+        return odr(OutputDataRate.values()[pos]);
+    }
+
+    @override
+     AccelerometerBma255.ConfigEditor range(float fsr) {
+        float[] ranges= AccRange.ranges();
+        int pos= Util.closestIndex(ranges, fsr);
+
+        return range(AccRange.values()[pos]);
+    }
+
+    @override
+    void commit() {
+        accDataConfig[0]&= 0xe0;
+        accDataConfig[0]|= odr.ordinal() + 8;
+
+        accDataConfig[1]&= 0xf0;
+        accDataConfig[1]|= ar.bitmask;
+
+        mwPrivate.sendCommand(ACCELEROMETER, DATA_CONFIG, accDataConfig);
+    }
+}
 
 /**
  * Created by etsai on 9/1/16.
  */
 class AccelerometerBma255Impl extends AccelerometerBoschImpl implements AccelerometerBma255 {
-    static final int IMPLEMENTATION= 0x3;
-    static final Uint8List DEFAULT_MOTION_CONFIG = Uint8List.fromList([0x00, 0x14, 0x14]);
+
+    static const int IMPLEMENTATION = 0x3;
+    static Uint8List DEFAULT_MOTION_CONFIG = Uint8List.fromList([0x00, 0x14, 0x14]);
 
     static final Uint8List accDataConfig= Uint8List.fromList([0x0b, 0x03]);
 
@@ -53,22 +97,22 @@ class AccelerometerBma255Impl extends AccelerometerBoschImpl implements Accelero
     }
 
     @override
-    protected float getAccDataScale() {
+     float getAccDataScale() {
         return AccRange.bitMaskToRange((byte) (accDataConfig[1] & 0xf)).scale;
     }
 
     @override
-    protected int getSelectedAccRange() {
+     int getSelectedAccRange() {
         return AccRange.bitMaskToRange((byte) (accDataConfig[1] & 0xf)).ordinal();
     }
 
     @override
-    protected int getMaxOrientHys() {
+     int getMaxOrientHys() {
         return 0x7;
     }
 
     @override
-    public AccelerometerBma255.ConfigEditor configure() {
+    AccelerometerBma255.ConfigEditor configure() {
         return new AccelerometerBma255.ConfigEditor() {
             private OutputDataRate odr= OutputDataRate.ODR_125HZ;
             private AccRange ar= AccRange.AR_2G;
