@@ -30,14 +30,14 @@ import 'package:flutter_metawear/module/Gsr.dart';
 import 'package:flutter_metawear/ForcedDataProducer.dart';
 import 'package:flutter_metawear/impl/ModuleType.dart';
 import 'package:flutter_metawear/impl/UintData.dart';
-
-
+import 'dart:typed_data';
+import 'package:sprintf/sprintf.dart';
 class Channel implements ForcedDataProducer{
     final int id;
     MetaWearBoardPrivate mwPrivate;
 
     Channel(this.id,this.mwPrivate) {
-        mwPrivate.tagProducer(name(), new UintData(ModuleType.GSR, Util.setSilentRead(CONDUCTANCE), id, new DataAttributes(new byte[] {4}, (byte) 1, (byte) 0, false)));
+        mwPrivate.tagProducer(new UintData(ModuleType.GSR, Util.setSilentRead(CONDUCTANCE), new DataAttributes(Uint8List.FromList([4]), 1, 0, false),id: id,input: name()));
     }
 
     void restoreTransientVariables(MetaWearBoardPrivate mwPrivate) {
@@ -56,7 +56,7 @@ class Channel implements ForcedDataProducer{
 
     @override
     String name() {
-        return String.format(Locale.US, CONDUCTANCE_PRODUCER_FORMAT, id);
+        return sprintf(GsrImpl.CONDUCTANCE_PRODUCER_FORMAT, id);
     }
 }
 
@@ -66,39 +66,8 @@ class Channel implements ForcedDataProducer{
 class GsrImpl extends ModuleImplBase implements Gsr {
     static const String CONDUCTANCE_PRODUCER_FORMAT= "com.mbientlab.metawear.impl.GsrImpl.CONDUCTANCE_PRODUCER_%d";
     static const  int CONDUCTANCE = 0x1, CALIBRATE = 0x2, CONFIG= 0x3;
+    final List<Channel> conductanceChannels;
 
-    private static class Channel implements ForcedDataProducer, Serializable {
-
-        private final byte id;
-        private transient MetaWearBoardPrivate mwPrivate;
-
-        Channel(byte id, MetaWearBoardPrivate mwPrivate) {
-            this.id= id;
-            this.mwPrivate = mwPrivate;
-            mwPrivate.tagProducer(name(), new UintData(GSR, Util.setSilentRead(CONDUCTANCE), id, new DataAttributes(new byte[] {4}, (byte) 1, (byte) 0, false)));
-        }
-
-        void restoreTransientVariables(MetaWearBoardPrivate mwPrivate) {
-            this.mwPrivate = mwPrivate;
-        }
-
-        @override
-        public void read() {
-            mwPrivate.lookupProducer(name()).read(mwPrivate);
-        }
-
-        @override
-        public Task<Route> addRouteAsync(RouteBuilder builder) {
-            return mwPrivate.queueRouteBuilder(builder, name());
-        }
-
-        @override
-        public String name() {
-            return String.format(Locale.US, CONDUCTANCE_PRODUCER_FORMAT, id);
-        }
-    }
-
-    private final Channel[] conductanceChannels;
     GsrImpl(MetaWearBoardPrivate mwPrivate) {
         super(mwPrivate);
 
@@ -110,7 +79,7 @@ class GsrImpl extends ModuleImplBase implements Gsr {
     }
 
     @override
-    public void restoreTransientVars(MetaWearBoardPrivate mwPrivate) {
+    void restoreTransientVars(MetaWearBoardPrivate mwPrivate) {
         super.restoreTransientVars(mwPrivate);
 
         for(Channel it: conductanceChannels) {
@@ -119,37 +88,37 @@ class GsrImpl extends ModuleImplBase implements Gsr {
     }
 
     @override
-    public ConfigEditor configure() {
+    ConfigEditor configure() {
         return new ConfigEditor() {
             private ConstantVoltage newCv= ConstantVoltage.CV_500MV;
             private Gain newGain= Gain.GSR_499K;
 
             @override
-            public ConfigEditor constantVoltage(ConstantVoltage cv) {
+            ConfigEditor constantVoltage(ConstantVoltage cv) {
                 newCv= cv;
                 return this;
             }
 
             @override
-            public ConfigEditor gain(Gain gain) {
+            ConfigEditor gain(Gain gain) {
                 newGain= gain;
                 return this;
             }
 
             @override
-            public void commit() {
+            void commit() {
                 mwPrivate.sendCommand(GSR, CONFIG, new byte[] {(byte) newCv.ordinal(), (byte) newGain.ordinal()});
             }
         };
     }
 
     @override
-    public Channel[] channels() {
+    Channel[] channels() {
         return conductanceChannels;
     }
 
     @override
-    public void calibrate() {
+    void calibrate() {
         mwPrivate.sendCommand(new byte[] {GSR.id, CALIBRATE});
     }
 }

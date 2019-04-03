@@ -22,109 +22,117 @@
  * hello@mbientlab.com.
  */
 
+import 'dart:async';
+import 'dart:collection';
 import 'dart:typed_data';
 
 import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
 import 'package:flutter_metawear/impl/ModuleImplBase.dart';
 import 'package:flutter_metawear/module/Macro.dart';
+import 'package:flutter_metawear/impl/ModuleType.dart';
+import 'package:tuple/tuple.dart';
 
 /**
  * Created by etsai on 11/30/16.
  */
 class MacroImpl extends ModuleImplBase implements Macro {
-    static const int WRITE_MACRO_DELAY = 2000;
+    static const Duration WRITE_MACRO_DELAY = Duration(seconds: 2);
     static const int ENABLE = 0x1,
             BEGIN = 0x2, ADD_COMMAND = 0x3, END = 0x4,
             EXECUTE = 0x5, NOTIFY_ENABLE = 0x6, NOTIFY = 0x7,
             ERASE_ALL = 0x8,
             ADD_PARTIAL = 0x9;
 
-    bool isRecording= false;
+    bool _isRecording= false;
     Queue<Uint8List> commands;
     bool execOnBoot;
-    TimedTask<Byte> startMacroTask;
+    StreamController<int> _streamController;
+
 
     MacroImpl(MetaWearBoardPrivate mwPrivate): super(mwPrivate);
 
 
     @override
     void init() {
-        startMacroTask = new TimedTask<>();
-        this.mwPrivate.addResponseHandler(new Pair<>(MACRO.id, BEGIN), response -> startMacroTask.setResult(response[2]));
+        this.mwPrivate.addResponseHandler(Tuple2(ModuleType.MACRO.id, BEGIN), (Uint8List response) => _streamController.add(response[2]));
     }
 
     @override
-    void startRecord() {
-        startRecord(true);
-    }
-
-    @override
-    void startRecord(bool execOnBoot) {
-        isRecording = true;
-        commands = new LinkedList<>();
+    void startRecord([bool execOnBoot = true]) {
+        _isRecording = true;
+        commands = Queue();
         this.execOnBoot = execOnBoot;
     }
 
     @override
-    Task<Byte> endRecordAsync() {
-        isRecording = false;
-        return Task.delay(WRITE_MACRO_DELAY).onSuccessTask(ignored ->
-                startMacroTask.execute("Did not received macro id within %dms", Constant.RESPONSE_TIMEOUT,
-                        () -> mwPrivate.sendCommand(new byte[] {MACRO.id, BEGIN, (byte) (this.execOnBoot ? 1 : 0)})
-                )
-        ).onSuccessTask(task -> {
-            while(!commands.isEmpty()) {
-                for(byte[] converted: convertToMacroCommand(commands.poll())) {
-                    mwPrivate.sendCommand(converted);
-                }
-            }
-            mwPrivate.sendCommand(new byte[] {MACRO.id, END});
+    Future<int> endRecordAsync() async {
+        _isRecording = false;
+        Stream<int> stream = _streamController.stream.timeout(
+            ModuleType.RESPONSE_TIMEOUT);
+        StreamIterator<int> iterator = StreamIterator(stream);
 
-            return task;
-        });
+
+        TimeoutException exception = TimeoutException(
+            "Did not received macro id", MacroImpl.WRITE_MACRO_DELAY);
+        mwPrivate.sendCommand(Uint8List.fromList(
+            [ModuleType.MACRO.id, BEGIN, (this.execOnBoot ? 1 : 0)]));
+        if (await iterator.moveNext().catchError((e) => throw exception,
+            test: (e) => e is TimeoutException) == false)
+            throw exception;
+
+        while (commands.isNotEmpty) {
+            for (Uint8List converted in convertToMacroCommand(
+                commands.removeLast())) {
+                mwPrivate.sendCommand(converted);
+            }
+        }
+        mwPrivate.sendCommand(Uint8List.fromList([ModuleType.MACRO.id, END]));
+        int result = iterator.current;
+        await iterator.cancel();
+        return result;
     }
 
     @override
-    void execute(byte id) {
-        mwPrivate.sendCommand(new byte[] {MACRO.id, EXECUTE, id});
+    void execute(int id) {
+        mwPrivate.sendCommand(Uint8List.fromList([ModuleType.MACRO.id, EXECUTE, id]));
     }
 
     @override
     void eraseAll() {
-        mwPrivate.sendCommand(new byte[] {MACRO.id, ERASE_ALL});
+        mwPrivate.sendCommand(Uint8List.fromList([ModuleType.MACRO.id, ERASE_ALL]));
     }
 
-    void collectCommand(byte[] command) {
+    void collectCommand(Uint8List command) {
         commands.add(command);
     }
 
     bool isRecording() {
-        return isRecording;
+        return _isRecording;
     }
 
     List<Uint8List> convertToMacroCommand(Uint8List command) {
-        if (command.length >= Constant.COMMAND_LENGTH) {
-            byte[][] macroCmds = new byte[2][];
+        if (command.length >= ModuleType.COMMAND_LENGTH) {
+            List<Uint8List> macroCmds = List(2);
 
-            final byte PARTIAL_LENGTH= 2;
-            macroCmds[0]= new byte[PARTIAL_LENGTH + 2];
-            macroCmds[0][0]= MACRO.id;
-            macroCmds[0][1]= ADD_PARTIAL;
-            System.arraycopy(command, 0, macroCmds[0], 2, PARTIAL_LENGTH);
+            final int PARTIAL_LENGTH= 2;
+            macroCmds[0] = Uint8List(PARTIAL_LENGTH + 2);
+            macroCmds[0][0] = ModuleType.MACRO.id;
+            macroCmds[0][1] = ADD_PARTIAL;
+            macroCmds[0].setAll(2,command);
 
-            macroCmds[1]= new byte[command.length - PARTIAL_LENGTH + 2];
-            macroCmds[1][0]= MACRO.id;
-            macroCmds[1][1]= ADD_COMMAND;
-            System.arraycopy(command, PARTIAL_LENGTH, macroCmds[1], 2, macroCmds[1].length - 2);
+
+            macroCmds[1] = Uint8List(command.length - PARTIAL_LENGTH + 2);
+            macroCmds[1][0] = ModuleType.MACRO.id;
+            macroCmds[1][1] = ADD_COMMAND;
+            macroCmds[1].setAll(2,command.skip(PARTIAL_LENGTH));
 
             return macroCmds;
         } else {
-            byte[][] macroCmds = new byte[1][];
-            macroCmds[0]= new byte[command.length + 2];
-            macroCmds[0][0]= MACRO.id;
+            List<Uint8List> macroCmds = List(1);
+            macroCmds[0]= Uint8List(command.length + 2);
+            macroCmds[0][0]= ModuleType.MACRO.id;
             macroCmds[0][1]= ADD_COMMAND;
-            System.arraycopy(command, 0, macroCmds[0], 2, command.length);
-
+            macroCmds[0].setAll(2, command);
             return macroCmds;
         }
     }

@@ -118,7 +118,7 @@ class SettingsImpl extends ModuleImplBase implements Settings {
         CHARGE_STATUS = 0x12;
 
 
-    private final DataTypeBase disconnectDummyProducer;
+    final DataTypeBase disconnectDummyProducer;
 
     private transient ActiveDataProducer powerStatus, chargeStatus;
     private transient TimedTask<byte[]> readConnParamsTask, readAdConfigTask;

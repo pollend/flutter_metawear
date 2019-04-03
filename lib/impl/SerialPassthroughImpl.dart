@@ -22,27 +22,34 @@
  * hello@mbientlab.com.
  */
 
+
+
 import 'package:flutter_metawear/impl/ByteArrayData.dart';
+import 'package:flutter_metawear/impl/ModuleType.dart';
+import 'package:flutter_metawear/impl/DataAttributes.dart';
+import 'package:flutter_metawear/impl/DataTypeBase.dart';
+import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
+import 'package:flutter_metawear/module/SerialPassthrough.dart';
+import 'dart:typed_data';
 
 class SerialPassthroughData extends ByteArrayData {
 
-    SerialPassthroughData(int register, int id, int length): super() {
-        super(SERIAL_PASSTHROUGH, register, id, new DataAttributes(new byte[] {length}, (byte) 1, (byte) 0, false));
-    }
+    SerialPassthroughData.Default(int register, int id, int length): super(ModuleType.SERIAL_PASSTHROUGH, register, new DataAttributes(Uint8List.fromList([length]), 1, 0, false),id:id);
 
-    SerialPassthroughData(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
-        super(input, module, register, id, attributes);
-    }
+
+    SerialPassthroughData(DataTypeBase input, ModuleType module, int register, int id, DataAttributes attributes):super(module, register, attributes,input:input,id:id);
+
 
     DataTypeBase dataProcessorCopy(DataTypeBase input, DataAttributes attributes) {
-        return new ByteArrayData(input, DATA_PROCESSOR, DataProcessorImpl.NOTIFY, NO_DATA_ID, attributes);
+        return new ByteArrayData(ModuleType.DATA_PROCESSOR, DataProcessorImpl.NOTIFY, attributes,input: input,id: NO_DATA_ID);
     }
+
     DataTypeBase dataProcessorStateCopy(DataTypeBase input, DataAttributes attributes) {
-        return new ByteArrayData(input, DATA_PROCESSOR, Util.setSilentRead(DataProcessorImpl.STATE), NO_DATA_ID, attributes);
+        return new ByteArrayData(input, ModuleType.DATA_PROCESSOR, Util.setSilentRead(DataProcessorImpl.STATE), NO_DATA_ID, attributes);
     }
 
     @override
-    DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
+    DataTypeBase copy(DataTypeBase input, ModuleType module, int register, int id, DataAttributes attributes) {
         return new SerialPassthroughData(input, module, register, id, attributes);
     }
 
@@ -58,6 +65,148 @@ class SerialPassthroughData extends ByteArrayData {
     System.arraycopy(parameters, 0, command, 2, parameters.length);
 
     mwPrivate.sendCommand(command);
+    }
+}
+
+
+class I2cInner implements I2C{
+    final int id;
+    MetaWearBoardPrivate mwPrivate;
+
+    I2cInner(this.id, int length, this.mwPrivate) {
+        mwPrivate.tagProducer(name(), new SerialPassthroughData(Util.setSilentRead(I2C_RW), id, length));
+    }
+
+    void restoreTransientVars(MetaWearBoardPrivate mwPrivate) {
+        this.mwPrivate = mwPrivate;
+    }
+
+    @override
+    void read(int deviceAddr, int registerAddr) {
+        DataTypeBase i2cProducer= mwPrivate.lookupProducer(name());
+        i2cProducer.read(mwPrivate, Uint8List.fromList([deviceAddr, registerAddr, id, i2cProducer.attributes.length()]);
+    }
+
+    @override
+    Future<Route> addRouteAsync(RouteBuilder builder) {
+        return mwPrivate.queueRouteBuilder(builder, name());
+    }
+
+    @override
+    String name() {
+        return String.format(Locale.US, I2C_PRODUCER_FORMAT, id);
+    }
+}
+class SpiInner implements SPI, Serializable {
+    private static final long serialVersionUID = -1781850442398737602L;
+
+    private final byte id;
+    transient MetaWearBoardPrivate mwPrivate;
+
+    SpiInner(byte id, byte length, MetaWearBoardPrivate mwPrivate) {
+        this.id= id;
+        this.mwPrivate = mwPrivate;
+
+        mwPrivate.tagProducer(name(), new SerialPassthroughData(Util.setSilentRead(SPI_RW), id, length));
+    }
+
+    void restoreTransientVars(MetaWearBoardPrivate mwPrivate) {
+        this.mwPrivate = mwPrivate;
+    }
+
+    @override
+    SpiParameterBuilder<Void> read() {
+        final DataTypeBase spiProducer= mwPrivate.lookupProducer(name());
+        return new SpiParameterBuilderInner<Void>((byte) ((spiProducer.attributes.length() - 1) | (id << 4))) {
+            @override
+            Void commit() {
+                spiProducer.read(mwPrivate, config);
+                return null;
+            }
+        };
+    }
+
+    @override
+    Task<Route> addRouteAsync(RouteBuilder builder) {
+        return mwPrivate.queueRouteBuilder(builder, name());
+    }
+
+    @override
+    String name() {
+        return String.format(Locale.US, SPI_PRODUCER_FORMAT, id);
+    }
+}
+
+class SpiParameterBuilderInner<T> implements SpiParameterBuilder<T> {
+    final byte originalLength;
+    byte[] config;
+
+    SpiParameterBuilderInner() {
+        this.originalLength = 5;
+        this.config= new byte[this.originalLength];
+    }
+
+    SpiParameterBuilderInner(byte fifthValue) {
+        this.originalLength = 6;
+        this.config= new byte[this.originalLength];
+        config[5] = fifthValue;
+    }
+
+    @override
+    SpiParameterBuilder<T> data(byte[] data) {
+    byte[] copy = new byte[config.length + data.length];
+    System.arraycopy(config, 0, copy, 0, this.originalLength);
+    System.arraycopy(data, 0, copy, this.originalLength, data.length);
+    config = copy;
+    return this;
+    }
+
+    @override
+    SpiParameterBuilder<T> slaveSelectPin(byte pin) {
+        config[0]= pin;
+        return this;
+    }
+
+    @override
+    SpiParameterBuilder<T> clockPin(byte pin) {
+        config[1]= pin;
+        return this;
+    }
+
+    @override
+    SpiParameterBuilder<T> mosiPin(byte pin) {
+        config[2]= pin;
+        return this;
+    }
+
+    @override
+    SpiParameterBuilder<T> misoPin(byte pin) {
+        config[3]= pin;
+        return this;
+    }
+
+    @override
+    SpiParameterBuilder<T> lsbFirst() {
+        config[4]|= 0x1;
+        return this;
+    }
+
+    @override
+    SpiParameterBuilder<T> mode(byte mode) {
+        config[4]|= (mode << 1);
+        return this;
+    }
+
+    @override
+    SpiParameterBuilder<T> frequency(SpiFrequency freq) {
+        config[4]|= (freq.ordinal() << 3);
+        return this;
+    }
+
+    @override
+    SpiParameterBuilder<T> useNativePins() {
+        config[4]|= (0x1 << 6);
+        return this;
     }
 }
 
@@ -82,168 +231,22 @@ class SerialPassthroughImpl extends ModuleImplBase implements SerialPassthrough 
             SPI_PRODUCER_FORMAT= "com.mbientlab.metawear.impl.SerialPassthroughImpl.SPI_PRODUCER_%d";
 
 
-    private static class I2cInner implements I2C, Serializable {
-        private static final long serialVersionUID = 8518548885863146365L;
-        private final byte id;
-        transient MetaWearBoardPrivate mwPrivate;
+    final Map<int, I2C> i2cDataProducers= new ConcurrentHashMap<>();
+    final Map<int, SPI> spiDataProducers = new ConcurrentHashMap<>();
+//    transient TimedTask<byte[]> readI2cDataTask, readSpiDataTask;
 
-        I2cInner(byte id, byte length, MetaWearBoardPrivate mwPrivate) {
-            this.id= id;
-            this.mwPrivate = mwPrivate;
+    SerialPassthroughImpl(MetaWearBoardPrivate mwPrivate): super(mwPrivate);
 
-            mwPrivate.tagProducer(name(), new SerialPassthroughData(Util.setSilentRead(I2C_RW), id, length));
-        }
-
-        void restoreTransientVars(MetaWearBoardPrivate mwPrivate) {
-            this.mwPrivate = mwPrivate;
-        }
-
-        @override
-        void read(byte deviceAddr, byte registerAddr) {
-            DataTypeBase i2cProducer= mwPrivate.lookupProducer(name());
-            i2cProducer.read(mwPrivate, new byte[]{deviceAddr, registerAddr, id, i2cProducer.attributes.length()});
-        }
-
-        @override
-        Task<Route> addRouteAsync(RouteBuilder builder) {
-            return mwPrivate.queueRouteBuilder(builder, name());
-        }
-
-        @override
-        String name() {
-            return String.format(Locale.US, I2C_PRODUCER_FORMAT, id);
-        }
-    }
-    private static class SpiInner implements SPI, Serializable {
-        private static final long serialVersionUID = -1781850442398737602L;
-
-        private final byte id;
-        transient MetaWearBoardPrivate mwPrivate;
-
-        SpiInner(byte id, byte length, MetaWearBoardPrivate mwPrivate) {
-            this.id= id;
-            this.mwPrivate = mwPrivate;
-
-            mwPrivate.tagProducer(name(), new SerialPassthroughData(Util.setSilentRead(SPI_RW), id, length));
-        }
-
-        void restoreTransientVars(MetaWearBoardPrivate mwPrivate) {
-            this.mwPrivate = mwPrivate;
-        }
-
-        @override
-        SpiParameterBuilder<Void> read() {
-            final DataTypeBase spiProducer= mwPrivate.lookupProducer(name());
-            return new SpiParameterBuilderInner<Void>((byte) ((spiProducer.attributes.length() - 1) | (id << 4))) {
-                @override
-                Void commit() {
-                    spiProducer.read(mwPrivate, config);
-                    return null;
-                }
-            };
-        }
-
-        @override
-        Task<Route> addRouteAsync(RouteBuilder builder) {
-            return mwPrivate.queueRouteBuilder(builder, name());
-        }
-
-        @override
-        String name() {
-            return String.format(Locale.US, SPI_PRODUCER_FORMAT, id);
-        }
-    }
-
-    private static abstract class SpiParameterBuilderInner<T> implements SpiParameterBuilder<T> {
-        final byte originalLength;
-        byte[] config;
-
-        SpiParameterBuilderInner() {
-            this.originalLength = 5;
-            this.config= new byte[this.originalLength];
-        }
-
-        SpiParameterBuilderInner(byte fifthValue) {
-            this.originalLength = 6;
-            this.config= new byte[this.originalLength];
-            config[5] = fifthValue;
-        }
-
-        @override
-        SpiParameterBuilder<T> data(byte[] data) {
-            byte[] copy = new byte[config.length + data.length];
-            System.arraycopy(config, 0, copy, 0, this.originalLength);
-            System.arraycopy(data, 0, copy, this.originalLength, data.length);
-            config = copy;
-            return this;
-        }
-
-        @override
-        SpiParameterBuilder<T> slaveSelectPin(byte pin) {
-            config[0]= pin;
-            return this;
-        }
-
-        @override
-        SpiParameterBuilder<T> clockPin(byte pin) {
-            config[1]= pin;
-            return this;
-        }
-
-        @override
-        SpiParameterBuilder<T> mosiPin(byte pin) {
-            config[2]= pin;
-            return this;
-        }
-
-        @override
-        SpiParameterBuilder<T> misoPin(byte pin) {
-            config[3]= pin;
-            return this;
-        }
-
-        @override
-        SpiParameterBuilder<T> lsbFirst() {
-            config[4]|= 0x1;
-            return this;
-        }
-
-        @override
-        SpiParameterBuilder<T> mode(byte mode) {
-            config[4]|= (mode << 1);
-            return this;
-        }
-
-        @override
-        SpiParameterBuilder<T> frequency(SpiFrequency freq) {
-            config[4]|= (freq.ordinal() << 3);
-            return this;
-        }
-
-        @override
-        SpiParameterBuilder<T> useNativePins() {
-            config[4]|= (0x1 << 6);
-            return this;
-        }
-    }
-
-    private final Map<Byte, I2C> i2cDataProducers= new ConcurrentHashMap<>();
-    private final Map<Byte, SPI> spiDataProducers = new ConcurrentHashMap<>();
-    private transient TimedTask<byte[]> readI2cDataTask, readSpiDataTask;
-
-    SerialPassthroughImpl(MetaWearBoardPrivate mwPrivate) {
-        super(mwPrivate);
-    }
 
     @override
     void restoreTransientVars(MetaWearBoardPrivate mwPrivate) {
         super.restoreTransientVars(mwPrivate);
 
-        for(I2C it: i2cDataProducers.values()) {
+        for(I2C it in i2cDataProducers.values()) {
             ((I2cInner) it).restoreTransientVars(mwPrivate);
         }
 
-        for(SPI it: spiDataProducers.values()) {
+        for(SPI it in spiDataProducers.values()) {
             ((SpiInner) it).restoreTransientVars(mwPrivate);
         }
     }
