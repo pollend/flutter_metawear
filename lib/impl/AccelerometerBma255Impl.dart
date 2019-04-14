@@ -30,7 +30,7 @@ import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
 import 'package:flutter_metawear/module/AccelerometerBma255.dart' as AccelerometerBma255;
 
 class _ConfigEditor extends AccelerometerBma255.ConfigEditor{
-    OutputDataRate odr= OutputDataRate.ODR_125HZ;
+    AccelerometerBma255.OutputDataRate odr= AccelerometerBma255.OutputDataRate.ODR_125HZ;
     AccRange ar= AccRange.AR_2G;
 
     @override
@@ -73,10 +73,42 @@ class _ConfigEditor extends AccelerometerBma255.ConfigEditor{
     }
 }
 
+class Bma255FlatDataProducer extends BoschFlatDataProducer implements AccelerometerBma255.FlatDataProducer {
+    @override
+    public AccelerometerBma255.FlatConfigEditor configure() {
+        return new AccelerometerBma255.FlatConfigEditor() {
+            private FlatHoldTime holdTime = FlatHoldTime.FHT_512_MS;
+            private float theta = 5.6889f;
+
+        @override
+        public AccelerometerBma255.FlatConfigEditor holdTime(FlatHoldTime time) {
+        holdTime = time;
+        return this;
+        }
+
+        @override
+        public AccelerometerBma255.FlatConfigEditor holdTime(float time) {
+        return holdTime(FlatHoldTime.values()[Util.closestIndex(FlatHoldTime.delays(), time)]);
+        }
+
+        @override
+        public AccelerometerBma255.FlatConfigEditor flatTheta(float angle) {
+        theta = angle;
+        return this;
+        }
+
+        @override
+        public void commit() {
+        writeFlatConfig(holdTime.ordinal(), theta);
+        }
+    };
+    }
+}
+
 /**
  * Created by etsai on 9/1/16.
  */
-class AccelerometerBma255Impl extends AccelerometerBoschImpl implements AccelerometerBma255 {
+class AccelerometerBma255Impl extends AccelerometerBoschImpl implements AccelerometerBma255.AccelerometerBma255 {
 
     static const int IMPLEMENTATION = 0x3;
     static Uint8List DEFAULT_MOTION_CONFIG = Uint8List.fromList([0x00, 0x14, 0x14]);
@@ -84,20 +116,18 @@ class AccelerometerBma255Impl extends AccelerometerBoschImpl implements Accelero
     static final Uint8List accDataConfig= Uint8List.fromList([0x0b, 0x03]);
 
     AsyncDataProducer _flat, _lowhigh, _noMotion, _slowMotion, _anyMotion;
-    TimedTask<Uint8List> _pullConfigTask;
+//    TimedTask<Uint8List> _pullConfigTask;
 
     AccelerometerBma255Impl(MetaWearBoardPrivate mwPrivate): super(mwPrivate);
 
 
     @override
     void init() {
-        pullConfigTask = new TimedTask<>();
-
         mwPrivate.addResponseHandler(new Pair<>(ACCELEROMETER.id, Util.setRead(DATA_CONFIG)), response -> pullConfigTask.setResult(response));
     }
 
     @override
-     float getAccDataScale() {
+     double getAccDataScale() {
         return AccRange.bitMaskToRange((byte) (accDataConfig[1] & 0xf)).scale;
     }
 
@@ -159,17 +189,17 @@ class AccelerometerBma255Impl extends AccelerometerBoschImpl implements Accelero
     }
 
     @override
-    public float getOdr() {
+    double getOdr() {
         return OutputDataRate.values()[(accDataConfig[0] & ~0xe0) - 8].frequency;
     }
 
     @override
-    public float getRange() {
+    double getRange() {
         return AccRange.bitMaskToRange((byte) (accDataConfig[1] & ~0xf0)).range;
     }
 
     @override
-    public Task<Void> pullConfigAsync() {
+    Future<void> pullConfigAsync() {
         return pullConfigTask.execute("Did not receive BMA255 acc config within %dms", Constant.RESPONSE_TIMEOUT,
                 () -> mwPrivate.sendCommand(new byte[] {ACCELEROMETER.id, Util.setRead(DATA_CONFIG)})
         ).onSuccessTask(task -> {
@@ -178,37 +208,7 @@ class AccelerometerBma255Impl extends AccelerometerBoschImpl implements Accelero
         });
     }
 
-    private class Bma255FlatDataProducer extends BoschFlatDataProducer implements AccelerometerBma255.FlatDataProducer {
-        @override
-        public AccelerometerBma255.FlatConfigEditor configure() {
-            return new AccelerometerBma255.FlatConfigEditor() {
-                private FlatHoldTime holdTime = FlatHoldTime.FHT_512_MS;
-                private float theta = 5.6889f;
 
-                @override
-                public AccelerometerBma255.FlatConfigEditor holdTime(FlatHoldTime time) {
-                    holdTime = time;
-                    return this;
-                }
-
-                @override
-                public AccelerometerBma255.FlatConfigEditor holdTime(float time) {
-                    return holdTime(FlatHoldTime.values()[Util.closestIndex(FlatHoldTime.delays(), time)]);
-                }
-
-                @override
-                public AccelerometerBma255.FlatConfigEditor flatTheta(float angle) {
-                    theta = angle;
-                    return this;
-                }
-
-                @override
-                public void commit() {
-                    writeFlatConfig(holdTime.ordinal(), theta);
-                }
-            };
-        }
-    }
     @override
     public AccelerometerBma255.FlatDataProducer flat() {
         if (flat == null) {
@@ -226,7 +226,7 @@ class AccelerometerBma255Impl extends AccelerometerBoschImpl implements Accelero
     }
 
     @override
-    public <T extends MotionDetection> T motion(Class<T> motionClass) {
+    T motion<T extends MotionDetection>() {
         if (motionClass.equals(NoMotionDataProducer.class)) {
             return motionClass.cast(noMotion());
         }

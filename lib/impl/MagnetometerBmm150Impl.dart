@@ -22,6 +22,7 @@
  * hello@mbientlab.com.
  */
 
+import 'package:flutter_metawear/AsyncDataProducer.dart';
 import 'package:flutter_metawear/Data.dart';
 import 'package:flutter_metawear/data/MagneticField.dart';
 import 'package:flutter_metawear/impl/DataPrivate.dart';
@@ -151,17 +152,16 @@ class MagnetometerBmm150Impl extends ModuleImplBase implements MagnetometerBmm15
 
 
 
-    private transient AsyncDataProducer bfield, packedBfield;
+    AsyncDataProducer bfield, packedBfield;
 
-    MagnetometerBmm150Impl(MetaWearBoardPrivate mwPrivate) {
-        super(mwPrivate);
-
+    MagnetometerBmm150Impl(MetaWearBoardPrivate mwPrivate): super(mwPrivate) {
         DataTypeBase cfProducer = new Bmm150CartesianFloatData();
         mwPrivate.tagProducer(BFIELD_PRODUCER, cfProducer);
         mwPrivate.tagProducer(BFIELD_X_AXIS_PRODUCER, cfProducer.split[0]);
         mwPrivate.tagProducer(BFIELD_Y_AXIS_PRODUCER, cfProducer.split[1]);
         mwPrivate.tagProducer(BFIELD_Z_AXIS_PRODUCER, cfProducer.split[2]);
-        mwPrivate.tagProducer(BFIELD_PACKED_PRODUCER, new Bmm150CartesianFloatData(PACKED_MAG_DATA, (byte) 3));
+        mwPrivate.tagProducer(BFIELD_PACKED_PRODUCER,
+            new Bmm150CartesianFloatData(PACKED_MAG_DATA, (byte) 3));
     }
 
     @override

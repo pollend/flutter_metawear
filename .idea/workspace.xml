@@ -5,37 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="4cb0f089-fc99-4dea-a4d4-afab97db7b8a" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/flutter_metawear.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/flutter_metawear.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Flutter_Plugins.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Flutter_Plugins.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/Data.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/Data.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/impl/AccelerometerBma255Impl.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/AccelerometerBma255Impl.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/impl/ArrayData.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/ArrayData.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/impl/BarometerBmp280Impl.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/BarometerBmp280Impl.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/impl/BarometerBoschImpl.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/BarometerBoschImpl.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/impl/ByteArrayData.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/ByteArrayData.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/impl/ColorTcs34725Impl.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/ColorTcs34725Impl.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/impl/DataPrivate.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/DataPrivate.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/impl/DataProcessorConfig.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/DataProcessorConfig.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/impl/DataProcessorImpl.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/DataProcessorImpl.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/impl/DataTypeBase.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/DataTypeBase.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/impl/GpioImpl.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/GpioImpl.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/impl/GsrImpl.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/GsrImpl.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/impl/IntData.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/IntData.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/impl/LoggingImpl.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/LoggingImpl.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/impl/AccelerometerBoschImpl.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/AccelerometerBoschImpl.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/impl/MagnetometerBmm150Impl.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/MagnetometerBmm150Impl.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/impl/SFloatData.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/SFloatData.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/impl/SensorFusionBoschImpl.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/SensorFusionBoschImpl.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/impl/SerialPassthroughImpl.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/SerialPassthroughImpl.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/impl/SettingsImpl.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/SettingsImpl.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/impl/StreamedDataConsumer.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/StreamedDataConsumer.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/impl/UFloatData.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/UFloatData.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/impl/UintData.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/impl/UintData.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/module/AccelerometerBma255.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/module/AccelerometerBma255.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/module/AccelerometerBmi160.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/module/AccelerometerBmi160.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/module/AccelerometerMma8452q.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/module/AccelerometerMma8452q.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/module/BarometerBmp280.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/module/BarometerBmp280.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/module/SensorFusionBosch.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/module/SensorFusionBosch.dart" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -66,31 +40,22 @@
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/lib/impl/GpioImpl.dart">
+        <entry file="file://$PROJECT_DIR$/lib/impl/AccelerometerBoschImpl.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="762">
-              <caret line="307" column="9" selection-start-line="307" selection-start-column="9" selection-end-line="307" selection-end-column="9" />
+            <state relative-caret-position="525">
+              <caret line="240" column="13" selection-start-line="240" selection-start-column="13" selection-end-line="240" selection-end-column="13" />
               <folding>
-                <element signature="e#1802#1847#0" expanded="true" />
+                <element signature="e#1803#1860#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/lib/module/Gpio.dart">
+        <entry file="file://$PROJECT_DIR$/lib/module/AccelerometerBosch.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="854">
-              <caret line="136" column="16" selection-start-line="136" selection-start-column="16" selection-end-line="136" selection-end-column="16" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/lib/impl/ModuleImplBase.dart">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="105">
-              <caret line="29" column="15" selection-start-line="29" selection-start-column="15" selection-end-line="29" selection-end-column="15" />
+            <state relative-caret-position="283">
+              <caret line="344" column="37" selection-start-line="344" selection-start-column="16" selection-end-line="344" selection-end-column="37" />
             </state>
           </provider>
         </entry>
@@ -99,27 +64,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>confige</find>
-      <find>standBy</find>
-      <find>Compariso</find>
-      <find>(byte)</find>
-      <find>ABS_REF_PRODUCER_FORMAT</find>
-      <find>Byteview</find>
-      <find>.view</find>
-      <find>DataPrivate2</find>
-      <find>createme</find>
-      <find>convertToFirmwareUnits</find>
-      <find>writeCalibrationData</find>
-      <find>call</find>
-      <find>pollingPeriod</find>
-      <find>stream.</find>
-      <find>_readControllerCalibration</find>
-      <find>protected</find>
-      <find>NOTIFY</find>
-      <find>Notify</find>
-      <find>Task</find>
-      <find>stream</find>
-      <find>_SpiParameterBuilderInner</find>
       <find>Control</find>
       <find>StreamCon</find>
       <find>_ForcedDataProducer</find>
@@ -129,6 +73,27 @@
       <find>ProcessorEntry</find>
       <find>_streamController</find>
       <find>init</find>
+      <find>LowHighConfigEditor</find>
+      <find>OutputDataRate</find>
+      <find>AccRange</find>
+      <find>class LowHighDataProducer</find>
+      <find>LowH</find>
+      <find>enableHighGX</find>
+      <find>enableHighGy</find>
+      <find>enableHighGz</find>
+      <find>enableLowG</find>
+      <find>highDuration</find>
+      <find>highHysteresis</find>
+      <find>highThreshold</find>
+      <find>lowGMode</find>
+      <find>lowHysteresis</find>
+      <find>duration</find>
+      <find>lowDuration</find>
+      <find>getSelectedAccRange</find>
+      <find>_highDataProducerInner</find>
+      <find>LOW_HYSTERESIS_STEP</find>
+      <find>LOW_HIGH_G_CONFIG</find>
+      <find>AnyMotionConfigEditor</find>
     </findStrings>
     <replaceStrings>
       <replace>bool</replace>
@@ -140,6 +105,7 @@
       <replace>Tuple2&lt;DataTypeBase,DataTypeBase&gt;</replace>
       <replace>Uint8List.fromList([</replace>
       <replace>Future</replace>
+      <replace>ModuleType</replace>
     </replaceStrings>
     <dirStrings>
       <dir>$PROJECT_DIR$/android</dir>
@@ -152,7 +118,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/lib/impl/RouteSplitImpl.dart" />
         <option value="$PROJECT_DIR$/lib/IllegalRouteOperationException.dart" />
         <option value="$PROJECT_DIR$/lib/impl/EventImpl.dart" />
         <option value="$PROJECT_DIR$/lib/impl/JseMetaWearBoard.dart" />
@@ -174,7 +139,6 @@
         <option value="$PROJECT_DIR$/lib/impl/BarometerBme280Impl.dart" />
         <option value="$PROJECT_DIR$/lib/impl/MacroImpl.dart" />
         <option value="$PROJECT_DIR$/lib/impl/DebugImpl.dart" />
-        <option value="$PROJECT_DIR$/lib/impl/MagnetometerBmm150Impl.dart" />
         <option value="$PROJECT_DIR$/lib/Data.dart" />
         <option value="$PROJECT_DIR$/lib/impl/DataPrivate.dart" />
         <option value="$PROJECT_DIR$/lib/impl/UFloatData.dart" />
@@ -190,7 +154,6 @@
         <option value="$PROJECT_DIR$/lib/impl/ColorTcs34725Impl.dart" />
         <option value="$PROJECT_DIR$/lib/impl/ByteArrayData.dart" />
         <option value="$PROJECT_DIR$/lib/impl/ArrayData.dart" />
-        <option value="$PROJECT_DIR$/lib/impl/AccelerometerBma255Impl.dart" />
         <option value="$PROJECT_DIR$/lib/module/AccelerometerBma255.dart" />
         <option value="$PROJECT_DIR$/lib/impl/BarometerBoschImpl.dart" />
         <option value="$PROJECT_DIR$/lib/module/BarometerBmp280.dart" />
@@ -203,6 +166,9 @@
         <option value="$PROJECT_DIR$/lib/impl/DataProcessorConfig.dart" />
         <option value="$PROJECT_DIR$/lib/impl/GsrImpl.dart" />
         <option value="$PROJECT_DIR$/lib/impl/GpioImpl.dart" />
+        <option value="$PROJECT_DIR$/lib/impl/MagnetometerBmm150Impl.dart" />
+        <option value="$PROJECT_DIR$/lib/impl/AccelerometerBma255Impl.dart" />
+        <option value="$PROJECT_DIR$/lib/impl/AccelerometerBoschImpl.dart" />
       </list>
     </option>
   </component>
@@ -212,10 +178,10 @@
       <select />
     </treeState>
   </component>
-  <component name="ProjectFrameBounds">
-    <option name="x" value="1920" />
-    <option name="width" value="2036" />
-    <option name="height" value="1404" />
+  <component name="ProjectFrameBounds" extendedState="7">
+    <option name="y" value="27" />
+    <option name="width" value="1920" />
+    <option name="height" value="1053" />
   </component>
   <component name="ProjectReloadState">
     <option name="STATE" value="1" />
@@ -242,19 +208,12 @@
               <item name="flutter_metawear" type="b2602c69:ProjectViewProjectNode" />
               <item name="flutter_metawear" type="462c0819:PsiDirectoryNode" />
               <item name="lib" type="462c0819:PsiDirectoryNode" />
-              <item name="data" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="flutter_metawear" type="b2602c69:ProjectViewProjectNode" />
-              <item name="flutter_metawear" type="462c0819:PsiDirectoryNode" />
-              <item name="lib" type="462c0819:PsiDirectoryNode" />
               <item name="impl" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="flutter_metawear" type="b2602c69:ProjectViewProjectNode" />
               <item name="flutter_metawear" type="462c0819:PsiDirectoryNode" />
-              <item name="lib" type="462c0819:PsiDirectoryNode" />
-              <item name="module" type="462c0819:PsiDirectoryNode" />
+              <item name="test" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="flutter_metawear" type="b2602c69:ProjectViewProjectNode" />
@@ -277,30 +236,6 @@
               <item name="Flutter Plugins" type="70bed36:NamedLibraryElementNode" />
               <item name="flutter_metawear" type="462c0819:PsiDirectoryNode" />
               <item name="lib" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="flutter_metawear" type="b2602c69:ProjectViewProjectNode" />
-              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
-              <item name="Flutter Plugins" type="70bed36:NamedLibraryElementNode" />
-              <item name="flutter_metawear" type="462c0819:PsiDirectoryNode" />
-              <item name="lib" type="462c0819:PsiDirectoryNode" />
-              <item name="data" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="flutter_metawear" type="b2602c69:ProjectViewProjectNode" />
-              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
-              <item name="Flutter Plugins" type="70bed36:NamedLibraryElementNode" />
-              <item name="flutter_metawear" type="462c0819:PsiDirectoryNode" />
-              <item name="lib" type="462c0819:PsiDirectoryNode" />
-              <item name="impl" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="flutter_metawear" type="b2602c69:ProjectViewProjectNode" />
-              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
-              <item name="Flutter Plugins" type="70bed36:NamedLibraryElementNode" />
-              <item name="flutter_metawear" type="462c0819:PsiDirectoryNode" />
-              <item name="lib" type="462c0819:PsiDirectoryNode" />
-              <item name="module" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -313,9 +248,9 @@
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1554245061871" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1554510759054" />
     <property name="dart.analysis.tool.window.force.activate" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../MetaWear-SDK-Android" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="nodejs_package_manager_path" value="npm" />
@@ -341,7 +276,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Flutter Test.tests in TestDataProcessor.dart">
+  <component name="RunManager">
     <configuration name="main.dart" type="FlutterRunConfigurationType" factoryName="Flutter">
       <option name="filePath" value="$PROJECT_DIR$/example/lib/main.dart" />
       <method v="2" />
@@ -350,11 +285,6 @@
       <option name="testFile" value="$PROJECT_DIR$/test/TestDataProcessor.dart" />
       <method v="2" />
     </configuration>
-    <recent_temporary>
-      <list>
-        <item itemvalue="Flutter Test.tests in TestDataProcessor.dart" />
-      </list>
-    </recent_temporary>
   </component>
   <component name="SvnConfiguration">
     <configuration />
@@ -395,6 +325,14 @@
       <workItem from="1554245125161" duration="251000" />
       <workItem from="1554254121460" duration="15331000" />
       <workItem from="1554301327702" duration="16698000" />
+      <workItem from="1554509065922" duration="1691000" />
+      <workItem from="1555010871903" duration="471000" />
+      <workItem from="1555014555405" duration="52000" />
+      <workItem from="1555014694145" duration="624000" />
+      <workItem from="1555015522542" duration="432000" />
+      <workItem from="1555029129237" duration="1053000" />
+      <workItem from="1555036041924" duration="3565000" />
+      <workItem from="1555042464610" duration="2055000" />
     </task>
     <servers />
   </component>
@@ -404,7 +342,7 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="277731000" />
+    <option name="totallyTimeSpent" value="287674000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -416,10 +354,10 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="1920" y="0" width="2036" height="1404" extended-state="0" />
+    <frame x="0" y="27" width="1920" height="1053" extended-state="7" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.65037596" visible="true" weight="0.16649848" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.65037596" visible="true" weight="0.20490928" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Designer" order="2" />
       <window_info id="Image Layers" order="3" />
@@ -464,68 +402,6 @@
     <option name="version" value="1" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/lib/ForcedDataProducer.dart">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="135">
-          <caret line="31" column="15" selection-start-line="31" selection-start-column="15" selection-end-line="31" selection-end-column="15" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/AsyncDataProducer.dart">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <folding>
-            <element signature="e#0#2234#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/impl/IntData.dart">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="792">
-          <caret line="77" column="7" lean-forward="true" selection-start-line="69" selection-start-column="4" selection-end-line="77" selection-end-column="7" />
-          <folding>
-            <element signature="e#1803#1828#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/module/AccelerometerMma8452q.dart">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-180">
-          <caret line="158" column="26" selection-start-line="158" selection-start-column="26" selection-end-line="158" selection-end-column="26" />
-          <folding>
-            <element signature="e#0#16325#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/opt/flutter/bin/cache/pkg/sky_engine/lib/core/date_time.dart">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="414">
-          <caret line="122" column="6" selection-start-line="122" selection-start-column="6" selection-end-line="122" selection-end-column="6" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/impl/ArrayData.dart">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1182">
-          <caret line="95" column="1" selection-start-line="95" selection-start-column="1" selection-end-line="95" selection-end-column="1" />
-          <folding>
-            <element signature="e#0#5164#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/impl/AccelerometerBmi160Impl.dart">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <folding>
-            <element signature="e#0#20402#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/lib/module/AccelerometerBmi160.dart">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="549">
@@ -540,13 +416,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/module/AccelerometerBosch.dart">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="12">
-          <caret line="463" column="5" lean-forward="true" selection-start-line="463" selection-start-column="5" selection-end-line="463" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/lib/module/Accelerometer.dart">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="510">
@@ -554,24 +423,6 @@
           <folding>
             <element signature="e#1802#1859#0" expanded="true" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/module/AccelerometerBma255.dart">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1707">
-          <caret line="137" column="20" selection-start-line="137" selection-start-column="20" selection-end-line="137" selection-end-column="20" />
-          <folding>
-            <element signature="e#0#5939#0" expanded="true" />
-            <element signature="e#1803#1822#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/Configurable.dart">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="195">
-          <caret line="35" column="6" selection-start-line="35" selection-start-column="6" selection-end-line="35" selection-end-column="6" />
         </state>
       </provider>
     </entry>
@@ -771,16 +622,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/impl/MagnetometerBmm150Impl.dart">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="954">
-          <caret line="129" column="28" selection-start-line="129" selection-start-column="6" selection-end-line="129" selection-end-column="28" />
-          <folding>
-            <element signature="e#1802#1846#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/lib/impl/Version.dart">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="510">
@@ -818,16 +659,6 @@
           <caret line="720" lean-forward="true" selection-start-line="720" selection-end-line="720" />
           <folding>
             <element signature="e#1#26#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/impl/AccelerometerBma255Impl.dart">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="300">
-          <caret line="42" column="49" selection-start-line="42" selection-start-column="49" selection-end-line="42" selection-end-column="49" />
-          <folding>
-            <element signature="e#1802#1827#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -881,9 +712,19 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/lib/impl/GpioImpl.dart">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="853">
+          <caret line="333" selection-start-line="333" selection-end-line="333" />
+          <folding>
+            <element signature="e#1802#1847#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/lib/module/Gpio.dart">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="854">
+        <state relative-caret-position="1680">
           <caret line="136" column="16" selection-start-line="136" selection-start-column="16" selection-end-line="136" selection-end-column="16" />
         </state>
       </provider>
@@ -895,12 +736,96 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/impl/GpioImpl.dart">
+    <entry file="file://$PROJECT_DIR$/lib/impl/MagnetometerBmm150Impl.dart">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="762">
-          <caret line="307" column="9" selection-start-line="307" selection-start-column="9" selection-end-line="307" selection-end-column="9" />
+        <state relative-caret-position="15">
+          <caret line="43" lean-forward="true" selection-start-line="43" selection-end-line="43" />
           <folding>
-            <element signature="e#1802#1847#0" expanded="true" />
+            <element signature="e#1802#1859#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/module/AccelerometerBma255.dart">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="130">
+          <caret line="137" column="20" selection-start-line="137" selection-start-column="20" selection-end-line="137" selection-end-column="20" />
+          <folding>
+            <element signature="e#1803#1822#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/Route.dart">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/AsyncDataProducer.dart">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="150">
+          <caret line="32" column="15" selection-start-line="32" selection-start-column="15" selection-end-line="32" selection-end-column="15" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/Configurable.dart">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="120">
+          <caret line="30" column="15" selection-start-line="30" selection-start-column="15" selection-end-line="30" selection-end-column="15" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/impl/AccelerometerMma8452qImpl.dart">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-2205" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/impl/LoggingImpl.dart">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-6755">
+          <folding>
+            <element signature="e#0#26702#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/impl/JseMetaWearBoard.dart">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <folding>
+            <element signature="e#0#72612#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/impl/GyroBmi160Impl.dart">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1350">
+          <caret line="172" selection-start-line="172" selection-end-line="172" />
+          <folding>
+            <element signature="e#0#13842#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/impl/AccelerometerBma255Impl.dart">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="75">
+          <caret line="27" column="40" selection-start-line="27" selection-start-column="40" selection-end-line="27" selection-end-column="40" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/module/AccelerometerBosch.dart">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="283">
+          <caret line="344" column="37" selection-start-line="344" selection-start-column="16" selection-end-line="344" selection-end-column="37" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/impl/AccelerometerBoschImpl.dart">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="525">
+          <caret line="240" column="13" selection-start-line="240" selection-start-column="13" selection-end-line="240" selection-end-column="13" />
+          <folding>
+            <element signature="e#1803#1860#0" expanded="true" />
           </folding>
         </state>
       </provider>

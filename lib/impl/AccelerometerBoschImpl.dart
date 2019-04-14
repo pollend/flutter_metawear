@@ -23,7 +23,264 @@
  */
 
 
+import 'package:flutter_metawear/AsyncDataProducer.dart';
 import 'package:flutter_metawear/impl/FloatVectorData.dart';
+import 'package:flutter_metawear/impl/ModuleImplBase.dart';
+import 'package:flutter_metawear/module/AccelerometerBosch.dart' as AccelerometerBosch;
+import 'dart:typed_data';
+import 'package:sprintf/sprintf.dart';
+import 'package:flutter_metawear/impl/DataTypeBase.dart';
+import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
+import 'package:flutter_metawear/impl/ModuleType.dart';
+import 'package:flutter_metawear/Route.dart';
+import 'package:flutter_metawear/builder/RouteBuilder.dart';
+
+abstract class BoschFlatDataProducer implements AccelerometerBosch.FlatDataProducer {
+    final MetaWearBoardPrivate _mwPrivate;
+
+    BoschFlatDataProducer(this._mwPrivate);
+
+    @override
+    Future<Route> addRouteAsync(RouteBuilder builder) {
+        return _mwPrivate.queueRouteBuilder(builder, AccelerometerBoschImpl.FLAT_PRODUCER);
+    }
+
+    @override
+    String name() {
+        return AccelerometerBoschImpl.FLAT_PRODUCER;
+    }
+
+    @override
+    void start() {
+        _mwPrivate.sendCommand(Uint8List.fromList([ModuleType.ACCELEROMETER.id, AccelerometerBoschImpl.FLAT_INTERRUPT_ENABLE, 1, 0]));
+    }
+
+    @override
+    void stop() {
+        _mwPrivate.sendCommand(Uint8List.fromList([ModuleType.ACCELEROMETER.id, AccelerometerBoschImpl.FLAT_INTERRUPT_ENABLE, 0, 1]));
+    }
+}
+
+class LowHighConfigEditor extends AccelerometerBosch.LowHighConfigEditor {
+    AccelerometerBosch.LowGMode _lowGMode;
+    int _lowDuration = null,
+        _highDuration = null;
+    double _lowThreshold = null,
+        _lowHysteresis = null,
+        _newHighThreshold = null,
+        _newHighHysteresis = null;
+    int _lowHighEnableMask = 0;
+
+    final AccelerometerBoschImpl _impl;
+    final Uint8List _lowHighConfig;
+    final LowHighDataProducerInner _highDataProducerInner;
+
+    LowHighConfigEditor(this._lowHighConfig,this._highDataProducerInner,this._impl);
+
+
+    @override
+    void commit() {
+        if (_lowDuration != null) {
+            _lowHighConfig[0] = ((_lowDuration.toDouble() / _highDataProducerInner.durationStep) - 1).toInt();
+        }
+        if (_lowThreshold != null) {
+            _lowHighConfig[1] = (_lowThreshold.toDouble() / AccelerometerBoschImpl.LOW_THRESHOLD_STEP.toDouble()).toInt();
+        }
+        if (_newHighHysteresis != null) {
+            _lowHighConfig[2] |= ((_newHighHysteresis / AccelerometerBoschImpl.BOSCH_HIGH_HYSTERESIS_STEPS[_impl.getSelectedAccRange()]).toInt() & 0x3) << 6;
+        }
+        if (lowGMode != null) {
+            _lowHighConfig[2] &= 0xfb;
+            _lowHighConfig[2] |= (_lowGMode.index << 2);
+        }
+        if (_lowHysteresis  != null) {
+            _lowHighConfig[2] &= 0xfc;
+            _lowHighConfig[2] |= ((_lowHysteresis / AccelerometerBoschImpl.LOW_HYSTERESIS_STEP).toInt() & 0x3);
+        }
+        if (_highDuration != null) {
+            _lowHighConfig[3] = ((_highDuration / _highDataProducerInner.durationStep) - 1).toInt();
+        }
+        if (_newHighThreshold != null) {
+            _lowHighConfig[4] = (_newHighThreshold / AccelerometerBoschImpl.BOSCH_HIGH_THRESHOLD_STEPS[_impl.getSelectedAccRange()]).toInt();
+        }
+
+        _impl.mwPrivate.sendCommandForModule(ModuleType.ACCELEROMETER, AccelerometerBoschImpl.LOW_HIGH_G_CONFIG, _lowHighConfig);
+    }
+
+    @override
+    AccelerometerBosch.LowHighConfigEditor enableHighGx() {
+        _lowHighEnableMask |= 0x1;
+        return this;
+    }
+
+    @override
+    AccelerometerBosch.LowHighConfigEditor enableHighGy() {
+        _lowHighEnableMask |= 0x2;
+        return null;
+    }
+
+    @override
+    AccelerometerBosch.LowHighConfigEditor enableHighGz() {
+        _lowHighEnableMask |= 0x4;
+        return this;
+    }
+
+    @override
+    AccelerometerBosch.LowHighConfigEditor enableLowG() {
+        _lowHighEnableMask |= 0x8;
+        return this;
+    }
+
+    @override
+    AccelerometerBosch.LowHighConfigEditor highDuration(int duration) {
+        _highDuration = duration;
+        return this;
+    }
+
+    @override
+    AccelerometerBosch.LowHighConfigEditor highHysteresis(double hysteresis) {
+        _newHighHysteresis = hysteresis;
+        return this;
+    }
+
+    @override
+    AccelerometerBosch.LowHighConfigEditor highThreshold(double threshold) {
+        _newHighThreshold = threshold;
+        return this;
+    }
+
+    @override
+    AccelerometerBosch.LowHighConfigEditor lowDuration(int duration) {
+        _lowDuration = duration;
+        return null;
+    }
+
+    @override
+    AccelerometerBosch.LowHighConfigEditor lowGMode(
+        AccelerometerBosch.LowGMode mode) {
+        _lowGMode = mode;
+        return this;
+    }
+
+    @override
+    AccelerometerBosch.LowHighConfigEditor lowHysteresis(double hysteresis) {
+        _lowHysteresis = hysteresis;
+        return this;
+    }
+
+    @override
+    AccelerometerBosch.LowHighConfigEditor lowThreshold(double threshold) {
+        _lowThreshold = threshold;
+        return this;
+    }
+}
+
+class LowHighDataProducerInner implements AccelerometerBosch.LowHighDataProducer {
+    final Uint8List initialConfig;
+    final double durationStep;
+    final MetaWearBoardPrivate _mwPrivate;
+    int lowHighEnableMask = 0;
+
+    LowHighDataProducerInner(this._mwPrivate,this.initialConfig,this.durationStep);
+
+
+    @override
+    AccelerometerBosch.LowHighConfigEditor configure() {
+        final Uint8List lowHighConfig = []..addAll(initialConfig);
+        lowHighEnableMask = 0;
+        return null;
+    }
+
+    @override
+    Future<Route> addRouteAsync(RouteBuilder builder) {
+        return _mwPrivate.queueRouteBuilder(builder, AccelerometerBoschImpl.LOW_HIGH_PRODUCER);
+    }
+
+    @override
+    String name() {
+        return AccelerometerBoschImpl.LOW_HIGH_PRODUCER;
+    }
+
+    @override
+    void start() {
+        _mwPrivate.sendCommand(Uint8List.fromList([ModuleType.ACCELEROMETER.id, AccelerometerBoschImpl.LOW_HIGH_G_INTERRUPT_ENABLE, lowHighEnableMask, 0x0]));
+    }
+
+    @override
+    void stop() {
+        _mwPrivate.sendCommand(Uint8List.fromList([ModuleType.ACCELEROMETER.id, AccelerometerBoschImpl.LOW_HIGH_G_INTERRUPT_ENABLE, 0, 0xf]));
+    }
+
+}
+class AnyMotionConfigEditorInner implements AccelerometerBosch.AnyMotionConfigEditor {
+    int _count= null;
+    double _threshold= null;
+    final Uint8List _motionConfig;
+
+    AnyMotionConfigEditorInner(this._motionConfig);
+
+    @override
+    AccelerometerBosch.AnyMotionConfigEditor count(int count) {
+        this._count = count;
+        return this;;
+    }
+
+    @override
+    AccelerometerBosch.AnyMotionConfigEditor threshold(double threshold) {
+        this._threshold = threshold;
+        return this;
+    }
+
+    @override
+    void commit() {
+        if (count != null) {
+            _motionConfig[0]&= 0xfc;
+            _motionConfig[0]|= (_count - 1) & 0x3;
+        }
+
+        if (_threshold != null) {
+            _motionConfig[1]= (threshold / BOSCH_ANY_MOTION_THS_STEPS[getSelectedAccRange()]);
+        }
+
+        mwPrivate.sendCommand(ACCELEROMETER, MOTION_CONFIG, motionConfig);
+    }
+
+
+}
+class SlowMotionConfigEditorInner implements SlowMotionConfigEditor {
+    int count= null;
+    double threshold= null;
+    final Uint8List motionConfig;
+
+    SlowMotionConfigEditorInner(byte[] initialConfig) {
+    motionConfig = initialConfig;
+    }
+
+    @override
+    SlowMotionConfigEditor count(byte count) {
+        this.count= count;
+        return this;
+    }
+
+    @override
+    SlowMotionConfigEditor threshold(float threshold) {
+        this.threshold= threshold;
+        return this;
+    }
+
+    @override
+    void commit() {
+        if (count != null) {
+            motionConfig[0]&= 0x3;
+            motionConfig[0]|= (count - 1) << 2;
+        }
+        if (threshold != null) {
+            motionConfig[2]= (byte) (threshold / BOSCH_NO_MOTION_THS_STEPS[getSelectedAccRange()]);
+        }
+
+        mwPrivate.sendCommand(ACCELEROMETER, MOTION_CONFIG, motionConfig);
+    }
+}
 
 class BoschAccCartesianFloatData extends FloatVectorData {
     BoschAccCartesianFloatData.Default() : super(DATA_INTERRUPT,  1);
@@ -32,17 +289,17 @@ class BoschAccCartesianFloatData extends FloatVectorData {
         super(ACCELEROMETER, register, new DataAttributes(new byte[] {2, 2, 2}, copies, (byte) 0, true));
     }
 
-    BoschAccCartesianFloatData(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
+    BoschAccCartesianFloatData(DataTypeBase input, ModuleType module, byte register, byte id, DataAttributes attributes) {
         super(input, module, register, id, attributes);
     }
 
     @override
-    public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
+    DataTypeBase copy(DataTypeBase input, ModuleType module, byte register, byte id, DataAttributes attributes) {
         return new BoschAccCartesianFloatData(input, module, register, id, attributes);
     }
 
     @override
-    public DataTypeBase[] createSplits() {
+    DataTypeBase[] createSplits() {
         return new DataTypeBase[] {new BoschAccSFloatData((byte) 0), new BoschAccSFloatData((byte) 2), new BoschAccSFloatData((byte) 4)};
         }
 
@@ -52,7 +309,7 @@ class BoschAccCartesianFloatData extends FloatVectorData {
     }
 
     @override
-    public Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, final byte[] data, final Calendar timestamp, DataPrivate.ClassToObject mapper) {
+    Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, final byte[] data, final Calendar timestamp, DataPrivate.ClassToObject mapper) {
     ByteBuffer buffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN);
     short[] unscaled = new short[]{buffer.getShort(), buffer.getShort(), buffer.getShort()};
     final float scale= scale(mwPrivate);
@@ -60,17 +317,17 @@ class BoschAccCartesianFloatData extends FloatVectorData {
 
     return new DataPrivate(timestamp, data, mapper) {
     @override
-    public float scale() {
+    float scale() {
     return scale;
     }
 
     @override
-    public Class<?>[] types() {
+    Class<?>[] types() {
     return new Class<?>[] {Acceleration.class, float[].class};
     }
 
     @override
-    public <T> T value(Class<T> clazz) {
+    <T> T value(Class<T> clazz) {
     if (clazz.equals(Acceleration.class)) {
     return clazz.cast(value);
     } else if (clazz.equals(float[].class)) {
@@ -82,50 +339,46 @@ class BoschAccCartesianFloatData extends FloatVectorData {
     }
 }
 class BoschAccSFloatData extends SFloatData {
-    private static final long serialVersionUID = 7931910535343574126L;
 
-    BoschAccSFloatData(byte offset) {
-        super(ACCELEROMETER, DATA_INTERRUPT, new DataAttributes(new byte[] {2}, (byte) 1, offset, true));
-    }
+    BoschAccSFloatData.offset(int offset): super(ModuleType.ACCELEROMETER, DATA_INTERRUPT, new DataAttributes(new byte[] {2}, (byte) 1, offset, true));
 
-    BoschAccSFloatData(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
+
+    BoschAccSFloatData(DataTypeBase input, ModuleType module, byte register, byte id, DataAttributes attributes) {
         super(input, module, register, id, attributes);
     }
 
     @override
-    protected float scale(MetaWearBoardPrivate mwPrivate) {
+    double scale(MetaWearBoardPrivate mwPrivate) {
         return ((AccelerometerBoschImpl) mwPrivate.getModules().get(AccelerometerBosch.class)).getAccDataScale();
     }
 
     @override
-    public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
+    DataTypeBase copy(DataTypeBase input, ModuleType module, byte register, byte id, DataAttributes attributes) {
         return new BoschAccSFloatData(input, module, register, id, attributes);
     }
 }
 class BoschFlatData extends DataTypeBase {
-    private static final long serialVersionUID = 7754881668078978202L;
 
-    BoschFlatData() {
-        super(ACCELEROMETER, FLAT_INTERRUPT, new DataAttributes(new byte[] {1}, (byte) 1, (byte) 0, false));
-    }
+    BoschFlatData(): super(ModuleType.ACCELEROMETER, FLAT_INTERRUPT, new DataAttributes(new byte[] {1}, (byte) 1, (byte) 0, false));
 
-    BoschFlatData(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
+
+    BoschFlatData(DataTypeBase input, ModuleType module, byte register, byte id, DataAttributes attributes) {
         super(input, module, register, id, attributes);
     }
 
     @override
-    public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
+    DataTypeBase copy(DataTypeBase input, ModuleType module, byte register, byte id, DataAttributes attributes) {
         return new BoschFlatData(input, module, register, id, attributes);
     }
 
     @override
-    public Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, byte[] data, Calendar timestamp, DataPrivate.ClassToObject mapper) {
+    Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, byte[] data, Calendar timestamp, DataPrivate.ClassToObject mapper) {
     int mask = mwPrivate.lookupModuleInfo(ACCELEROMETER).revision >= FLAT_REVISION ? 0x4 : 0x2;
     final boolean isFlat = (data[0] & mask) == mask;
 
     return new DataPrivate(timestamp, data, mapper) {
     @override
-    public <T> T value(Class<T> clazz) {
+    <T> T value(Class<T> clazz) {
     if (clazz.equals(Boolean.class)) {
     return clazz.cast(isFlat);
     }
@@ -133,35 +386,32 @@ class BoschFlatData extends DataTypeBase {
     }
 
     @override
-    public Class<?>[] types() {
+    Class<?>[] types() {
     return new Class<?>[] {Boolean.class};
     }
     };
     }
 }
 class BoschOrientationData extends DataTypeBase {
-    private static final long serialVersionUID = -3067060296134186104L;
 
-    BoschOrientationData() {
-        super(ACCELEROMETER, ORIENT_INTERRUPT, new DataAttributes(new byte[] {1}, (byte) 1, (byte) 0, false));
-    }
+    BoschOrientationData.Default(): super(ModuleType.ACCELEROMETER, ORIENT_INTERRUPT, new DataAttributes(Uint8List.fromList([1]), 1, 0, false));
 
-    BoschOrientationData(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
-        super(input, module, register, id, attributes);
-    }
+
+    BoschOrientationData(DataTypeBase input, ModuleType module, byte register, byte id, DataAttributes attributes): super(module, register, attributes,input:input,id:id);
+
 
     @override
-    public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
+    DataTypeBase copy(DataTypeBase input, ModuleType module, byte register, byte id, DataAttributes attributes) {
         return new BoschOrientationData(input, module, register, id, attributes);
     }
 
     @override
-    public Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, byte[] data, Calendar timestamp, DataPrivate.ClassToObject mapper) {
+    Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, byte[] data, Calendar timestamp, DataPrivate.ClassToObject mapper) {
     final SensorOrientation orientation = SensorOrientation.values()[((data[0] & 0x6) >> 1) + 4 * ((data[0] & 0x8) >> 3)];
 
     return new DataPrivate(timestamp, data, mapper) {
     @override
-    public <T> T value(Class<T> clazz) {
+    <T> T value(Class<T> clazz) {
     if (clazz.equals(SensorOrientation.class)) {
     return clazz.cast(orientation);
     }
@@ -169,7 +419,7 @@ class BoschOrientationData extends DataTypeBase {
     }
 
     @override
-    public Class<?>[] types() {
+    Class<?>[] types() {
     return new Class<?>[] {SensorOrientation.class};
     }
     };
@@ -181,12 +431,12 @@ class BoschLowHighData extends DataTypeBase {
         super(ACCELEROMETER, LOW_HIGH_G_INTERRUPT, new DataAttributes(new byte[] {1}, (byte) 1, (byte) 0, false));
     }
 
-    BoschLowHighData(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
+    BoschLowHighData(DataTypeBase input, ModuleType module, byte register, byte id, DataAttributes attributes) {
         super(input, module, register, id, attributes);
     }
 
     @override
-    public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
+    DataTypeBase copy(DataTypeBase input, ModuleType module, byte register, byte id, DataAttributes attributes) {
         return new BoschLowHighData(input, module, register, id, attributes);
     }
 
@@ -196,7 +446,7 @@ class BoschLowHighData extends DataTypeBase {
     }
 
     @override
-    public Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, final byte[] data, Calendar timestamp, DataPrivate.ClassToObject mapper) {
+    Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, final byte[] data, Calendar timestamp, DataPrivate.ClassToObject mapper) {
     final byte highFirst = (byte) ((data[0] & 0x1c) >> 2);
     final LowHighResponse castedData = new LowHighResponse(
     (data[0] & 0x1) == 0x1,
@@ -208,7 +458,7 @@ class BoschLowHighData extends DataTypeBase {
 
     return new DataPrivate(timestamp, data, mapper) {
     @override
-    public <T> T value(Class<T> clazz) {
+    <T> T value(Class<T> clazz) {
     if (clazz.equals(LowHighResponse.class)) {
     return clazz.cast(castedData);
     }
@@ -216,35 +466,32 @@ class BoschLowHighData extends DataTypeBase {
     }
 
     @override
-    public Class<?>[] types() {
+    Class<?>[] types() {
     return new Class<?>[] {LowHighResponse.class};
     }
     };
     }
 }
 class BoschMotionData extends DataTypeBase {
-    private static final long serialVersionUID = 5170523637959567052L;
 
-    BoschMotionData() {
-        super(ACCELEROMETER, MOTION_INTERRUPT, new DataAttributes(new byte[] {1}, (byte) 1, (byte) 0, false));
-    }
+    BoschMotionData.Default(): super(ModuleType.ACCELEROMETER, MOTION_INTERRUPT, new DataAttributes(Uint8List.fromList([1]), 1, 0, false));
 
-    BoschMotionData(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
-        super(input, module, register, id, attributes);
-    }
+
+    BoschMotionData(DataTypeBase input, ModuleType module, int register, int id, DataAttributes attributes) : super(input, module, register, id, attributes);
+
 
     @override
-    public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
+    DataTypeBase copy(DataTypeBase input, ModuleType module, int register, int id, DataAttributes attributes) {
         return new BoschMotionData(input, module, register, id, attributes);
     }
 
-    private boolean detected(CartesianAxis axis, byte value) {
-        byte mask= (byte) (0x1 << (axis.ordinal() + 3));
+    bool detected(CartesianAxis axis, int value) {
+        int mask= (0x1 << (axis.ordinal() + 3));
         return (value & mask) == mask;
     }
 
     @override
-    public Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, final byte[] data, Calendar timestamp, DataPrivate.ClassToObject mapper) {
+    Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, final Uint8List data, DateTime timestamp, DataPrivate.ClassToObject mapper) {
     final AnyMotion castedData = new AnyMotion(
     (data[0] & 0x40) == 0x40 ? Sign.NEGATIVE : Sign.POSITIVE,
     detected(CartesianAxis.X, data[0]),
@@ -254,7 +501,7 @@ class BoschMotionData extends DataTypeBase {
 
     return new DataPrivate(timestamp, data, mapper) {
     @override
-    public <T> T value(Class<T> clazz) {
+    <T> T value(Class<T> clazz) {
     if (clazz.equals(AnyMotion.class)) {
     return clazz.cast(castedData);
     }
@@ -262,30 +509,27 @@ class BoschMotionData extends DataTypeBase {
     }
 
     @override
-    public Class<?>[] types() {
+    Class<?>[] types() {
     return new Class<?>[] {AnyMotion.class};
     }
     };
     }
 }
 class BoschTapData extends DataTypeBase {
-    private static final long serialVersionUID = 7541750644119353713L;
+    
+    BoschTapData.Default():super(ModuleType.ACCELEROMETER, TAP_INTERRUPT, new DataAttributes(Uint8List.fromList([1]), 1, 0, false));
+    
 
-    BoschTapData() {
-        super(ACCELEROMETER, TAP_INTERRUPT, new DataAttributes(new byte[] {1}, (byte) 1, (byte) 0, false));
-    }
-
-    BoschTapData(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
-        super(input, module, register, id, attributes);
-    }
+    BoschTapData(DataTypeBase input, ModuleType module, int register, int id, DataAttributes attributes): super(input, module, register, id, attributes);
+    
 
     @override
-    public DataTypeBase copy(DataTypeBase input, Constant.Module module, byte register, byte id, DataAttributes attributes) {
+    DataTypeBase copy(DataTypeBase input, ModuleType module, byte register, byte id, DataAttributes attributes) {
         return new BoschTapData(input, module, register, id, attributes);
     }
 
     @override
-    public Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, final byte[] data, Calendar timestamp, DataPrivate.ClassToObject mapper) {
+    Data createMessage(boolean logData, MetaWearBoardPrivate mwPrivate, final byte[] data, Calendar timestamp, DataPrivate.ClassToObject mapper) {
     TapType type = null;
     if ((data[0] & 0x1) == 0x1) {
     type = TapType.DOUBLE;
@@ -296,7 +540,7 @@ class BoschTapData extends DataTypeBase {
     final Tap castedData = new Tap(type, (data[0] & 0x20) == 0x20 ? Sign.NEGATIVE : Sign.POSITIVE);
     return new DataPrivate(timestamp, data, mapper) {
     @override
-    public <T> T value(Class<T> clazz) {
+    <T> T value(Class<T> clazz) {
     if (clazz.equals(Tap.class)) {
     return clazz.cast(castedData);
     }
@@ -304,7 +548,7 @@ class BoschTapData extends DataTypeBase {
     }
 
     @override
-    public Class<?>[] types() {
+    Class<?>[] types() {
     return new Class<?>[] {Tap.class};
     }
     };
@@ -318,7 +562,7 @@ abstract class AccelerometerBoschImpl extends ModuleImplBase implements Accelero
     static String createUri(DataTypeBase dataType) {
         switch (dataType.eventConfig[1]) {
             case DATA_INTERRUPT:
-                return dataType.attributes.length() > 2 ? "acceleration" : String.format(Locale.US, "acceleration[%d]", (dataType.attributes.offset >> 1));
+                return dataType.attributes.length() > 2 ? "acceleration" : sprintf("acceleration[%d]", (dataType.attributes.offset >> 1));
             case ORIENT_INTERRUPT:
                 return "orientation";
             case FLAT_INTERRUPT:
@@ -337,12 +581,12 @@ abstract class AccelerometerBoschImpl extends ModuleImplBase implements Accelero
     }
 
     static const int PACKED_ACC_REVISION = 0x1, FLAT_REVISION = 0x2;
-    static const double LOW_THRESHOLD_STEP= 0.00781f, LOW_HYSTERESIS_STEP= 0.125f;
-    static const List<double> BOSCH_HIGH_THRESHOLD_STEPS= {0.00781f, 0.01563f, 0.03125f, 0.0625f},
-            BOSCH_HIGH_HYSTERESIS_STEPS= {0.125f, 0.250f, 0.5f, 1f},
-            BOSCH_ANY_MOTION_THS_STEPS= {0.00391f, 0.00781f, 0.01563f, 0.03125f};
+    static const double LOW_THRESHOLD_STEP = 0.00781, LOW_HYSTERESIS_STEP= 0.125;
+    static const List<double> BOSCH_HIGH_THRESHOLD_STEPS= [0.00781, 0.01563, 0.03125, 0.0625],
+            BOSCH_HIGH_HYSTERESIS_STEPS= [0.125, 0.250, 0.5, 1.0],
+            BOSCH_ANY_MOTION_THS_STEPS= [0.00391, 0.00781, 0.01563, 0.03125];
     static const List<double> BOSCH_NO_MOTION_THS_STEPS= BOSCH_ANY_MOTION_THS_STEPS;
-    static const List<double> BOSCH_TAP_THS_STEPS= {0.0625f, 0.125f, 0.250f, 0.5f};
+    static const List<double> BOSCH_TAP_THS_STEPS= [0.0625, 0.125, 0.250, 0.5];
     static const int POWER_MODE = 1,
             DATA_INTERRUPT_ENABLE = 2, DATA_CONFIG = 3, DATA_INTERRUPT = 4, DATA_INTERRUPT_CONFIG = 5,
             ORIENT_INTERRUPT_ENABLE = 0xf, ORIENT_CONFIG = 0x10, ORIENT_INTERRUPT = 0x11,
@@ -364,240 +608,14 @@ abstract class AccelerometerBoschImpl extends ModuleImplBase implements Accelero
     static const double ORIENT_HYS_G_PER_STEP= 0.0625, THETA_STEP= (44.8/63.0);
 
 
-    abstract class BoschFlatDataProducer implements FlatDataProducer {
-        @override
-        public Task<Route> addRouteAsync(RouteBuilder builder) {
-            return mwPrivate.queueRouteBuilder(builder, FLAT_PRODUCER);
-        }
 
-        @override
-        public String name() {
-            return FLAT_PRODUCER;
-        }
 
-        @override
-        public void start() {
-            mwPrivate.sendCommand(new byte[] {ACCELEROMETER.id, FLAT_INTERRUPT_ENABLE, (byte) 1, (byte) 0});
-        }
+    int tapEnableMask;
+    AsyncDataProducer packedAcceleration, acceleration, orientation, tap;
 
-        @override
-        public void stop() {
-            mwPrivate.sendCommand(new byte[] {ACCELEROMETER.id, FLAT_INTERRUPT_ENABLE, (byte) 0, (byte) 1});
-        }
-    }
-    class LowHighDataProducerInner implements LowHighDataProducer {
-        private final byte[] initialConfig;
-        private final float durationStep;
-        private byte lowHighEnableMask = 0;
+    AccelerometerBoschImpl(MetaWearBoardPrivate mwPrivate): super(mwPrivate){
 
-        LowHighDataProducerInner(byte[] initialConfig, float durationStep) {
-            this.initialConfig = initialConfig;
-            this.durationStep = durationStep;
-        }
-
-        @override
-        public LowHighConfigEditor configure() {
-            final byte[] lowHighConfig = Arrays.copyOf(initialConfig, initialConfig.length);
-            lowHighEnableMask = 0;
-            return new LowHighConfigEditor() {
-                private LowGMode lowGMode= null;
-                private Integer lowDuration= null, highDuration= null;
-                private Float lowThreshold= null, lowHysteresis= null, newHighThreshold= null, newHighHysteresis= null;
-
-                @override
-                public LowHighConfigEditor enableLowG() {
-                    lowHighEnableMask |= 0x8;
-                    return this;
-                }
-
-                @override
-                public LowHighConfigEditor enableHighGx() {
-                    lowHighEnableMask |= 0x1;
-                    return this;
-                }
-
-                @override
-                public LowHighConfigEditor enableHighGy() {
-                    lowHighEnableMask |= 0x2;
-                    return this;
-                }
-
-                @override
-                public LowHighConfigEditor enableHighGz() {
-                    lowHighEnableMask |= 0x4;
-                    return this;
-                }
-
-                @override
-                public LowHighConfigEditor lowDuration(int duration) {
-                    lowDuration= duration;
-                    return this;
-                }
-
-                @override
-                public LowHighConfigEditor lowThreshold(float threshold) {
-                    lowThreshold= threshold;
-                    return this;
-                }
-
-                @override
-                public LowHighConfigEditor lowHysteresis(float hysteresis) {
-                    lowHysteresis= hysteresis;
-                    return this;
-                }
-
-                @override
-                public LowHighConfigEditor lowGMode(LowGMode mode) {
-                    lowGMode= mode;
-                    return this;
-                }
-
-                @override
-                public LowHighConfigEditor highDuration(int duration) {
-                    highDuration= duration;
-                    return this;
-                }
-
-                @override
-                public LowHighConfigEditor highThreshold(float threshold) {
-                    newHighThreshold= threshold;
-                    return this;
-                }
-
-                @override
-                public LowHighConfigEditor highHysteresis(float hysteresis) {
-                    newHighHysteresis= hysteresis;
-                    return this;
-                }
-
-                @override
-                public void commit() {
-                    if (lowDuration != null) {
-                        lowHighConfig[0]= (byte) ((lowDuration / durationStep) - 1);
-                    }
-                    if (lowThreshold != null) {
-                        lowHighConfig[1]= (byte) (lowThreshold / LOW_THRESHOLD_STEP);
-                    }
-                    if (newHighHysteresis != null) {
-                        lowHighConfig[2]|= ((int) (newHighHysteresis / BOSCH_HIGH_HYSTERESIS_STEPS[getSelectedAccRange()]) & 0x3) << 6;
-                    }
-                    if (lowGMode != null) {
-                        lowHighConfig[2]&= 0xfb;
-                        lowHighConfig[2]|= (lowGMode.ordinal() << 2);
-                    }
-                    if (lowHysteresis != null) {
-                        lowHighConfig[2]&= 0xfc;
-                        lowHighConfig[2]|= ((byte) (lowHysteresis / LOW_HYSTERESIS_STEP) & 0x3);
-                    }
-                    if (highDuration != null) {
-                        lowHighConfig[3]= (byte) ((highDuration / durationStep) - 1);
-                    }
-                    if (newHighThreshold != null) {
-                        lowHighConfig[4]= (byte) (newHighThreshold / BOSCH_HIGH_THRESHOLD_STEPS[getSelectedAccRange()]);
-                    }
-
-                    mwPrivate.sendCommand(ACCELEROMETER, LOW_HIGH_G_CONFIG, lowHighConfig);
-                }
-            };
-        }
-
-        @override
-        public Task<Route> addRouteAsync(RouteBuilder builder) {
-            return mwPrivate.queueRouteBuilder(builder, LOW_HIGH_PRODUCER);
-        }
-
-        @override
-        public String name() {
-            return LOW_HIGH_PRODUCER;
-        }
-
-        @override
-        public void start() {
-            mwPrivate.sendCommand(new byte[] {ACCELEROMETER.id, LOW_HIGH_G_INTERRUPT_ENABLE, lowHighEnableMask, (byte) 0x0});
-        }
-
-        @override
-        public void stop() {
-            mwPrivate.sendCommand(new byte[] {ACCELEROMETER.id, LOW_HIGH_G_INTERRUPT_ENABLE, (byte) 0, 0xf});
-        }
-    }
-    class AnyMotionConfigEditorInner implements AnyMotionConfigEditor {
-        private Integer count= null;
-        private Float threshold= null;
-        private final byte[] motionConfig;
-
-        AnyMotionConfigEditorInner(byte[] initialConfig) {
-            motionConfig = initialConfig;
-        }
-
-        @override
-        public AnyMotionConfigEditor count(int count) {
-            this.count= count;
-            return this;
-        }
-
-        @override
-        public AnyMotionConfigEditor threshold(float threshold) {
-            this.threshold= threshold;
-            return this;
-        }
-
-        @override
-        public void commit() {
-            if (count != null) {
-                motionConfig[0]&= 0xfc;
-                motionConfig[0]|= (count - 1) & 0x3;
-            }
-
-            if (threshold != null) {
-                motionConfig[1]= (byte) (threshold / BOSCH_ANY_MOTION_THS_STEPS[getSelectedAccRange()]);
-            }
-
-            mwPrivate.sendCommand(ACCELEROMETER, MOTION_CONFIG, motionConfig);
-        }
-    }
-    class SlowMotionConfigEditorInner implements SlowMotionConfigEditor {
-        private Byte count= null;
-        private Float threshold= null;
-        private final byte[] motionConfig;
-
-        SlowMotionConfigEditorInner(byte[] initialConfig) {
-            motionConfig = initialConfig;
-        }
-
-        @override
-        public SlowMotionConfigEditor count(byte count) {
-            this.count= count;
-            return this;
-        }
-
-        @override
-        public SlowMotionConfigEditor threshold(float threshold) {
-            this.threshold= threshold;
-            return this;
-        }
-
-        @override
-        public void commit() {
-            if (count != null) {
-                motionConfig[0]&= 0x3;
-                motionConfig[0]|= (count - 1) << 2;
-            }
-            if (threshold != null) {
-                motionConfig[2]= (byte) (threshold / BOSCH_NO_MOTION_THS_STEPS[getSelectedAccRange()]);
-            }
-
-            mwPrivate.sendCommand(ACCELEROMETER, MOTION_CONFIG, motionConfig);
-        }
-    }
-
-    private transient byte tapEnableMask;
-    private transient AsyncDataProducer packedAcceleration, acceleration, orientation, tap;
-
-    AccelerometerBoschImpl(MetaWearBoardPrivate mwPrivate) {
-        super(mwPrivate);
-
-        DataTypeBase cfProducer = new BoschAccCartesianFloatData();
+        DataTypeBase cfProducer = new BoschAccCartesianFloatData.Default();
 
         this.mwPrivate= mwPrivate;
         this.mwPrivate.tagProducer(ACCEL_PRODUCER, cfProducer);
@@ -612,54 +630,54 @@ abstract class AccelerometerBoschImpl extends ModuleImplBase implements Accelero
         this.mwPrivate.tagProducer(ACCEL_PACKED_PRODUCER, new BoschAccCartesianFloatData(PACKED_ACC_DATA, (byte) 3));
     }
 
-    protected abstract float getAccDataScale();
-    protected abstract int getSelectedAccRange();
-    protected abstract int getMaxOrientHys();
-    void writeFlatConfig(int holdTime, float theta) {
-        byte[] flatConfig = new byte[] {0x08, 0x11};
+    double getAccDataScale();
+    int getSelectedAccRange();
+    int getMaxOrientHys();
+    void writeFlatConfig(int holdTime, double theta) {
+        Uint8List flatConfig = Uint8List.fromList([0x08, 0x11]);
 
-        flatConfig[0]|= ((int) (theta / THETA_STEP) & 0x3f);
+        flatConfig[0]|= ((theta / THETA_STEP) & 0x3f);
         flatConfig[1]|= (holdTime << 4);
 
-        mwPrivate.sendCommand(ACCELEROMETER, FLAT_CONFIG, flatConfig);
+        mwPrivate.sendCommandForModule(ModuleType.ACCELEROMETER, FLAT_CONFIG, flatConfig);
     }
 
     @override
-    public AccelerationDataProducer acceleration() {
+    AccelerationDataProducer acceleration() {
         if (acceleration == null) {
             acceleration = new AccelerationDataProducer() {
                 @override
-                public Task<Route> addRouteAsync(RouteBuilder builder) {
+                Future<Route> addRouteAsync(RouteBuilder builder) {
                     return mwPrivate.queueRouteBuilder(builder, ACCEL_PRODUCER);
                 }
 
                 @override
-                public String name() {
+                String name() {
                     return ACCEL_PRODUCER;
                 }
 
                 @override
-                public void start() {
+                void start() {
                     mwPrivate.sendCommand(new byte[] {ACCELEROMETER.id, DATA_INTERRUPT_ENABLE, 0x01, 0x00});
                 }
 
                 @override
-                public void stop() {
+                void stop() {
                     mwPrivate.sendCommand(new byte[] {ACCELEROMETER.id, DATA_INTERRUPT_ENABLE, 0x00, 0x01});
                 }
 
                 @override
-                public String xAxisName() {
+                String xAxisName() {
                     return ACCEL_X_AXIS_PRODUCER;
                 }
 
                 @override
-                public String yAxisName() {
+                String yAxisName() {
                     return ACCEL_Y_AXIS_PRODUCER;
                 }
 
                 @override
-                public String zAxisName() {
+                String zAxisName() {
                     return ACCEL_Z_AXIS_PRODUCER;
                 }
             };
@@ -668,27 +686,27 @@ abstract class AccelerometerBoschImpl extends ModuleImplBase implements Accelero
     }
 
     @override
-    public AsyncDataProducer packedAcceleration() {
+    AsyncDataProducer packedAcceleration() {
         if (mwPrivate.lookupModuleInfo(ACCELEROMETER).revision >= PACKED_ACC_REVISION) {
             if (packedAcceleration == null) {
                 packedAcceleration = new AsyncDataProducer() {
                     @override
-                    public Task<Route> addRouteAsync(RouteBuilder builder) {
+                    Future<Route> addRouteAsync(RouteBuilder builder) {
                         return mwPrivate.queueRouteBuilder(builder, ACCEL_PACKED_PRODUCER);
                     }
 
                     @override
-                    public String name() {
+                    String name() {
                         return ACCEL_PACKED_PRODUCER;
                     }
 
                     @override
-                    public void start() {
+                    void start() {
                         mwPrivate.sendCommand(new byte[] {ACCELEROMETER.id, DATA_INTERRUPT_ENABLE, 0x01, 0x00});
                     }
 
                     @override
-                    public void stop() {
+                    void stop() {
                         mwPrivate.sendCommand(new byte[] {ACCELEROMETER.id, DATA_INTERRUPT_ENABLE, 0x00, 0x01});
                     }
                 };
@@ -699,39 +717,39 @@ abstract class AccelerometerBoschImpl extends ModuleImplBase implements Accelero
     }
 
     @override
-    public void start() {
-        mwPrivate.sendCommand(new byte[] {ACCELEROMETER.id, POWER_MODE, 0x01});
+    void start() {
+        mwPrivate.sendCommand(Uint8List.fromList([ModuleType.ACCELEROMETER.id, POWER_MODE, 0x01]));
     }
 
     @override
-    public void stop() {
-        mwPrivate.sendCommand(new byte[] {ACCELEROMETER.id, POWER_MODE, 0x00});
+    void stop() {
+        mwPrivate.sendCommand(Uint8List.fromList([ModuleType.ACCELEROMETER.id, POWER_MODE, 0x00]));
     }
 
     @override
-    public OrientationDataProducer orientation() {
+    OrientationDataProducer orientation() {
         if (orientation == null) {
             orientation = new OrientationDataProducer() {
                 @override
-                public OrientationConfigEditor configure() {
+                OrientationConfigEditor configure() {
                     return new OrientationConfigEditor() {
                         private Float hysteresis = null;
                         private OrientationMode mode = OrientationMode.SYMMETRICAL;
 
                         @override
-                        public OrientationConfigEditor hysteresis(float hysteresis) {
+                        OrientationConfigEditor hysteresis(float hysteresis) {
                             this.hysteresis = hysteresis;
                             return this;
                         }
 
                         @override
-                        public OrientationConfigEditor mode(OrientationMode mode) {
+                        OrientationConfigEditor mode(OrientationMode mode) {
                             this.mode = mode;
                             return this;
                         }
 
                         @override
-                        public void commit() {
+                        void commit() {
                             byte[] orientationConfig = new byte[] {0x18, 0x48};
 
                             if (hysteresis != null) {
@@ -747,22 +765,22 @@ abstract class AccelerometerBoschImpl extends ModuleImplBase implements Accelero
                 }
 
                 @override
-                public Task<Route> addRouteAsync(RouteBuilder builder) {
+                Future<Route> addRouteAsync(RouteBuilder builder) {
                     return mwPrivate.queueRouteBuilder(builder, ORIENTATION_PRODUCER);
                 }
 
                 @override
-                public String name() {
+                String name() {
                     return ORIENTATION_PRODUCER;
                 }
 
                 @override
-                public void start() {
+                void start() {
                     mwPrivate.sendCommand(new byte[] {ACCELEROMETER.id, ORIENT_INTERRUPT_ENABLE, (byte) 0x1, (byte) 0x0});
                 }
 
                 @override
-                public void stop() {
+                void stop() {
                     mwPrivate.sendCommand(new byte[] {ACCELEROMETER.id, ORIENT_INTERRUPT_ENABLE, (byte) 0x0, (byte) 0x1});
                 }
             };
@@ -771,31 +789,31 @@ abstract class AccelerometerBoschImpl extends ModuleImplBase implements Accelero
     }
 
     @override
-    public TapDataProducer tap() {
+    TapDataProducer tap() {
         if (tap == null) {
             tap = new TapDataProducer() {
                 @override
-                public Task<Route> addRouteAsync(RouteBuilder builder) {
+                Future<Route> addRouteAsync(RouteBuilder builder) {
                     return mwPrivate.queueRouteBuilder(builder, TAP_PRODUCER);
                 }
 
                 @override
-                public String name() {
+                String name() {
                     return TAP_PRODUCER;
                 }
 
                 @override
-                public void start() {
+                void start() {
                     mwPrivate.sendCommand(new byte[] {ACCELEROMETER.id, TAP_INTERRUPT_ENABLE, tapEnableMask, (byte) 0});
                 }
 
                 @override
-                public void stop() {
+                void stop() {
                     mwPrivate.sendCommand(new byte[] {ACCELEROMETER.id, TAP_INTERRUPT_ENABLE, (byte) 0, (byte) 0x3});
                 }
 
                 @override
-                public TapConfigEditor configure() {
+                TapConfigEditor configure() {
                     return new TapConfigEditor() {
                         private TapQuietTime newTapTime= null;
                         private TapShockTime newShockTime= null;
@@ -804,43 +822,43 @@ abstract class AccelerometerBoschImpl extends ModuleImplBase implements Accelero
                         private final LinkedHashSet<TapType> types = new LinkedHashSet<>();
 
                         @override
-                        public TapConfigEditor enableDoubleTap() {
+                        TapConfigEditor enableDoubleTap() {
                             types.add(TapType.DOUBLE);
                             return this;
                         }
 
                         @override
-                        public TapConfigEditor enableSingleTap() {
+                        TapConfigEditor enableSingleTap() {
                             types.add(TapType.SINGLE);
                             return this;
                         }
 
                         @override
-                        public TapConfigEditor quietTime(TapQuietTime time) {
+                        TapConfigEditor quietTime(TapQuietTime time) {
                             newTapTime= time;
                             return this;
                         }
 
                         @override
-                        public TapConfigEditor shockTime(TapShockTime time) {
+                        TapConfigEditor shockTime(TapShockTime time) {
                             newShockTime= time;
                             return this;
                         }
 
                         @override
-                        public TapConfigEditor doubleTapWindow(DoubleTapWindow window) {
+                        TapConfigEditor doubleTapWindow(DoubleTapWindow window) {
                             newWindow= window;
                             return this;
                         }
 
                         @override
-                        public TapConfigEditor threshold(float threshold) {
+                        TapConfigEditor threshold(float threshold) {
                             newThs= threshold;
                             return this;
                         }
 
                         @override
-                        public void commit() {
+                        void commit() {
                             byte[] tapConfig = new byte[] {0x04, 0x0a};
 
                             if (newTapTime != null) {
