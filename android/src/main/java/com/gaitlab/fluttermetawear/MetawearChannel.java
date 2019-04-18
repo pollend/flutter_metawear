@@ -2,8 +2,10 @@ package com.gaitlab.fluttermetawear;
 
 import com.mbientlab.metawear.DeviceInformation;
 import com.mbientlab.metawear.MetaWearBoard;
+import com.mbientlab.metawear.Observer;
 import com.mbientlab.metawear.Route;
 import com.mbientlab.metawear.module.Accelerometer;
+import com.mbientlab.metawear.module.Settings;
 
 import java.util.HashMap;
 
@@ -93,29 +95,17 @@ public class MetawearChannel implements MethodChannel.MethodCallHandler {
                     }
                 });
                 break;
-            case "packed_acc":
-                metawearChannel.getBoard().getModule(Accelerometer.class).packedAcceleration().addRouteAsync(new MetawearRouteBuildChannel.ChannelRouteBuilder(registrar,this));
+            case "packed_acc_handler":
+                metawearChannel.getBoard().getModule(Accelerometer.class).packedAcceleration()
+                        .addRouteAsync(new MetawearRouteBuildChannel.ChannelRouteBuilder(registrar,this));
                 break;
-            case "acc":
+            case "acc_handler":
                 Accelerometer accelerometer;
                 if( (accelerometer = metawearChannel.getBoard().getModule(Accelerometer.class)) != null) {
                     MetawearRouteBuildChannel.ChannelRouteBuilder channel = new MetawearRouteBuildChannel.ChannelRouteBuilder(registrar, this);
-
-                    accelerometer.acceleration().addRouteAsync(channel).continueWith(new Continuation<Route, Object>() {
-                        @Override
-                        public Object then(Task<Route> task) throws Exception {
-                            if(task.isFaulted()){
-                                result.error("Failed","Failed to configure acc",null);
-
-                            } else if(task.isCompleted()) {
-                                result.success(task.getResult().id());
-                            }
-                            return null;
-                        }
-                    });
+                    accelerometer.acceleration().addRouteAsync(channel);
+                    result.success(channel.getNamespace());
                 }
-
-
                 break;
         }
     }

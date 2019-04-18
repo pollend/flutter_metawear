@@ -18,7 +18,7 @@ public class MetawearRouteBuildChannel implements MethodChannel.MethodCallHandle
     private final PluginRegistry.Registrar registrar;
     private final MetawearChannel metawearChannel;
     private final RouteComponent routeComponent;
-    private transient boolean isReleased = false;
+    private transient bool isReleased = false;
     private final List<RouteCallback> callbacks = new ArrayList<>();
 
 
@@ -31,7 +31,7 @@ public class MetawearRouteBuildChannel implements MethodChannel.MethodCallHandle
     @Override
     public void onMethodCall(MethodCall methodCall, MethodChannel.Result result) {
         switch (methodCall.method){
-            case "packed_acc":
+            case "steam":
                 routeComponent.stream(new Subscriber() {
                     @Override
                     public void apply(Data data, Object... env) {
