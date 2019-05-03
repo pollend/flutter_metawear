@@ -92,12 +92,8 @@ class _ConfigEditor extends ConfigEditor {
         _newGain = gain;
         return this;
     }
-
 }
 
-/**
- * Created by etsai on 9/21/16.
- */
 class GsrImpl extends ModuleImplBase implements Gsr {
     static const String CONDUCTANCE_PRODUCER_FORMAT= "com.mbientlab.metawear.impl.GsrImpl.CONDUCTANCE_PRODUCER_%d";
     static const  int CONDUCTANCE = 0x1, CALIBRATE = 0x2, CONFIG= 0x3;

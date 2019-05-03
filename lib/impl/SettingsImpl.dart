@@ -21,6 +21,8 @@
  * Should you have any questions regarding your right to use this Software, contact MbientLab via email:
  * hello@mbientlab.com.
  */
+import 'dart:async';
+
 import 'package:flutter_metawear/impl/DataAttributes.dart';
 import 'package:flutter_metawear/impl/DataTypeBase.dart';
 import 'package:flutter_metawear/impl/ModuleImplBase.dart';
@@ -29,28 +31,37 @@ import 'package:flutter_metawear/impl/Util.dart';
 import 'package:flutter_metawear/impl/ModuleType.dart';
 import 'dart:typed_data';
 import 'package:flutter_metawear/impl/MetaWearBoardPrivate.dart';
-
+import 'package:flutter_metawear/Data.dart';
+import 'package:flutter_metawear/impl/UintData.dart';
+import 'package:flutter_metawear/impl/MilliUnitsUFloatData.dart';
+import 'package:flutter_metawear/ActiveDataProducer.dart';
 
 class BatteryStateData extends DataTypeBase {
 
-    BatteryStateData.Default(): super(ModuleType.SETTINGS, Util.setSilentRead(SettingsImpl.BATTERY_STATE), new DataAttributes(Uint8List.fromList([1, 2]), 1, 0, false));
+    BatteryStateData.Default() : super(
+        ModuleType.SETTINGS, Util.setSilentRead(SettingsImpl.BATTERY_STATE),
+        new DataAttributes(Uint8List.fromList([1, 2]), 1, 0, false));
 
 
-    BatteryStateData(DataTypeBase input, ModuleType module, int register, int id, DataAttributes attributes): super(module, register, attributes,id:id,input:input);
+    BatteryStateData(DataTypeBase input, ModuleType module, int register,
+        int id, DataAttributes attributes)
+        : super(module, register, attributes, id: id, input: input);
 
 
     @override
-     DataTypeBase copy(DataTypeBase input, ModuleType module, int register, int id, DataAttributes attributes) {
+    DataTypeBase copy(DataTypeBase input, ModuleType module, int register,
+        int id, DataAttributes attributes) {
         return new BatteryStateData(input, module, register, id, attributes);
     }
 
     @override
-     num convertToFirmwareUnits(MetaWearBoardPrivate mwPrivate, num value) {
+    num convertToFirmwareUnits(MetaWearBoardPrivate mwPrivate, num value) {
         return value;
     }
 
     @override
-    Data createMessage(bool logData, MetaWearBoardPrivate mwPrivate, Uint8List data, DateTime timestamp, T Function<T>() apply) {
+    Data createMessage(bool logData, MetaWearBoardPrivate mwPrivate,
+        Uint8List data, DateTime timestamp, T Function<T>() apply) {
         throw UnsupportedError("Unsupported DataTypeBase");
     }
 
@@ -79,8 +90,13 @@ class BatteryStateData extends DataTypeBase {
     @override
     List<DataTypeBase> createSplits() {
         return [
-            new UintData(SETTINGS, eventConfig[1], eventConfig[2], new DataAttributes(Uint8List.fromList([1]), 1, 0, false)),
-        new MilliUnitsUFloatData(SETTINGS, eventConfig[1], eventConfig[2], new DataAttributes(Uint8List.fromList([2]), 1, 1, false))];
+            new UintData(ModuleType.SETTINGS, eventConfig[1],
+                DataAttributes(Uint8List.fromList([1]), 1, 0, false),
+                id: eventConfig[2]),
+            new MilliUnitsUFloatData(ModuleType.SETTINGS, eventConfig[1],
+                new DataAttributes(Uint8List.fromList([2]), 1, 1, false),
+                id: eventConfig[2])
+        ];
     }
 }
 
@@ -132,9 +148,12 @@ class SettingsImpl extends ModuleImplBase implements Settings {
 
     final DataTypeBase disconnectDummyProducer;
 
-    ActiveDataProducer powerStatus, chargeStatus;
-    TimedTask<byte[]> readConnParamsTask, readAdConfigTask;
-    TimedTask<Byte> readPowerStatusTask, readChargeStatusTask;
+    ActiveDataProducer _powerStatus, _chargeStatus;
+    StreamController<Uint8List> _readConnParamsTask, _readAdConfigTask;
+    StreamController<int> _readPowerStatusTask, _readChargeStatusTask;
+
+//    TimedTask<byte[]> ActiveDataProducerreadConnParamsTask, readAdConfigTask;
+//    TimedTask<Byte> readPowerStatusTask, readChargeStatusTask;
 
     SettingsImpl(MetaWearBoardPrivate mwPrivate) {
         super(mwPrivate);

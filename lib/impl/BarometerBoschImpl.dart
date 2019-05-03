@@ -40,139 +40,149 @@ import 'dart:typed_data';
 
 class BoschPressureUFloatData extends UFloatData {
 
-    BoschPressureUFloatData.Default(): super(ModuleType.BAROMETER, BarometerBoschImpl.PRESSURE, new DataAttributes(Uint8List.fromList([4]), 1, 0, false));
+  BoschPressureUFloatData.Default() : super(
+      ModuleType.BAROMETER, BarometerBoschImpl.PRESSURE,
+      new DataAttributes(Uint8List.fromList([4]), 1, 0, false));
 
+  BoschPressureUFloatData(DataTypeBase input, ModuleType module, int register,
+      int id, DataAttributes attributes)
+      : super(module, register, attributes, id: id, input: input,);
 
-    BoschPressureUFloatData(DataTypeBase input, ModuleType module, int register, int id, DataAttributes attributes): super(module, register, attributes,id:id,input:input,);
+  @override
+  DataTypeBase copy(DataTypeBase input, ModuleType module, int register, int id,
+      DataAttributes attributes) {
+    return new BoschPressureUFloatData(input, module, register, id, attributes);
+  }
 
-
-    @override
-    DataTypeBase copy(DataTypeBase input, ModuleType module, int register, int id, DataAttributes attributes) {
-        return new BoschPressureUFloatData(input, module, register, id, attributes);
-    }
-
-    @override
-    double scale(MetaWearBoardPrivate mwPrivate) {
-        return 256.0;
-    }
+  @override
+  double scale(MetaWearBoardPrivate mwPrivate) {
+    return 256.0;
+  }
 }
 class BoschAltitudeSFloatData extends SFloatData {
 
-    BoschAltitudeSFloatData() :   super(ModuleType.BAROMETER, BarometerBoschImpl.ALTITUDE, new DataAttributes(Uint8List.fromList([4]), 1, 0, true));
+  BoschAltitudeSFloatData() : super(
+      ModuleType.BAROMETER, BarometerBoschImpl.ALTITUDE,
+      new DataAttributes(Uint8List.fromList([4]), 1, 0, true));
 
+  @override
+  DataTypeBase copy(DataTypeBase input, ModuleType module, int register, int id,
+      DataAttributes attributes) {
+    return new BoschPressureUFloatData(input, module, register, id, attributes);
+  }
 
-    @override
-    DataTypeBase copy(DataTypeBase input, ModuleType module, int register, int id, DataAttributes attributes) {
-        return new BoschPressureUFloatData(input, module, register, id, attributes);
-    }
-
-    @override
-    double scale(MetaWearBoardPrivate mwPrivate) {
-        return 256.0;
-    }
+  @override
+  double scale(MetaWearBoardPrivate mwPrivate) {
+    return 256.0;
+  }
 }
 
-class _PressureAsyncDataProducer extends AsyncDataProducer{
-    final BarometerBoschImpl _impl;
+class _PressureAsyncDataProducer extends AsyncDataProducer {
+  final BarometerBoschImpl _impl;
 
   _PressureAsyncDataProducer(this._impl);
 
 
-    @override
-    Future<Route> addRouteAsync(RouteBuilder builder) {
-        return this._impl.mwPrivate.queueRouteBuilder(builder, BarometerBoschImpl.PRESSURE_PRODUCER);
-    }
+  @override
+  Future<Route> addRouteAsync(RouteBuilder builder) {
+    return this._impl.mwPrivate.queueRouteBuilder(
+        builder, BarometerBoschImpl.PRESSURE_PRODUCER);
+  }
 
-    @override
-    String name() {
-        return BarometerBoschImpl.PRESSURE_PRODUCER;
-    }
+  @override
+  String name() {
+    return BarometerBoschImpl.PRESSURE_PRODUCER;
+  }
 
-    @override
-    void start() {
+  @override
+  void start() {
 
-    }
+  }
 
-    @override
-    void stop() {
+  @override
+  void stop() {
 
-    }
+  }
 
 }
 
-class _AltitudeAsyncDataProducer extends AsyncDataProducer{
-    final BarometerBoschImpl _impl;
+class _AltitudeAsyncDataProducer extends AsyncDataProducer {
+  final BarometerBoschImpl _impl;
 
-    _AltitudeAsyncDataProducer(this._impl);
+  _AltitudeAsyncDataProducer(this._impl);
 
-    @override
-     Future<Route> addRouteAsync(RouteBuilder builder) {
-        return _impl.mwPrivate.queueRouteBuilder(builder, BarometerBoschImpl.ALTITUDE_PRODUCER);
-    }
+  @override
+  Future<Route> addRouteAsync(RouteBuilder builder) {
+    return _impl.mwPrivate.queueRouteBuilder(
+        builder, BarometerBoschImpl.ALTITUDE_PRODUCER);
+  }
 
-    @override
-     String name() {
+  @override
+  String name() {
+    return BarometerBoschImpl.ALTITUDE_PRODUCER;
+  }
 
-        return BarometerBoschImpl.ALTITUDE_PRODUCER;
-    }
+  @override
+  void start() {
+    _impl.enableAltitude = 1;
+  }
 
-    @override
-     void start() {
-        _impl.enableAltitude= 1;
-    }
-
-    @override
-     void stop() {
-        _impl.enableAltitude= 0;
-    }
-
+  @override
+  void stop() {
+    _impl.enableAltitude = 0;
+  }
 }
 
 /**
  * Created by etsai on 9/20/16.
  */
-abstract class BarometerBoschImpl extends ModuleImplBase implements BarometerBosch{
-    static String createUri(DataTypeBase dataType) {
-        switch (dataType.eventConfig[1]) {
-            case PRESSURE:
-                return "pressure";
-            case ALTITUDE:
-                return "altitude";
-            default:
-                return null;
-        }
+abstract class BarometerBoschImpl extends ModuleImplBase implements BarometerBosch {
+  static String createUri(DataTypeBase dataType) {
+    switch (dataType.eventConfig[1]) {
+      case PRESSURE:
+        return "pressure";
+      case ALTITUDE:
+        return "altitude";
+      default:
+        return null;
     }
+  }
 
-    static const String PRESSURE_PRODUCER= "com.mbientlab.metawear.impl.BarometerBoschImpl.PRESSURE_PRODUCER",
-            ALTITUDE_PRODUCER= "com.mbientlab.metawear.impl.BarometerBoschImpl.ALTITUDE_PRODUCER";
-    static const int PRESSURE = 1, ALTITUDE = 2, CYCLIC = 4;
-    static const int CONFIG = 3;
+  static const String PRESSURE_PRODUCER = "com.mbientlab.metawear.impl.BarometerBoschImpl.PRESSURE_PRODUCER",
+      ALTITUDE_PRODUCER = "com.mbientlab.metawear.impl.BarometerBoschImpl.ALTITUDE_PRODUCER";
+  static const int PRESSURE = 1,
+      ALTITUDE = 2,
+      CYCLIC = 4;
+  static const int CONFIG = 3;
 
 
-    int enableAltitude= 0;
+  int enableAltitude = 0;
 
-    BarometerBoschImpl(MetaWearBoardPrivate mwPrivate): super(mwPrivate){
-        mwPrivate.tagProducer(PRESSURE_PRODUCER, new BoschPressureUFloatData.Default());
-        mwPrivate.tagProducer(ALTITUDE_PRODUCER, new BoschAltitudeSFloatData());
-    }
+  BarometerBoschImpl(MetaWearBoardPrivate mwPrivate) : super(mwPrivate) {
+    mwPrivate.tagProducer(
+        PRESSURE_PRODUCER, new BoschPressureUFloatData.Default());
+    mwPrivate.tagProducer(ALTITUDE_PRODUCER, new BoschAltitudeSFloatData());
+  }
 
-    @override
-    AsyncDataProducer pressure() {
-        return _PressureAsyncDataProducer(this);
-    }
+  @override
+  AsyncDataProducer pressure() {
+    return _PressureAsyncDataProducer(this);
+  }
 
-    @override
-    AsyncDataProducer altitude() {
-        return _AltitudeAsyncDataProducer(this);
-    }
+  @override
+  AsyncDataProducer altitude() {
+    return _AltitudeAsyncDataProducer(this);
+  }
 
-    @override
-    void start() {
-        mwPrivate.sendCommand(Uint8List.fromList([ModuleType.BAROMETER.id, CYCLIC, 1, enableAltitude]));
-    }
+  @override
+  void start() {
+    mwPrivate.sendCommand(Uint8List.fromList(
+        [ModuleType.BAROMETER.id, CYCLIC, 1, enableAltitude]));
+  }
 
-    @override
-    void stop() {
-        mwPrivate.sendCommand(Uint8List.fromList([ModuleType.BAROMETER.id, CYCLIC, 0, 0]));
-    }
+  @override
+  void stop() {
+    mwPrivate.sendCommand(
+        Uint8List.fromList([ModuleType.BAROMETER.id, CYCLIC, 0, 0]));
+  }
 }
